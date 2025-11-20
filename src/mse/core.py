@@ -1,6 +1,6 @@
 from typing import List, Dict, Sequence
 from .morph_rules import morph_state_default
-from .semantic_mapper import SemanticMapper
+from .classes.SemanticMapper import SemanticMapper
 
 
 class MorphicSemanticEngine:
@@ -26,7 +26,12 @@ class MorphicSemanticEngine:
             raise ValueError("vocab must be non-empty")
 
         self.mod = mod
+        print("\n\ninitial state")
+        print(initial_state)
+           
         self.state = [int(x) % mod for x in initial_state]
+        print(self.state)
+        exit()
         self.t = 0  # iteration counter
 
         self.constants = {
@@ -59,6 +64,7 @@ class MorphicSemanticEngine:
         """
         return sum(self.state) % len(self.mapper.vocab)
 
+
     def step(self) -> str:
         """Advance the engine by one step and return the next token."""
         base = self._base_code()
@@ -78,10 +84,31 @@ class MorphicSemanticEngine:
         self.t += 1
         return token
 
+
     def next_token(self) -> str:
         """Alias for step() to make intent clearer in examples."""
         return self.step()
 
+
     def generate_tokens(self, n: int) -> List[str]:
         """Generate a list of n tokens."""
         return [self.step() for _ in range(n)]
+
+
+    ### build initial seed to create the initial state
+    def build_seed(self, signature, base_array=None, iterations=5):
+            if base_array is None:
+                base_array = [676, 612, 550, 490, 432, 376, 322, 270, 220]
+
+            arr = base_array[:]
+            h, c, st, strn, life = signature
+
+            for i in range(iterations):
+                for idx in range(len(arr)):
+                    delta = (h - c) + (strn - st) + life + i
+                    arr[idx] = (arr[idx] + delta + idx * h) % 9973  # match your mod
+
+            print("\n\nseed")
+            print(arr)
+            return arr  # this becomes initial_state / seed
+    
