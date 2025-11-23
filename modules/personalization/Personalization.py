@@ -8,9 +8,10 @@ SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
 if SRC_ROOT not in sys.path:
     sys.path.insert(0, SRC_ROOT)
 
+from modules.personalization.examples.Fitness import Fitness
 from mse.core import MorphicSemanticEngine
 from mse.classes.Modify import Modify
-from selections.Fitness import Fitness
+
 
 import random
 
@@ -29,7 +30,7 @@ class Personalization:
         self.answers = ["A", "B", "C", "D"]
         self.questions()
 
-        self.signature = self.normalize()
+        self.signature = self.create_signature()
         self.vocab = self.selection.get_vocab()
 
         if self.vocab == False:
@@ -84,7 +85,7 @@ class Personalization:
         print(self.selection.ratings)
 
 
-    def normalize(self, max_score=100):
+    def create_signature(self, max_score=100):
         signature = []
         for key in self.selection.ratings.keys():
             val = int(round((self.selection.ratings[key] / max_score) * 9))

@@ -24,7 +24,7 @@ class MorphicSemanticEngine:
             raise ValueError("initial_state must be non-empty")
         if not vocab:
             raise ValueError("vocab must be non-empty")
-
+        print("start")
         self.mod = mod
 
         self.seed = self.build_seed(initial_state)
@@ -39,6 +39,7 @@ class MorphicSemanticEngine:
         }
 
         self.mapper = SemanticMapper(vocab=vocab)
+        print("after mapper")
         self._prev_token_index = 0
 
     # ---------------------------
@@ -64,14 +65,12 @@ class MorphicSemanticEngine:
 
     def step(self) -> str:
         """Advance the engine by one step and return the next token."""
+
         base = self._base_code()
         offs = self._offset()
         idx = (base + offs + self._prev_token_index) % len(self.mapper.vocab)
-
         token = self.mapper.index_to_token(idx)
         self._prev_token_index = idx
-
-        # evolve state deterministically
         self.state = morph_state_default(
             state=self.state,
             t=self.t,
@@ -79,7 +78,7 @@ class MorphicSemanticEngine:
             **self.constants,
         )
         self.t += 1
-        return token
+        return int(token)
 
 
     def next_token(self) -> str:
