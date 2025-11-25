@@ -1,0 +1,82 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 6,
+    "table": "logs",
+    "columns": [
+        {
+            "name": "name",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "value",
+            "type": "FLOAT"
+        },
+        {
+            "name": "type",
+            "type": "DATETIME"
+        }
+    ],
+    "rows": [
+        [
+            "delta",
+            "golf",
+            "charlie",
+            "foxtrot",
+            "india",
+            "hotel",
+            "alpha",
+            "foxtrot",
+            "juliet"
+        ],
+        [
+            "delta",
+            "golf",
+            "charlie",
+            "foxtrot",
+            "india",
+            "hotel",
+            "alpha",
+            "foxtrot",
+            "juliet"
+        ],
+        [
+            "delta",
+            "golf",
+            "charlie",
+            "foxtrot",
+            "india",
+            "hotel",
+            "alpha",
+            "foxtrot",
+            "juliet"
+        ],
+        [
+            "delta",
+            "golf",
+            "charlie",
+            "foxtrot",
+            "india",
+            "hotel",
+            "alpha",
+            "foxtrot",
+            "juliet"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 19,
+    "table": "orders",
+    "columns": [
+        {
+            "name": "category",
+            "type": "FLOAT"
+        },
+        {
+            "name": "status",
+            "type": "INT"
+        },
+        {
+            "name": "email",
+            "type": "DATETIME"
+        },
+        {
+            "name": "amount",
+            "type": "VARCHAR(255)"
+        },
+        {
+            "name": "id",
+            "type": "DATETIME"
+        }
+    ],
+    "rows": [
+        [
+            "bravo",
+            "delta",
+            "juliet",
+            "hotel",
+            "delta",
+            "golf",
+            "alpha",
+            "alpha",
+            "echo"
+        ],
+        [
+            "bravo",
+            "delta",
+            "juliet",
+            "hotel",
+            "delta",
+            "golf",
+            "alpha",
+            "alpha",
+            "echo"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

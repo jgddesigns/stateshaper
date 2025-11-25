@@ -1,0 +1,89 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 10,
+    "table": "metrics",
+    "columns": [
+        {
+            "name": "value",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "uuid",
+            "type": "BOOLEAN"
+        }
+    ],
+    "rows": [
+        [
+            "juliet",
+            "alpha",
+            "foxtrot",
+            "bravo",
+            "delta",
+            "juliet",
+            "delta",
+            "alpha",
+            "delta"
+        ],
+        [
+            "juliet",
+            "alpha",
+            "foxtrot",
+            "bravo",
+            "delta",
+            "juliet",
+            "delta",
+            "alpha",
+            "delta"
+        ],
+        [
+            "juliet",
+            "alpha",
+            "foxtrot",
+            "bravo",
+            "delta",
+            "juliet",
+            "delta",
+            "alpha",
+            "delta"
+        ],
+        [
+            "juliet",
+            "alpha",
+            "foxtrot",
+            "bravo",
+            "delta",
+            "juliet",
+            "delta",
+            "alpha",
+            "delta"
+        ],
+        [
+            "juliet",
+            "alpha",
+            "foxtrot",
+            "bravo",
+            "delta",
+            "juliet",
+            "delta",
+            "alpha",
+            "delta"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

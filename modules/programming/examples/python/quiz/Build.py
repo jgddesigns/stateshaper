@@ -28,10 +28,39 @@ class Build:
         self.questions = ["a", "b", "c", "d", "e"]
         self.answers = ["1", "2", "3", "4", "5"]
 
+
+        # self.letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+
+        # self.numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+
         self.session = Quiz()
 
         self.build_and_run_quiz([676, 612, 550, 490, 432])
 
+
+        self.code_map = {}
+
+        self.get_code()
+
+        self.build_map(self.code)
+
+
+
+    def build_map(self, code):
+        i = 0
+        for item in code:
+            j = 0
+            for char in item:
+                if char not in self.code_map:
+                    self.code_map[char] = [i]
+                else:
+                    self.code_map[char].append(i)
+
+                i+=1
+                j+=1
+
+        print(self.code_map)
 
     def get_code(self):
         self.code = [
@@ -84,7 +113,7 @@ class Build:
     ###array of words for token stream..need to create a system that selects questions and answers based on a formula similar to ratings in fitness app
     def build_quiz_source(self, seed=[676, 612, 550, 490, 432], count=10) -> str:
 
-        self.questions, self.answers = self.session.generate_seed(seed, count)
+        self.questions, self.answers = self.session.generate_seed()
 
         print("\n\nquestions")
         print(self.questions)
@@ -121,7 +150,11 @@ class Build:
         ns: Dict[str, Any] = {}
         exec(code_obj, ns)
 
-        ns["run_quiz"]()
+        # uncomment to run quiz
+        # ns["run_quiz"]()
+
+
+
 
 
 Build()

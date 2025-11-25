@@ -11,7 +11,6 @@ if SRC_ROOT not in sys.path:
     sys.path.insert(0, SRC_ROOT)
 
 
-
 from dataclasses import dataclass
 from typing import Callable, List, Tuple
 from modules.programming.examples.python.quiz.Quiz import Quiz

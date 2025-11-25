@@ -1,0 +1,61 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 28,
+    "table": "events",
+    "columns": [
+        {
+            "name": "uuid",
+            "type": "FLOAT"
+        },
+        {
+            "name": "name",
+            "type": "DATETIME"
+        },
+        {
+            "name": "timestamp",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "type",
+            "type": "VARCHAR(255)"
+        },
+        {
+            "name": "status",
+            "type": "FLOAT"
+        },
+        {
+            "name": "name",
+            "type": "FLOAT"
+        }
+    ],
+    "rows": [
+        [
+            "foxtrot",
+            "juliet",
+            "bravo",
+            "charlie",
+            "echo",
+            "india",
+            "hotel",
+            "charlie",
+            "india"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

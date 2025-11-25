@@ -1,0 +1,60 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 26,
+    "table": "messages",
+    "columns": [
+        {
+            "name": "type",
+            "type": "DATETIME"
+        },
+        {
+            "name": "value",
+            "type": "INT"
+        },
+        {
+            "name": "value",
+            "type": "VARCHAR(255)"
+        }
+    ],
+    "rows": [
+        [
+            "golf",
+            "bravo",
+            "india",
+            "foxtrot",
+            "foxtrot",
+            "bravo",
+            "charlie",
+            "foxtrot",
+            "charlie"
+        ],
+        [
+            "golf",
+            "bravo",
+            "india",
+            "foxtrot",
+            "foxtrot",
+            "bravo",
+            "charlie",
+            "foxtrot",
+            "charlie"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

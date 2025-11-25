@@ -1,0 +1,71 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 3,
+    "table": "profiles",
+    "columns": [
+        {
+            "name": "timestamp",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "uuid",
+            "type": "FLOAT"
+        },
+        {
+            "name": "amount",
+            "type": "VARCHAR(255)"
+        }
+    ],
+    "rows": [
+        [
+            "hotel",
+            "golf",
+            "echo",
+            "bravo",
+            "golf",
+            "foxtrot",
+            "india",
+            "foxtrot",
+            "golf"
+        ],
+        [
+            "hotel",
+            "golf",
+            "echo",
+            "bravo",
+            "golf",
+            "foxtrot",
+            "india",
+            "foxtrot",
+            "golf"
+        ],
+        [
+            "hotel",
+            "golf",
+            "echo",
+            "bravo",
+            "golf",
+            "foxtrot",
+            "india",
+            "foxtrot",
+            "golf"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

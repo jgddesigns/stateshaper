@@ -1,0 +1,45 @@
+{
+    "user_id": "u_30day_example",
+    "day_index": 2,
+    "table": "events",
+    "columns": [
+        {
+            "name": "value",
+            "type": "TEXT"
+        },
+        {
+            "name": "name",
+            "type": "BOOLEAN"
+        }
+    ],
+    "rows": [
+        [
+            "foxtrot",
+            "foxtrot",
+            "foxtrot",
+            "charlie",
+            "alpha",
+            "delta",
+            "hotel",
+            "juliet",
+            "golf"
+        ]
+    ],
+    "mse_storage": {
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    }
+}

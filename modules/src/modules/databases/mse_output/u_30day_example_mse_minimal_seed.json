@@ -1,0 +1,46 @@
+{
+    "mse_storage": {
+        "user_id": "u_30day_example",
+        "signature": [
+            73,
+            77,
+            93,
+            82,
+            74
+        ],
+        "series_seed": 1252597299,
+        "mod": 9973,
+        "constants": {
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11
+        }
+    },
+    "profile": {
+        "avg_treadmill": 235.5,
+        "avg_steps": 12625.0,
+        "avg_calories": 2260.0,
+        "avg_protein": 127.16666666666667,
+        "avg_sleep": 6.400000000000002,
+        "subjective_stress": "high",
+        "subjective_fatigue": 6,
+        "subjective_mood": 7,
+        "user_id": "u_30day_example"
+    },
+    "base_signature": [
+        73,
+        77,
+        93,
+        82,
+        74
+    ],
+    "augmented_signature": [
+        23,
+        36,
+        28,
+        66,
+        78
+    ],
+    "series_seed": 1252597299
+}

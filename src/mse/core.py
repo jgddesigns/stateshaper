@@ -104,7 +104,5 @@ class MorphicSemanticEngine:
                     delta = (h - c) + (strn - st) + life + i
                     arr[idx] = (arr[idx] + delta + idx * h) % 9973  # match your mod
 
-            print("\n\nseed")
-            print(arr)
             return arr  # this becomes initial_state / seed
     
