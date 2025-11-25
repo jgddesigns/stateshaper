@@ -24,7 +24,7 @@ class MorphicSemanticEngine:
             raise ValueError("initial_state must be non-empty")
         if not vocab:
             raise ValueError("vocab must be non-empty")
-        print("start")
+
         self.mod = mod
 
         self.seed = self.build_seed(initial_state)
@@ -39,7 +39,6 @@ class MorphicSemanticEngine:
         }
 
         self.mapper = SemanticMapper(vocab=vocab)
-        print("after mapper")
         self._prev_token_index = 0
 
     # ---------------------------
