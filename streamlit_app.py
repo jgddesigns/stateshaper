@@ -7,14 +7,12 @@ from typing import Dict, Any, List
 import streamlit as st
 import pandas as pd
 
-# -------------------------------
-# Project path setup
-# -------------------------------
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
 
-if SRC_ROOT not in sys.path:
-    sys.path.insert(0, SRC_ROOT)
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # /mount/src/morphic_semantic_engine
+SRC_DIR = os.path.join(ROOT_DIR, "src")
+
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 
 # -------------------------------
 # Internal imports
