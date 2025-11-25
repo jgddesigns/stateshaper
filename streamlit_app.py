@@ -551,102 +551,102 @@ def main():
     )
 
 
-    # ---------------------------------------------------------
-    # Section 4: Full 30-Day Exports (Files on Disk)
-    # ---------------------------------------------------------
-    st.subheader("4. Export Files to Disk (Local Backend Exports)")
+    # # ---------------------------------------------------------
+    # # Section 4: Full 30-Day Exports (Files on Disk)
+    # # ---------------------------------------------------------
+    # st.subheader("4. Export Files to Disk (Local Backend Exports)")
 
-    st.markdown(
-        "These export the **30-day statistical data** (treadmill, steps, calories, protein, sleep) "
-        "or the **minimal stored object** for the MSE to local files under "
-        "`modules/databases/*_output` (relative to this app file)."
-    )
+    # st.markdown(
+    #     "These export the **30-day statistical data** (treadmill, steps, calories, protein, sleep) "
+    #     "or the **minimal stored object** for the MSE to local files under "
+    #     "`modules/databases/*_output` (relative to this app file)."
+    # )
 
-    stats_schema = build_stats_schema(days, profile)
-    app_root = os.path.dirname(os.path.abspath(__file__))
-    db_root = os.path.join(app_root, "modules", "databases", "output")
+    # stats_schema = build_stats_schema(days, profile)
+    # app_root = os.path.dirname(os.path.abspath(__file__))
+    # db_root = os.path.join(app_root, "modules", "databases", "output")
 
-    mse_dir      = os.path.join(db_root, "mse_output")
-    mongo_dir    = os.path.join(db_root, "mongo_output")
-    firebase_dir = os.path.join(db_root, "firebase_output")
-    dynamo_dir   = os.path.join(db_root, "dynamodb_output")
-    sql_dir      = os.path.join(db_root, "sql_output")
+    # mse_dir      = os.path.join(db_root, "mse_output")
+    # mongo_dir    = os.path.join(db_root, "mongo_output")
+    # firebase_dir = os.path.join(db_root, "firebase_output")
+    # dynamo_dir   = os.path.join(db_root, "dynamodb_output")
+    # sql_dir      = os.path.join(db_root, "sql_output")
 
-    os.makedirs(mse_dir, exist_ok=True)
-    os.makedirs(mongo_dir, exist_ok=True)
-    os.makedirs(firebase_dir, exist_ok=True)
-    os.makedirs(dynamo_dir, exist_ok=True)
-    os.makedirs(sql_dir, exist_ok=True)
+    # os.makedirs(mse_dir, exist_ok=True)
+    # os.makedirs(mongo_dir, exist_ok=True)
+    # os.makedirs(firebase_dir, exist_ok=True)
+    # os.makedirs(dynamo_dir, exist_ok=True)
+    # os.makedirs(sql_dir, exist_ok=True)
 
-    col_exp1, col_exp2, col_exp3, col_exp4, col_exp5 = st.columns(5)
+    # col_exp1, col_exp2, col_exp3, col_exp4, col_exp5 = st.columns(5)
 
-    with col_exp1:
-        if st.button("Export MSE Minimal Seed"):
-            filename = f"{profile['user_id']}_mse_minimal_seed.json"
-            path = os.path.join(mse_dir, filename)
+    # with col_exp1:
+    #     if st.button("Export MSE Minimal Seed"):
+    #         filename = f"{profile['user_id']}_mse_minimal_seed.json"
+    #         path = os.path.join(mse_dir, filename)
 
-            mse_full_export = {
-                "mse_storage": mse_storage,                # minimal seed object
-                "profile": profile,                        # aggregated stats
-                "base_signature": base_signature,
-                "augmented_signature": augmented_signature,
-                "series_seed": series_seed,
-            }
+    #         mse_full_export = {
+    #             "mse_storage": mse_storage,                # minimal seed object
+    #             "profile": profile,                        # aggregated stats
+    #             "base_signature": base_signature,
+    #             "augmented_signature": augmented_signature,
+    #             "series_seed": series_seed,
+    #         }
 
-            try:
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(mse_full_export, f, indent=4)
-                st.success(f"MSE minimal seed exported to:\n`{path}`")
-            except Exception as e:
-                st.error(f"Failed to export MSE minimal seed: {e}")
+    #         try:
+    #             with open(path, "w", encoding="utf-8") as f:
+    #                 json.dump(mse_full_export, f, indent=4)
+    #             st.success(f"MSE minimal seed exported to:\n`{path}`")
+    #         except Exception as e:
+    #             st.error(f"Failed to export MSE minimal seed: {e}")
 
-    with col_exp2:
-        if st.button("Export Mongo"):
-            filename = f"{profile['user_id']}_30day_stats_mongo.json"
-            path = os.path.join(mongo_dir, filename)
-            try:
-                formatted = format_mongo(stats_schema, profile, base_signature, series_seed, t=0)
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(formatted)
-                st.success(f"MongoDB stats exported to:\n`{path}`")
-            except Exception as e:
-                st.error(f"Failed to export MongoDB stats: {e}")
+    # with col_exp2:
+    #     if st.button("Export Mongo"):
+    #         filename = f"{profile['user_id']}_30day_stats_mongo.json"
+    #         path = os.path.join(mongo_dir, filename)
+    #         try:
+    #             formatted = format_mongo(stats_schema, profile, base_signature, series_seed, t=0)
+    #             with open(path, "w", encoding="utf-8") as f:
+    #                 f.write(formatted)
+    #             st.success(f"MongoDB stats exported to:\n`{path}`")
+    #         except Exception as e:
+    #             st.error(f"Failed to export MongoDB stats: {e}")
 
-    with col_exp3:
-        if st.button("Export Firebase"):
-            filename = f"{profile['user_id']}_30day_stats_firebase.json"
-            path = os.path.join(firebase_dir, filename)
-            try:
-                formatted = format_firebase(stats_schema, profile, base_signature, series_seed, t=0)
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(formatted)
-                st.success(f"Firebase stats exported to:\n`{path}`")
-            except Exception as e:
-                st.error(f"Failed to export Firebase stats: {e}")
+    # with col_exp3:
+    #     if st.button("Export Firebase"):
+    #         filename = f"{profile['user_id']}_30day_stats_firebase.json"
+    #         path = os.path.join(firebase_dir, filename)
+    #         try:
+    #             formatted = format_firebase(stats_schema, profile, base_signature, series_seed, t=0)
+    #             with open(path, "w", encoding="utf-8") as f:
+    #                 f.write(formatted)
+    #             st.success(f"Firebase stats exported to:\n`{path}`")
+    #         except Exception as e:
+    #             st.error(f"Failed to export Firebase stats: {e}")
 
-    with col_exp4:
-        if st.button("Export DynamoDB"):
-            filename = f"{profile['user_id']}_30day_stats_dynamo.json"
-            path = os.path.join(dynamo_dir, filename)
-            try:
-                formatted = format_dynamo(stats_schema, profile, base_signature, series_seed, t=0)
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(formatted)
-                st.success(f"DynamoDB stats exported to:\n`{path}`")
-            except Exception as e:
-                st.error(f"Failed to export DynamoDB stats: {e}")
+    # with col_exp4:
+    #     if st.button("Export DynamoDB"):
+    #         filename = f"{profile['user_id']}_30day_stats_dynamo.json"
+    #         path = os.path.join(dynamo_dir, filename)
+    #         try:
+    #             formatted = format_dynamo(stats_schema, profile, base_signature, series_seed, t=0)
+    #             with open(path, "w", encoding="utf-8") as f:
+    #                 f.write(formatted)
+    #             st.success(f"DynamoDB stats exported to:\n`{path}`")
+    #         except Exception as e:
+    #             st.error(f"Failed to export DynamoDB stats: {e}")
 
-    with col_exp5:
-        if st.button("Export SQL"):
-            filename = f"{profile['user_id']}_30day_stats.sql"
-            path = os.path.join(sql_dir, filename)
-            try:
-                formatted = format_sql(stats_schema, profile, base_signature, series_seed)
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(formatted)
-                st.success(f"SQL stats exported to:\n`{path}`")
-            except Exception as e:
-                st.error(f"Failed to export SQL stats: {e}")
+    # with col_exp5:
+    #     if st.button("Export SQL"):
+    #         filename = f"{profile['user_id']}_30day_stats.sql"
+    #         path = os.path.join(sql_dir, filename)
+    #         try:
+    #             formatted = format_sql(stats_schema, profile, base_signature, series_seed)
+    #             with open(path, "w", encoding="utf-8") as f:
+    #                 f.write(formatted)
+    #             st.success(f"SQL stats exported to:\n`{path}`")
+    #         except Exception as e:
+    #             st.error(f"Failed to export SQL stats: {e}")
 
     st.markdown("---")
     st.caption("Morphic Semantic Engine • One seed → four databases → live storage savings.")
