@@ -8,35 +8,56 @@ import streamlit as st
 
 
 # ============================================================
-# 1. ML Training "Personality" Traits & Storage Model
+# 1. Catalog Attributes & Storage Model
 # ============================================================
 
-TRAINING_TRAITS = [
-    "Data Richness Preference",     # high = wants large datasets
-    "Accuracy Priority",            # high = maximize metrics
-    "Training Speed Priority",      # high = finish quickly
-    "Regularization Strength",      # high = more reg
-    "Augmentation Intensity",       # high = heavy aug
-    "Experimentation Breadth",      # high = many runs/sweeps
-    "On-Device / Edge Focus",       # high = smaller/lighter models
-    "Interpretability Priority",    # high = simpler models, logs
+CATEGORIES = [
+    "Electronics",
+    "Clothing",
+    "Home & Kitchen",
+    "Sports",
+    "Books",
+    "Toys",
+    "Beauty",
+    "Grocery",
 ]
 
-BYTES_PER_FLOAT = 4   # e.g. float32 for config values
-BYTES_PER_CHAR = 1    # approx per character in seed string
+BRANDS = [
+    "Acme",
+    "HyperNova",
+    "Northwind",
+    "Orion",
+    "NovaTech",
+    "Skyline",
+    "Lumos",
+    "Cascade",
+]
+
+# Rough storage assumptions
+BYTES_PER_CHAR = 1            # approx per character
+UUID_LENGTH = 36              # typical v4 UUID string length: 8-4-4-4-12
+CLASSIC_SKU_LENGTH = 24       # e.g., "ELEC-ACM-2025-000123" (illustrative)
 
 
 @dataclass
-class TrainingSeed:
-    """Tiny, shareable representation of an ML training style."""
-    seed_code: str                # e.g. "ML-9A23BC"
-    vector: np.ndarray            # normalized trait vector (local only)
-    raw_traits: Dict[str, float]  # original sliders (local only)
+class CatalogSeed:
+    """Tiny, structured representation of a catalog item family."""
+    seed_code: str                # e.g. "CAT-3F9A2C"
+    vector: np.ndarray            # normalized attribute vector (local only)
+    raw_attributes: Dict[str, str]  # human-readable attributes
 
 
 # ============================================================
 # 2. Helper Functions
 # ============================================================
+
+def encode_category(cat: str) -> int:
+    return CATEGORIES.index(cat)
+
+
+def encode_brand(brand: str) -> int:
+    return BRANDS.index(brand)
+
 
 def normalize_vector(v: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(v)
@@ -45,19 +66,78 @@ def normalize_vector(v: np.ndarray) -> np.ndarray:
     return v / norm
 
 
-def hash_vector_to_code(prefix: str, v: np.ndarray) -> str:
-    """Turn vector into a short deterministic seed code (demo-style)."""
+def hash_vector_to_seed(prefix: str, v: np.ndarray) -> str:
+    """
+    Turn a numeric vector into a short deterministic seed code.
+    In a full MSE, this would be a morphic seed; here it's a simple hash.
+    """
     q = np.round(v * 100).astype(int)
     raw = ",".join(map(str, q.tolist())).encode("utf-8")
     digest = hashlib.sha256(raw).hexdigest()[:6].upper()
     return f"{prefix}-{digest}"
 
 
-def build_training_seed(traits: Dict[str, float]) -> TrainingSeed:
-    vec = np.array([traits[t] for t in TRAINING_TRAITS], dtype=float)
-    vec_norm = normalize_vector(vec)
-    seed_code = hash_vector_to_code("ML", vec_norm)
-    return TrainingSeed(seed_code=seed_code, vector=vec_norm, raw_traits=traits)
+def build_catalog_seed(
+    category: str,
+    brand: str,
+    price_tier: int,
+    seasonality: int,
+    year: int,
+) -> CatalogSeed:
+    """
+    Build a CatalogSeed from a few key attributes.
+    Vector is numeric; raw_attributes is human-readable.
+    """
+    cat_idx = encode_category(category)
+    brand_idx = encode_brand(brand)
+
+    # Simple numeric vector: [cat_idx, brand_idx, price_tier, seasonality, year_mod]
+    year_mod = year % 100  # last two digits
+    v = np.array(
+        [
+            cat_idx,
+            brand_idx,
+            float(price_tier),
+            float(seasonality),
+            float(year_mod),
+        ],
+        dtype=float,
+    )
+    v_norm = normalize_vector(v)
+    seed_code = hash_vector_to_seed("CAT", v_norm)
+    attrs = {
+        "category": category,
+        "brand": brand,
+        "price_tier": str(price_tier),
+        "seasonality": str(seasonality),
+        "year": str(year),
+    }
+    return CatalogSeed(seed_code=seed_code, vector=v_norm, raw_attributes=attrs)
+
+
+def build_catalog_id(seed: CatalogSeed, variant_index: int) -> str:
+    """
+    Build a compact CatalogID from:
+    - category abbrev
+    - brand abbrev
+    - year suffix
+    - seed hash suffix
+    - variant index
+    Example: ELE-ACM-25-C3F9-0012
+    """
+    cat = seed.raw_attributes["category"]
+    brand = seed.raw_attributes["brand"]
+    year = int(seed.raw_attributes["year"])
+    year_suffix = str(year % 100).zfill(2)
+
+    cat_abbrev = cat.replace("&", "").replace(" ", "")[:3].upper()
+    brand_abbrev = brand[:3].upper()
+
+    # Take last 4 chars of seed code digest for brevity
+    digest_part = seed.seed_code.split("-")[-1][-4:]
+    variant_str = str(variant_index).zfill(4)
+
+    return f"{cat_abbrev}-{brand_abbrev}-{year_suffix}-{digest_part}-{variant_str}"
 
 
 def human_readable_bytes(n: int) -> str:
@@ -76,457 +156,327 @@ def human_readable_bytes(n: int) -> str:
     return f"{tb:.1f} TB"
 
 
-# ============================================================
-# 3. Training Plan Generation from TrainingSeed (Demo Logic)
-# ============================================================
-
-def clamp(x, lo, hi):
-    return max(lo, min(hi, x))
-
-
-def build_training_plan(seed: TrainingSeed) -> pd.DataFrame:
-    """
-    Generate a training plan with phases and rough hyperparam styles:
-      - dataset size scale
-      - model size
-      - epochs
-      - batch size
-      - learning rate scale
-      - augmentation level
-      - regularization level
-      - experiments count
-    based on TrainingSeed traits.
-    """
-    traits = seed.raw_traits
-
-    # 0–10 -> 0–1
-    s = lambda name: traits[name] / 10.0
-
-    data_rich = s("Data Richness Preference")
-    acc = s("Accuracy Priority")
-    speed = s("Training Speed Priority")
-    reg = s("Regularization Strength")
-    aug = s("Augmentation Intensity")
-    exp = s("Experimentation Breadth")
-    edge = s("On-Device / Edge Focus")
-    interp = s("Interpretability Priority")
-
-    # Base ranges (interpretation)
-    # dataset: small (0.2) to huge (1.5)
-    # model size: small (0.3) to huge (1.5)
-    # epochs: 5–200
-    # batch size: 16–2048
-    # lr scale: 0.2–2.0
-    # aug/reg: 0–100
-    # experiments: 1–100
-
-    def dataset_scale(multiplier: float = 1.0) -> float:
-        base = 0.2 + 1.3 * data_rich
-        return round(base * multiplier, 2)
-
-    def model_scale(multiplier: float = 1.0) -> float:
-        # high accuracy → bigger; high edge → smaller
-        base = 0.3 + 1.2 * acc
-        base *= (0.7 + 0.3 * (1.0 - edge))
-        return round(base * multiplier, 2)
-
-    def epoch_count(base: int, scale_factor: float = 1.0) -> int:
-        # speed trades off with acc and reg
-        base_epochs = base + int(80 * acc + 40 * reg - 60 * speed)
-        base_epochs = clamp(base_epochs, 5, 200)
-        return int(base_epochs * scale_factor)
-
-    def batch_size() -> int:
-        # high speed & edge focus: larger batch (if GPU), otherwise moderate
-        base_bs = 32 + int(512 * speed + 256 * edge)
-        return int(clamp(base_bs, 16, 2048))
-
-    def lr_scale() -> float:
-        # more reg/aug → can tolerate higher LR; high accuracy → moderate LR
-        lr = 0.2 + 1.0 * speed + 0.5 * aug + 0.3 * reg - 0.5 * acc
-        return round(clamp(lr, 0.2, 2.0), 2)
-
-    def aug_level(multiplier: float = 1.0) -> int:
-        # interpretability often prefers simpler schemes
-        val = 100 * aug * multiplier * (0.7 + 0.3 * (1.0 - interp))
-        return int(clamp(val, 0, 100))
-
-    def reg_level(multiplier: float = 1.0) -> int:
-        val = 100 * reg * multiplier
-        return int(clamp(val, 0, 100))
-
-    def exp_count(multiplier: float = 1.0) -> int:
-        base_exp = 1 + int(90 * exp * multiplier)
-        return int(clamp(base_exp, 1, 100))
-
-    phases = []
-
-    # Phase 1: Base model / backbone
-    phases.append(
-        {
-            "Phase": "Base Pretraining / Backbone",
-            "Dataset Scale (×)": dataset_scale(1.0),
-            "Model Size (×)": model_scale(1.0),
-            "Epochs": epoch_count(20, 1.0),
-            "Batch Size": batch_size(),
-            "LR Scale": lr_scale(),
-            "Augmentation (0–100)": aug_level(0.7),
-            "Regularization (0–100)": reg_level(0.6),
-            "Experiments (runs)": exp_count(0.4),
-            "Notes": "Core representation learning; large-ish dataset if data-rich.",
-        }
-    )
-
-    # Phase 2: Domain fine-tuning
-    phases.append(
-        {
-            "Phase": "Domain Fine-Tuning",
-            "Dataset Scale (×)": dataset_scale(0.4),
-            "Model Size (×)": model_scale(1.0),
-            "Epochs": epoch_count(10, 0.8),
-            "Batch Size": batch_size(),
-            "LR Scale": round(lr_scale() * 0.6, 2),
-            "Augmentation (0–100)": aug_level(1.0),
-            "Regularization (0–100)": reg_level(0.8),
-            "Experiments (runs)": exp_count(0.6),
-            "Notes": "Task-specific data, heavier aug/reg when accuracy is high priority.",
-        }
-    )
-
-    # Phase 3: Hyperparam sweep / experimentation
-    phases.append(
-        {
-            "Phase": "Hyperparam Sweep",
-            "Dataset Scale (×)": dataset_scale(0.3),
-            "Model Size (×)": model_scale(1.0),
-            "Epochs": epoch_count(5, 0.7),
-            "Batch Size": batch_size(),
-            "LR Scale": lr_scale(),
-            "Augmentation (0–100)": aug_level(0.8),
-            "Regularization (0–100)": reg_level(0.7),
-            "Experiments (runs)": exp_count(1.0),
-            "Notes": "Multiple configs; experimentation breadth controls number of runs.",
-        }
-    )
-
-    # Phase 4: Distillation / edge deployment (if edge high)
-    if traits["On-Device / Edge Focus"] > 2.0:
-        phases.append(
-            {
-                "Phase": "Distillation / Edge Model",
-                "Dataset Scale (×)": dataset_scale(0.2),
-                "Model Size (×)": round(model_scale(0.5), 2),
-                "Epochs": epoch_count(8, 0.7),
-                "Batch Size": batch_size(),
-                "LR Scale": round(lr_scale() * 0.8, 2),
-                "Augmentation (0–100)": aug_level(0.6),
-                "Regularization (0–100)": reg_level(0.9),
-                "Experiments (runs)": exp_count(0.5),
-                "Notes": "Compress to smaller model; more reg; suitable for on-device.",
-            }
-        )
-
-    # Phase 5: Interpretability / monitoring (if high priority)
-    if traits["Interpretability Priority"] > 4.0:
-        phases.append(
-            {
-                "Phase": "Interpretability & Monitoring",
-                "Dataset Scale (×)": dataset_scale(0.2),
-                "Model Size (×)": model_scale(0.8),
-                "Epochs": epoch_count(5, 0.5),
-                "Batch Size": batch_size(),
-                "LR Scale": round(lr_scale() * 0.5, 2),
-                "Augmentation (0–100)": aug_level(0.4),
-                "Regularization (0–100)": reg_level(0.5),
-                "Experiments (runs)": exp_count(0.3),
-                "Notes": "Calibrate, log-rich models, simpler variants for explainability.",
-            }
-        )
-
-    df = pd.DataFrame(phases)
-    return df
+def pct_saved(old: int, new: int) -> float:
+    if old <= 0:
+        return 0.0
+    return 100.0 * (1.0 - (new / old))
 
 
 # ============================================================
-# 4. Storage & Bandwidth Estimates
-# ============================================================
-
-def estimate_storage_bytes_per_training_profile(num_traits: int, approx_config_params: int = 40) -> int:
-    """
-    Assume you store:
-    - one float per trait
-    - plus ~approx_config_params floats for concrete hyperparams, thresholds, etc.
-    """
-    return (num_traits + approx_config_params) * BYTES_PER_FLOAT
-
-
-def estimate_storage_bytes_per_training_seed(seed_code: str) -> int:
-    return len(seed_code) * BYTES_PER_CHAR
-
-
-# ============================================================
-# 5. Streamlit UI
+# 3. Streamlit UI Setup
 # ============================================================
 
 st.set_page_config(
-    page_title="MSE ML Training Seed Demo",
+    page_title="MSE Catalog ID / UUID Seed Demo",
     page_icon="🧬",
     layout="wide",
 )
 
-st.title("🧬 MSE ML Training & Seed Compression Demo")
+st.title("🧬 MSE Catalog ID & UUID-Style Seed Demo")
 
 st.write(
     """
-This demo shows how an **MSE-style TrainingSeed** can represent an ML team's
-**training style & hyperparam tendencies**, and how that saves **storage and bandwidth**.
+This demo shows how an **MSE-style CatalogSeed** can replace or augment
+classic **UUIDs / catalog IDs**, while saving **storage and bandwidth**.
 
-- You control **training traits** via sliders.
-- The app builds a tiny **TrainingSeed** from those traits.
-- That seed generates a **multi-phase training plan**.
-- Then we estimate **storage/bandwidth savings** for seeds vs full configs.
+- You define **catalog attributes** (category, brand, price tier, etc.).
+- The app computes a compact **CatalogSeed** and uses it to create **CatalogIDs**.
+- IDs are structured and deterministic, encoding product family + variant.
+- We then compare **storage & bandwidth**, including **% saved**, vs:
+  - classic random UUIDs, and
+  - longer SKU-style IDs.
 """
 )
 
-# Sidebar: traits
-st.sidebar.header("🤖 Training Traits")
+# ============================================================
+# 4. Sidebar: Catalog Attributes
+# ============================================================
 
-st.sidebar.write("Set your ML training preferences (0 = not at all, 10 = very strong).")
+st.sidebar.header("📦 Catalog Item Family")
 
-default_traits = {
-    "Data Richness Preference": 7.0,
-    "Accuracy Priority": 8.0,
-    "Training Speed Priority": 4.0,
-    "Regularization Strength": 6.0,
-    "Augmentation Intensity": 5.0,
-    "Experimentation Breadth": 7.0,
-    "On-Device / Edge Focus": 3.0,
-    "Interpretability Priority": 5.0,
-}
+category = st.sidebar.selectbox("Category", CATEGORIES, index=0)
+brand = st.sidebar.selectbox("Brand", BRANDS, index=0)
 
-trait_values: Dict[str, float] = {}
-for trait in TRAINING_TRAITS:
-    trait_values[trait] = st.sidebar.slider(trait, 0.0, 10.0, float(default_traits[trait]), 0.5)
+price_tier = st.sidebar.slider(
+    "Price Tier (1 = budget, 5 = premium)",
+    min_value=1,
+    max_value=5,
+    value=3,
+)
+seasonality = st.sidebar.slider(
+    "Seasonality (0 = evergreen, 10 = highly seasonal)",
+    min_value=0,
+    max_value=10,
+    value=4,
+)
+year = st.sidebar.slider("Release Year", min_value=2015, max_value=2035, value=2025, step=1)
 
-show_raw_profile = st.sidebar.checkbox("Show raw training trait profile (local only)", value=True)
-show_vector = st.sidebar.checkbox("Show normalized training style vector (debug)", value=False)
+num_variants = st.sidebar.slider("Number of variants to generate", 1, 50, 10, 1)
 
-# Build seed and training plan
-training_seed = build_training_seed(trait_values)
-plan_df = build_training_plan(training_seed)
+show_raw_attrs = st.sidebar.checkbox("Show raw attribute profile (local only)", value=True)
+show_vector = st.sidebar.checkbox("Show normalized attribute vector (debug)", value=False)
 
-# Layout columns
+# ============================================================
+# 5. Build Seed and Example Catalog IDs
+# ============================================================
+
+catalog_seed = build_catalog_seed(category, brand, price_tier, seasonality, year)
+
+rows_items: List[Dict[str, str]] = []
+for idx in range(1, num_variants + 1):
+    cat_id = build_catalog_id(catalog_seed, variant_index=idx)
+    rows_items.append(
+        {
+            "Variant #": idx,
+            "CatalogID (Seed-based)": cat_id,
+        }
+    )
+
+items_df = pd.DataFrame(rows_items)
+
+# ============================================================
+# 6. Layout: Seed Explanation & Catalog IDs
+# ============================================================
+
 col_left, col_right = st.columns([1.1, 1.7])
 
 with col_left:
-    st.subheader("🧬 TrainingSeed & Style Encoding")
+    st.subheader("🧬 CatalogSeed & Structured ID Family")
 
     st.markdown(
         f"""
-**Step 1 – Traits → TrainingSeed**
+**Step 1 – Attributes → CatalogSeed**
 
-- The sliders define your ML **training style**:
-  - how much data you prefer to use,
-  - whether you prioritize accuracy vs speed,
-  - how strong your regularization & augmentation are,
-  - whether you push hard on experimentation,
-  - whether you care about edge devices and interpretability.
+You picked:
 
-- These traits become a **normalized vector**.
-- That vector is encoded into a tiny seed:
+- **Category:** `{category}`  
+- **Brand:** `{brand}`  
+- **Price Tier:** `{price_tier}`  
+- **Seasonality:** `{seasonality}`  
+- **Year:** `{year}`  
 
-> **TrainingSeed:** `{training_seed.seed_code}`
+These attributes are encoded as numeric features, normalized, and turned into a short **seed**:
 
-In a full MSE system, this seed could regenerate:
+> **CatalogSeed:** `{catalog_seed.seed_code}`
 
-- default hyperparam configs,  
-- training curricula,  
-- experiment templates,  
-- resource allocations (GPU/TPU),  
-- on-device vs server model variants.
+In a full MSE system, that seed could regenerate:
 
-What you persist/sync is just the **seed**, not a huge config file each time.
+- product family metadata,  
+- pricing bands,  
+- regional availability,  
+- recommendation / personalization behavior.
+
+But what you actually store/transmit is just the **seed** (or short IDs built from it).
 """
     )
 
-    if show_raw_profile:
-        st.markdown("**Local raw training traits (stay in orchestrator / config UI):**")
-        st.json(training_seed.raw_traits)
+    if show_raw_attrs:
+        st.markdown("**Local raw attributes (editor / back-office only):**")
+        st.json(catalog_seed.raw_attributes)
 
     if show_vector:
-        st.markdown("**Normalized training style vector:**")
-        st.write(training_seed.vector)
+        st.markdown("**Normalized attribute vector:**")
+        st.write(catalog_seed.vector)
 
     st.markdown("---")
 
     st.markdown(
         """
-**Step 2 – From Seed to Training Plan**
+**Step 2 – Seed → CatalogID Series**
 
-The engine uses the TrainingSeed to derive a **multi-phase plan**, including:
+From the CatalogSeed, we generate **variant IDs** that encode:
 
-- Base pretraining / backbone choices,  
-- Domain fine-tuning settings,  
-- Hyperparam sweep style,  
-- Optional distillation for edge deployment,  
-- Optional interpretability/monitoring passes.
+- category abbreviation,  
+- brand abbreviation,  
+- year suffix,  
+- a seed hash fragment,  
+- variant index.
 
-This demo uses simple heuristics; a real MSE implementation would encode
-much richer morphic rules and auto-derived settings.
+This gives you deterministic, structured IDs that behave like UUIDs, but can be:
+
+- shorter,  
+- semantically meaningful,  
+- consistent per product family.
 """
     )
 
 with col_right:
-    st.subheader("📋 Generated Training Plan (Phases)")
+    st.subheader("📋 Generated Catalog IDs for This Product Family")
 
     st.write(
-        """
-This table shows an **end-to-end training strategy** implied by the current TrainingSeed.
-Tweak traits and watch the configuration reshuffle.
+        f"""
+Below are **{num_variants}** example CatalogIDs derived from this **one** CatalogSeed.
+The IDs share a family signature (same category, brand, year + seed hash).
 """
     )
-    st.dataframe(plan_df, use_container_width=True)
+    st.dataframe(items_df, use_container_width=True)
 
     st.markdown(
         """
-Examples:
+You might:
 
-- Increase **Accuracy Priority** → more epochs, slightly bigger models, more runs.  
-- Increase **Training Speed Priority** → fewer epochs, more aggressive LR.  
-- Increase **On-Device / Edge Focus** → more emphasis on distillation and smaller models.  
-- Increase **Experimentation Breadth** → more hyperparam sweep runs.  
-- Increase **Interpretability Priority** → extra monitoring/interpretability phase.
+- Use the **CatalogSeed** internally to regenerate full metadata.  
+- Use the **CatalogID** as a public/DB key.  
+- Optionally still keep a random UUID for strict global uniqueness, while
+  the seed gives you a semantic “handle” on the product family.
 """
     )
 
 st.markdown("---")
 
 # ============================================================
-# 6. Storage & Bandwidth Savings
+# 7. Storage Savings (with %)
 # ============================================================
 
-st.subheader("💾 Storage & 📡 Bandwidth Savings for Training Configs")
+st.subheader("💾 Storage Savings for Catalog IDs")
 
-approx_config_params = 40  # rough guess of how many floats/params a config might have
-raw_bytes_per_training = estimate_storage_bytes_per_training_profile(len(TRAINING_TRAITS), approx_config_params)
-seed_bytes_per_training = estimate_storage_bytes_per_training_seed(training_seed.seed_code)
+# Per-ID comparison
+seed_based_id_example = items_df["CatalogID (Seed-based)"].iloc[0]
+seed_id_length = len(seed_based_id_example)
+seed_code_length = len(catalog_seed.seed_code)
+
+uuid_bytes = UUID_LENGTH * BYTES_PER_CHAR
+sku_bytes = CLASSIC_SKU_LENGTH * BYTES_PER_CHAR
+seed_id_bytes = seed_id_length * BYTES_PER_CHAR
+seed_code_bytes = seed_code_length * BYTES_PER_CHAR
+
+uuid_vs_seed_id_pct = pct_saved(uuid_bytes, seed_id_bytes)
+sku_vs_seed_id_pct = pct_saved(sku_bytes, seed_id_bytes)
 
 st.markdown(
     f"""
-### Per Training Profile
+### Per ID / Seed
 
-**Raw training profile storage (traits + config params)**
+**Classic UUID v4 string**  
+- Length: **{UUID_LENGTH}** chars  
+- Storage: **{uuid_bytes} bytes** per ID  
 
-- {len(TRAINING_TRAITS)} traits + ~{approx_config_params} config params  
-- total ~{len(TRAINING_TRAITS) + approx_config_params} floats × {BYTES_PER_FLOAT} bytes/float  
-- ≈ **{raw_bytes_per_training} bytes** per profile
+**Classic SKU-style ID (example)**  
+- Approx length: **{CLASSIC_SKU_LENGTH}** chars  
+- Storage: **{sku_bytes} bytes** per ID  
 
-**Seed-only training storage**
+**Seed-based CatalogID (demo)**  
+- Example: `{seed_based_id_example}`  
+- Length: **{seed_id_length}** chars  
+- Storage: **{seed_id_bytes} bytes** per ID  
+- **Storage saved vs UUID:** ~**{uuid_vs_seed_id_pct:.1f}%**  
+- **Storage saved vs classic SKU:** ~**{sku_vs_seed_id_pct:.1f}%**  
 
-- `{training_seed.seed_code}` → {len(training_seed.seed_code)} characters × {BYTES_PER_CHAR} byte/char  
-- ≈ **{seed_bytes_per_training} bytes** per profile
-
-So in this simplified example, the seed is about **{raw_bytes_per_training / max(seed_bytes_per_training,1):.1f}× smaller**  
-than storing a full trait+config bundle directly.
-
-In a real MSE system, the seed could also implicitly encode:
-- model families,
-- curriculum choices,
-- resource tiers,
-- and experiment graph structure.
+**CatalogSeed** (shared across variants in the same family)  
+- `{catalog_seed.seed_code}`  
+- Length: **{seed_code_length}** chars  
+- Storage: **{seed_code_bytes} bytes** per seed
 """
 )
 
-# Scale for many projects / experiments
-scale_profiles = [100, 10_000, 1_000_000]
+# At catalog scale
+st.markdown("### At Catalog Scale (Storage Across Many Items)")
+
+catalog_sizes = [10_000, 1_000_000, 100_000_000]
 rows_storage = []
-for n_profiles in scale_profiles:
-    raw_total = raw_bytes_per_training * n_profiles
-    seed_total = seed_bytes_per_training * n_profiles
-    savings = 1.0 - (seed_total / raw_total) if raw_total > 0 else 0.0
+
+for n_items in catalog_sizes:
+    uuid_total = uuid_bytes * n_items
+    sku_total = sku_bytes * n_items
+    seed_id_total = seed_id_bytes * n_items
+
+    # Assume ~1 seed per 100 items (family concept)
+    num_seeds = max(1, n_items // 100)
+    seeds_total = seed_code_bytes * num_seeds
+
+    # Total with seed system = IDs + seeds
+    total_seed_system = seed_id_total + seeds_total
+
+    uuid_pct_saved = pct_saved(uuid_total, total_seed_system)
+    sku_pct_saved = pct_saved(sku_total, total_seed_system)
+
     rows_storage.append(
         {
-            "Training Profiles": f"{n_profiles:,}",
-            "Raw Config Storage": human_readable_bytes(raw_total),
-            "Seed-Only Storage": human_readable_bytes(seed_total),
-            "Storage Saved": f"{savings*100:.1f}%",
+            "Catalog Size (items)": f"{n_items:,}",
+            "UUID-Only Storage": human_readable_bytes(uuid_total),
+            "SKU-Only Storage": human_readable_bytes(sku_total),
+            "Seed-Based IDs + Seeds": human_readable_bytes(total_seed_system),
+            "% Saved vs UUID": f"{uuid_pct_saved:.1f}%",
+            "% Saved vs SKU": f"{sku_pct_saved:.1f}%",
         }
     )
 
-st.markdown("### At Scale (Storage Across Many Experiments / Teams)")
 st.dataframe(pd.DataFrame(rows_storage), use_container_width=True)
 
 st.markdown(
     """
-Large orgs often have:
+**Key idea:**
 
-- many projects,  
-- many variants per project,  
-- multiple environments (dev, staging, prod),  
-- long-lived config histories.
-
-Encoding much of that into **TrainingSeeds (+ small deltas)** keeps the config surface lean.
+- UUID-only or SKU-only approaches store a full-length ID for *every* item.  
+- Seed-based systems use a **shared CatalogSeed** per product family +  
+  **shorter IDs** per variant.  
+- That reduces total string storage and gives you semantic grouping “for free”.
 """
 )
 
-# Bandwidth section
-st.markdown("### Bandwidth for Orchestrator ↔ Workers / Cloud")
+st.markdown("---")
+
+# ============================================================
+# 8. Bandwidth Savings (with %)
+# ============================================================
+
+st.subheader("📡 Bandwidth Savings for Sync / Export")
 
 st.markdown(
     """
-Now imagine sending training configs to:
+Consider syncing catalog data:
 
-- distributed workers,  
-- remote clusters,  
-- AutoML / experiment services.
+- **PIM → e-commerce**,  
+- **e-commerce → search index**,  
+- **central DB → caches / edge nodes**.
 
-Instead of pushing full configs each time, you can:
+We compare sending:
 
-- send a **TrainingSeed**,  
-- let workers regenerate the full config locally.
-
-Below is a rough comparison of sending full configs vs seeds when dispatching jobs.
+- a full UUID per item vs  
+- a seed-based ID per item + one CatalogSeed per family.
 """
 )
 
-jobs_per_day = st.slider("Assumed training jobs dispatched per day", 10, 500_000, 10_000, step=10)
-workers_in_fleet = st.slider("Number of workers receiving configs per day", 10, 100_000, 1_000, step=10)
+sync_items = st.slider("Items in a sync/export batch", 1_000, 5_000_000, 100_000, step=1_000)
 
-# Simple model: each job sends its config to one worker
-raw_payload_per_job = raw_bytes_per_training
-seed_payload_per_job = seed_bytes_per_training
-raw_per_day = raw_payload_per_job * jobs_per_day
-seed_per_day = seed_payload_per_job * jobs_per_day
-savings_per_day = 1.0 - (seed_per_day / raw_per_day) if raw_per_day > 0 else 0.0
+uuid_payload = uuid_bytes * sync_items
+sku_payload = sku_bytes * sync_items
+seed_id_payload = seed_id_bytes * sync_items
+
+# Assume same 1 seed per 100 items
+num_seeds_sync = max(1, sync_items // 100)
+seeds_payload = seed_code_bytes * num_seeds_sync
+
+total_seed_sync_payload = seed_id_payload + seeds_payload
+
+uuid_sync_pct_saved = pct_saved(uuid_payload, total_seed_sync_payload)
+sku_sync_pct_saved = pct_saved(sku_payload, total_seed_sync_payload)
 
 rows_bandwidth = [
     {
-        "Scenario": "Per job dispatched",
-        "Raw Config Payload": human_readable_bytes(raw_payload_per_job),
-        "Seed Payload": human_readable_bytes(seed_payload_per_job),
-        "Bandwidth Saved": f"{(1 - seed_payload_per_job / raw_payload_per_job)*100:.1f}%" if raw_payload_per_job > 0 else "0%",
-    },
-    {
-        "Scenario": "Per day (all jobs)",
-        "Raw Config Payload": human_readable_bytes(int(raw_per_day)),
-        "Seed Payload": human_readable_bytes(int(seed_per_day)),
-        "Bandwidth Saved": f"{savings_per_day*100:.1f}%",
-    },
+        "Metric": "Payload size for this sync batch",
+        "Items in Batch": f"{sync_items:,}",
+        "UUID Payload": human_readable_bytes(uuid_payload),
+        "SKU Payload": human_readable_bytes(sku_payload),
+        "Seed-Based IDs + Seeds": human_readable_bytes(total_seed_sync_payload),
+        "% Saved vs UUID": f"{uuid_sync_pct_saved:.1f}%",
+        "% Saved vs SKU": f"{sku_sync_pct_saved:.1f}%",
+    }
 ]
 
 st.dataframe(pd.DataFrame(rows_bandwidth), use_container_width=True)
 
 st.markdown(
     """
-In practice, **seed-based ML training** lets you:
+With millions of items and many syncs:
 
-- reuse structured training recipes across teams and models,  
-- version and diff seeds instead of giant YAMLs,  
-- sync high-level behavior (e.g., "aggressive experimentation, edge-focused")
-  across fleets with a few bytes.
+- **Seed-based IDs** shrink the per-item identifier.  
+- **CatalogSeeds** let you share structure once, not per-row.  
+- Combined, you get **real % savings** on both storage and bandwidth,
+  plus deterministic, semantic IDs mapped back to rich MSE-generated metadata.
 
-This is the ML-training version of your MSE idea:
+This is the catalog / UUID angle of the MSE story:
 
-> **Rich training strategies, tiny deterministic seeds.**
+> **Huge catalogs, small IDs, shared seeds, real % savings.**
 """
 )
