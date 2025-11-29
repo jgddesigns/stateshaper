@@ -1,13 +1,10 @@
 from random import randint
 from AdLinks import AdLinks
 from MappingRules import MappingRules
-
+from mse.core import MorphicSemanticEngine
 
 import os
 import sys
-
-from mse.core import MorphicSemanticEngine
-
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
@@ -83,7 +80,7 @@ class Advertising:
         )
 
         self.original_tokens = self.engine.generate_tokens(50)
-        
+
         print("\n\n")
         print(self.original_tokens)
         
