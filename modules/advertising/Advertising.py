@@ -27,6 +27,10 @@ class Advertising:
 
         self.most_relevant = 0
 
+        self.original_tokens = None
+
+        self.engine = None
+
         self.mapping_rules = MappingRules()
 
         self.ad_links = AdLinks()
@@ -71,13 +75,17 @@ class Advertising:
 
 
     def start_engine(self):
-        engine = MorphicSemanticEngine(
+        self.engine = MorphicSemanticEngine(
             initial_state=self.get_state(),
             vocab=self.vocab,
             constants={"a": 3, "b": 5, "c": 7, "d": 11},
             mod=9973,
         )
-        engine.step()
+
+        self.original_tokens = self.engine.generate_tokens(50)
+        
+        print("\n\n")
+        print(self.original_tokens)
         
 
     def get_state(self):
