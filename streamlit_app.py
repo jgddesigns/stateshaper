@@ -1,656 +1,388 @@
-import os
-import sys
-import json
-from io import BytesIO
-from typing import Dict, Any, List
+import math
+from dataclasses import dataclass
+from typing import List, Tuple, Optional
 
-import streamlit as st
-import pandas as pd
-
-
-# ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # /mount/src/morphic_semantic_engine
-# SRC_DIR = os.path.join(ROOT_DIR, "src")
-
-# if SRC_DIR not in sys.path:
-#     sys.path.insert(0, SRC_DIR)
-
-# -------------------------------
-# Internal imports
-# -------------------------------
-from mse.core import MorphicSemanticEngine
-from modules.databases.TableData import TableData
-from modules.databases.Statistics import Statistics
-
-# Optional: backend exporter classes (full 30-day file export)
+# Try to import Streamlit; if not installed, CLI mode still works.
 try:
-    from modules.databases.examples.MySQL import MySQL as SQLExporter
+    import streamlit as st
+    HAS_STREAMLIT = True
 except ImportError:
-    SQLExporter = None
-
-try:
-    from modules.databases.examples.MongoDB import MongoDB as MongoExporter
-except ImportError:
-    MongoExporter = None
-
-try:
-    from modules.databases.examples.Firebase import Firebase as FirebaseExporter
-except ImportError:
-    FirebaseExporter = None
-
-try:
-    from modules.databases.examples.DynamoDB import DynamoDB as DynamoExporter
-except ImportError:
-    DynamoExporter = None
-
-try:
-    from modules.databases.examples.MSE import MSE as MSEExporter
-except ImportError:
-    MSEExporter = None
+    HAS_STREAMLIT = False
 
 
+# ============================================================
+# 1. Core data structures
+# ============================================================
 
-# -------------------------------
-# DB format helper functions
-# -------------------------------
-
-def format_sql(schema: Dict[str, Any], profile: Dict[str, Any], base_signature, series_seed) -> str:
-    table = schema["table"]
-    columns = schema["columns"]
-    rows = schema["rows"]
-
-    lines = []
-    # Header with minimal seed info
-    lines.append(f"-- user_id={profile['user_id']}")
-    lines.append(f"-- signature={base_signature}")
-    lines.append(f"-- series_seed={series_seed}")
-    lines.append(f"-- mod=9973")
-    lines.append("")
-
-    # CREATE TABLE
-    lines.append(f"CREATE TABLE `{table}` (")
-    col_lines = [f"  `{name}` {dtype}" for name, dtype in columns]
-    lines.append(",\n".join(col_lines))
-    lines.append(");")
-    lines.append("")
-
-    # INSERTs
-    col_names = ", ".join(f"`{name}`" for name, _ in columns)
-    for row in rows:
-        values = ", ".join(f"'{v}'" for v in row[:len(columns)])
-        lines.append(f"INSERT INTO `{table}` ({col_names}) VALUES ({values});")
-
-    return "\n".join(lines)
+@dataclass
+class MorphProgram:
+    family_id: str
+    series_length: int
+    a: float
+    b: float
+    smooth_strength: float
+    nonlin_strength: float
 
 
-def format_mongo(schema: Dict[str, Any], profile: Dict[str, Any], base_signature, series_seed, t: int) -> str:
-    doc = {
-        "_id": f"{profile['user_id']}_day_{t}",
-        "user_id": profile["user_id"],
-        "day_index": t,
-        "table": schema["table"],
-        "columns": [
-            {"name": col_name, "type": dtype}
-            for col_name, dtype in schema["columns"]
-        ],
-        "rows": schema["rows"],
-        "mse_storage": {
-            "signature": list(base_signature),
-            "series_seed": series_seed,
-            "mod": 9973,
-            "constants": {"a": 3, "b": 5, "c": 7, "d": 11},
-        },
-    }
-    return json.dumps(doc, indent=4)
+@dataclass
+class TileSeed:
+    mode: int                 # 0 = pure MSE, 1 = MSE+residual (not used yet), 2 = raw tokens
+    length: int
+    norm_min: float
+    norm_max: float
+    tokens: List[int]         # for now we store explicit tokens; can later compress
+    morph_program: MorphProgram
+    residuals: Optional[List[float]] = None  # placeholder for mode 1
 
 
-def format_firebase(schema: Dict[str, Any], profile: Dict[str, Any], base_signature, series_seed, t: int) -> str:
-    doc = {
-        "user_id": profile["user_id"],
-        "day_index": t,
-        "table": schema["table"],
-        "columns": [
-            {"name": name, "type": dtype}
-            for name, dtype in schema["columns"]
-        ],
-        "rows": schema["rows"],
-        "mse_storage": {
-            "signature": list(base_signature),
-            "series_seed": series_seed,
-            "mod": 9973,
-            "constants": {"a": 3, "b": 5, "c": 7, "d": 11},
-        },
-    }
-    return json.dumps(doc, indent=4)
+# ============================================================
+# 2. Tokenization / normalization (1..100 tokens)
+# ============================================================
+
+def normalize_to_tokens(values: List[float], num_tokens: int = 100) -> Tuple[List[int], Tuple[float, float]]:
+    """
+    Map arbitrary numeric values to integer tokens in [1..num_tokens].
+    Returns (tokens, (min_val, max_val)).
+    """
+    if len(values) == 0:
+        raise ValueError("Array is empty")
+
+    min_val = min(values)
+    max_val = max(values)
+
+    if max_val == min_val:
+        tokens = [num_tokens // 2] * len(values)
+        return tokens, (min_val, max_val)
+
+    span = max_val - min_val
+    tokens: List[int] = []
+    for x in values:
+        # Normalize to [0,1], then to [1..num_tokens]
+        norm = (x - min_val) / span
+        t = 1 + int(norm * (num_tokens - 1))
+        # Safety clamp
+        t = max(1, min(num_tokens, t))
+        tokens.append(t)
+    return tokens, (min_val, max_val)
 
 
-def to_ddb_str(value: str) -> Dict[str, str]:
-    return {"S": value}
+def tokens_to_base(tokens: List[int], norm_params: Tuple[float, float], num_tokens: int = 100) -> List[float]:
+    """
+    Convert tokens back to a base numeric approximation using (min, max).
+    """
+    min_val, max_val = norm_params
+    if max_val == min_val:
+        return [min_val] * len(tokens)
+
+    span = max_val - min_val
+    base: List[float] = []
+    for t in tokens:
+        # Interpret token t as representing the center of its bin
+        frac = (t - 0.5) / num_tokens  # in (0..1)
+        x = min_val + frac * span
+        base.append(x)
+    return base
 
 
-def format_dynamo(schema: Dict[str, Any], profile: Dict[str, Any], base_signature, series_seed, t: int) -> str:
-    item = {
-        "t": {"N": str(t)},
-        "user_id": {"S": profile["user_id"]},
-        "table": {"S": schema["table"]},
-        "columns": {
-            "L": [
+# ============================================================
+# 3. Morph family: terrain_1d_v1
+#    (simple: linear + smoothing + token-based nonlinearity)
+# ============================================================
+
+def linear_step(x: List[float], a: float, b: float) -> List[float]:
+    return [a * xi + b for xi in x]
+
+
+def smooth_step(x: List[float], strength: float) -> List[float]:
+    """
+    strength in [0,1]. 0 = no smoothing, 1 = full smoothing.
+    Core smoothing: y[i] = (x[i-1] + 2*x[i] + x[i+1]) / 4
+    Then blend: out[i] = (1-strength)*x[i] + strength*y[i]
+    """
+    if strength <= 0.0:
+        return x[:]  # no-op
+
+    n = len(x)
+    if n == 1:
+        return x[:]
+
+    y = [0.0] * n
+    for i in range(n):
+        left = x[i - 1] if i > 0 else x[i]
+        right = x[i + 1] if i < n - 1 else x[i]
+        center = x[i]
+        sm = (left + 2 * center + right) / 4.0
+        y[i] = sm
+
+    out = [(1.0 - strength) * x[i] + strength * y[i] for i in range(n)]
+    return out
+
+
+def nonlin_step(x: List[float], tokens: List[int], strength: float) -> List[float]:
+    """
+    Simple token-dependent nonlinearity.
+    - High tokens (>70) bump values up slightly.
+    - Low tokens (<30) bump values down slightly.
+    - Mid tokens mostly unchanged.
+    strength in [0,1] controls magnitude.
+    """
+    if strength <= 0.0:
+        return x[:]
+
+    n = len(x)
+    out = [0.0] * n
+    for i in range(n):
+        t = tokens[i]
+        base = x[i]
+
+        if t > 70:
+            # bump up, scaled by how high the token is
+            delta = (t - 70) / 30.0  # in (0..1)
+            out[i] = base + strength * delta * 0.5  # 0.5 is arbitrary scale
+        elif t < 30:
+            # bump down
+            delta = (30 - t) / 29.0  # in (0..1)
+            out[i] = base - strength * delta * 0.5
+        else:
+            out[i] = base
+    return out
+
+
+def run_morph_program(tokens: List[int],
+                      norm_params: Tuple[float, float],
+                      program: MorphProgram) -> List[float]:
+    """
+    Given tokens, normalization params, and a morph program, generate the numeric array.
+    """
+    # Start from base numeric approximation of tokens
+    x = tokens_to_base(tokens, norm_params)
+
+    for _ in range(program.series_length):
+        # linear
+        x = linear_step(x, program.a, program.b)
+        # smoothing
+        x = smooth_step(x, program.smooth_strength)
+        # non-linear
+        x = nonlin_step(x, tokens, program.nonlin_strength)
+
+    return x
+
+
+# ============================================================
+# 4. Error metric
+# ============================================================
+
+def mse(a: List[float], b: List[float]) -> float:
+    if len(a) != len(b):
+        raise ValueError("Length mismatch for MSE")
+    if not a:
+        return 0.0
+    s = 0.0
+    for x, y in zip(a, b):
+        d = x - y
+        s += d * d
+    return s / len(a)
+
+
+# ============================================================
+# 5. Seed searcher (single tile, bounded grid search)
+# ============================================================
+
+@dataclass
+class SeedSearchResult:
+    seed: TileSeed
+    reconstructed: List[float]
+    error: float
+
+
+def search_best_seed_for_tile(values: List[float]) -> SeedSearchResult:
+    """
+    Very simple, bounded grid search for a best-fit MorphProgram seed
+    for a single tile. This is the prototype version, not the final
+    production-level searcher.
+    """
+
+    # 1. Normalize to tokens
+    tokens, (min_val, max_val) = normalize_to_tokens(values)
+
+    length = len(values)
+
+    # 2. Define search grid.
+    series_lengths   = [1, 2, 3]
+    a_values         = [1.0]                # keep linear step simple for now
+    b_values         = [0.0, -0.5, 0.5]     # small offset tweaks
+    smooth_strengths = [0.0, 0.3, 0.6]
+    nonlin_strengths = [0.0, 0.3, 0.6]
+
+    best_score = float("inf")
+    best_program: Optional[MorphProgram] = None
+    best_recon: List[float] = []
+
+    # 3. Brute-force over this small parameter grid.
+    for T in series_lengths:
+        for a in a_values:
+            for b in b_values:
+                for s_smooth in smooth_strengths:
+                    for s_nonlin in nonlin_strengths:
+                        program = MorphProgram(
+                            family_id="terrain_1d_v1",
+                            series_length=T,
+                            a=a,
+                            b=b,
+                            smooth_strength=s_smooth,
+                            nonlin_strength=s_nonlin,
+                        )
+                        recon = run_morph_program(tokens, (min_val, max_val), program)
+                        err = mse(values, recon)
+
+                        # Simple complexity penalty (favor fewer iterations & weaker nonlin)
+                        complexity = 0.1 * (T - 1) + 0.05 * (s_nonlin > 0.0)
+                        score = err + complexity
+
+                        if score < best_score:
+                            best_score = score
+                            best_program = program
+                            best_recon = recon
+
+    # 4. Build TileSeed (mode 0 = pure MSE) with found program.
+    if best_program is None:
+        # Fallback: no search improvement; just use base tokens with identity morph.
+        best_program = MorphProgram(
+            family_id="terrain_1d_v1",
+            series_length=1,
+            a=1.0,
+            b=0.0,
+            smooth_strength=0.0,
+            nonlin_strength=0.0,
+        )
+        best_recon = run_morph_program(tokens, (min_val, max_val), best_program)
+        best_score = mse(values, best_recon)
+
+    tile_seed = TileSeed(
+        mode=0,
+        length=length,
+        norm_min=min_val,
+        norm_max=max_val,
+        tokens=tokens,
+        morph_program=best_program,
+        residuals=None,
+    )
+
+    return SeedSearchResult(seed=tile_seed, reconstructed=best_recon, error=best_score)
+
+
+# ============================================================
+# 6. Pretty-print helpers
+# ============================================================
+
+def summarize_seed(seed: TileSeed) -> str:
+    p = seed.morph_program
+    return (
+        f"TileSeed(mode={seed.mode}, length={seed.length})\n"
+        f"  norm_min={seed.norm_min:.4f}, norm_max={seed.norm_max:.4f}\n"
+        f"  tokens[0:10]={seed.tokens[:10]}{'...' if len(seed.tokens) > 10 else ''}\n"
+        f"  MorphProgram(family_id={p.family_id}, series_length={p.series_length},\n"
+        f"               a={p.a}, b={p.b}, smooth_strength={p.smooth_strength},\n"
+        f"               nonlin_strength={p.nonlin_strength})"
+    )
+
+
+# ============================================================
+# 7. CLI entry point (for quick testing)
+# ============================================================
+
+def run_cli_demo():
+    print("MSE Seed Searcher Demo (single tile)")
+    print("Enter a comma-separated list of numbers, e.g.: 57,1456,34,69")
+    raw = input("Array: ").strip()
+    if not raw:
+        print("No input.")
+        return
+
+    try:
+        values = [float(x.strip()) for x in raw.split(",") if x.strip()]
+    except ValueError:
+        print("Could not parse numbers.")
+        return
+
+    result = search_best_seed_for_tile(values)
+
+    print("\n=== Best Seed Found ===")
+    print(summarize_seed(result.seed))
+    print(f"\nMSE error: {result.error:.6f}")
+
+    print("\nOriginal vs Reconstructed (first 20 items):")
+    for i, (orig, rec) in enumerate(zip(values, result.reconstructed)):
+        if i >= 20:
+            print("...")
+            break
+        print(f"{i:3d}: orig={orig:.4f}, recon={rec:.4f}, diff={orig-rec:.4f}")
+
+
+# ============================================================
+# 8. Streamlit app (if Streamlit is installed)
+# ============================================================
+
+def run_streamlit_app():
+    st.title("MSE Seed Searcher (Prototype)")
+    st.write("Given an array of numbers, find a best-fit MSE seed and reconstruct it.")
+
+    default_array = "57, 1456, 34, 69, 120, 980, 43, 88"
+    raw = st.text_area("Input array (comma-separated numbers):", value=default_array, height=120)
+
+    if st.button("Search for Seed"):
+        try:
+            values = [float(x.strip()) for x in raw.split(",") if x.strip()]
+        except ValueError:
+            st.error("Could not parse the input. Make sure it's comma-separated numbers.")
+            return
+
+        if not values:
+            st.error("Please enter at least one number.")
+            return
+
+        result = search_best_seed_for_tile(values)
+
+        st.subheader("Best Seed Found")
+        st.code(summarize_seed(result.seed))
+
+        st.subheader("Error")
+        st.write(f"Mean Squared Error (MSE): `{result.error:.6f}`")
+
+        # Show original vs reconstructed
+        st.subheader("Original vs Reconstructed (first 100 items)")
+        n_show = min(100, len(values))
+        rows = []
+        for i in range(n_show):
+            rows.append(
                 {
-                    "M": {
-                        "name": to_ddb_str(col_name),
-                        "dtype": to_ddb_str(dtype),
-                    }
+                    "index": i,
+                    "original": values[i],
+                    "reconstructed": result.reconstructed[i],
+                    "diff": values[i] - result.reconstructed[i],
                 }
-                for col_name, dtype in schema["columns"]
-            ]
-        },
-        "rows": {
-            "L": [
-                {"L": [to_ddb_str(v) for v in row]}
-                for row in schema["rows"]
-            ]
-        },
-        "mse_storage": {
-            "M": {
-                "signature": {"L": [{"N": str(x)} for x in base_signature]},
-                "series_seed": {"N": str(series_seed)},
-                "mod": {"N": "9973"},
-            }
-        },
-    }
-    return json.dumps(item, indent=4)
-
-
-# -------------------------------
-# Engine + seed helpers
-# -------------------------------
-
-def build_engine_and_seed_from_days(days: List[Dict[str, Any]], stats: Statistics):
-    """
-    Given a list of per-day stats dicts:
-    - Aggregate into a profile
-    - Build base signature
-    - Encode full 30-day series to series_seed
-    - Augment signature with series_seed
-    - Initialize MorphicSemanticEngine
-    """
-    profile = stats.aggregate_profile_from_30days(days)
-    base_signature = stats.profile_to_signature(profile)
-    series_seed = stats.encode_30day_stats(days)
-    augmented_signature = stats.augment_signature_with_series(base_signature, series_seed)
-
-    vocab = [str(i) for i in range(27)]
-    constants = {"a": 3, "b": 5, "c": 7, "d": 11}
-
-    engine = MorphicSemanticEngine(
-        initial_state=tuple(augmented_signature),
-        vocab=vocab,
-        constants=constants,
-        mod=9973,
-    )
-
-    mse_storage = {
-        "user_id": profile["user_id"],
-        "signature": list(base_signature),
-        "series_seed": series_seed,
-        "mod": 9973,
-        "constants": constants,
-    }
-
-    return engine, profile, base_signature, series_seed, augmented_signature, mse_storage
-
-
-def run_engine_with_tabledata(engine: MorphicSemanticEngine, steps: int = 30):
-    """Run the engine for `steps` and capture TableData schemas per t."""
-    db = TableData()
-    schemas_by_t: Dict[int, Dict[str, Any]] = {}
-    for _ in range(steps):
-        engine.step()
-        schemas_by_t[engine.t] = db.capture_state(engine)
-    return schemas_by_t
-
-
-def build_stats_schema(days: List[Dict[str, Any]], profile: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Build a DB-friendly schema from the 30-day stats:
-    day, treadmill_minutes, avg_daily_steps, calories, protein_g, sleep_hours
-    """
-    table_name = f"{profile.get('user_id', 'user')}_30day_stats"
-
-    columns = [
-        ("day", "INT"),
-        ("treadmill_minutes", "INT"),
-        ("avg_daily_steps", "INT"),
-        ("calories", "INT"),
-        ("protein_g", "INT"),
-        ("sleep_hours", "FLOAT"),
-    ]
-
-    rows = []
-    for d in days:
-        rows.append([
-            int(d["day_index"] + 1),                     # 1–30, internal day_index is still 0–29
-            int(d["treadmill_minutes"]),
-            int(d["avg_daily_steps"]),
-            int(d["calories"]),
-            int(d["protein_g"]),
-            float(d["sleep_hours"]),
-        ])
-
-    return {
-        "table": table_name,
-        "columns": columns,
-        "rows": rows,
-    }
-
-
-
-
-# -------------------------------
-# Streamlit app
-# -------------------------------
-
-def main():
-    st.set_page_config(page_title="MSE DB Formats Demo", layout="wide")
-
-    st.title("Morphic Semantic Engine – DB Format Demo")
-    st.caption("Edit 30-day stats → build minimal seed → view & export SQL / Mongo / Firebase / DynamoDB.")
-
-    stats = Statistics()
-
-    # ---------------------------------------------------------
-    # Section 1: Editable 30-day stats
-    # ---------------------------------------------------------
-    st.subheader("1. Edit 30-Day Statistics")
-
-    default_days = stats.get_30day_stats()
-    df_default = pd.DataFrame(default_days)[
-        ["day_index", "treadmill_minutes", "avg_daily_steps", "calories", "protein_g", "sleep_hours"]
-    ]
-    df_default["day"] = df_default["day_index"] + 1
-    df_default = df_default[
-        ["day", "day_index", "treadmill_minutes", "avg_daily_steps", "calories", "protein_g", "sleep_hours"]
-    ]
-
-    st.markdown(
-        "Use the table below to adjust treadmill minutes, steps, calories, protein, and sleep "
-        "for each day. These stats feed into the MSE seed used for all DB formats."
-    )
-
-    edited_df = st.data_editor(
-        df_default,
-        num_rows="fixed",
-        use_container_width=True,
-        column_config={
-            "day": st.column_config.NumberColumn("Day", disabled=True),
-            "day_index": st.column_config.NumberColumn("day_index", disabled=True),
-        },
-        key="stats_editor",
-    )
-
-    # Convert edited DataFrame back into days list
-    days: List[Dict[str, Any]] = []
-    for _, row in edited_df.iterrows():
-        days.append(
-            {
-                "day_index": int(row["day_index"]),
-                "treadmill_minutes": float(row["treadmill_minutes"]),
-                "avg_daily_steps": float(row["avg_daily_steps"]),
-                "calories": float(row["calories"]),
-                "protein_g": float(row["protein_g"]),
-                "sleep_hours": float(row["sleep_hours"]),
-            }
-        )
-
-    # Quick charts
-    col_chart1, col_chart2 = st.columns(2)
-    df_days_display = pd.DataFrame(days)
-    df_days_display["day"] = df_days_display["day_index"] + 1
-    df_days_display = df_days_display[
-        ["day", "treadmill_minutes", "avg_daily_steps", "calories", "protein_g", "sleep_hours"]
-    ]
-
-    with col_chart1:
-        st.markdown("**Treadmill Minutes & Sleep**")
-        st.line_chart(df_days_display.set_index("day")[["treadmill_minutes", "sleep_hours"]])
-
-    with col_chart2:
-        st.markdown("**Steps & Calories**")
-        st.line_chart(df_days_display.set_index("day")[["avg_daily_steps", "calories"]])
-
-    # ---------------------------------------------------------
-    # Section 2: Seed from edited stats
-    # ---------------------------------------------------------
-    st.subheader("2. Minimal Seed Derived from Your Stats")
-
-    engine, profile, base_signature, series_seed, augmented_signature, mse_storage = build_engine_and_seed_from_days(
-        days, stats
-    )
-
-    col_sig, col_seed = st.columns(2)
-
-    with col_sig:
-        st.markdown("**Aggregate Profile (from edited stats)**")
-        st.json(profile)
-
-        st.markdown("**Base Signature (5 ints)**")
-        st.json(
-            {
-                "health": base_signature[0],
-                "cognition": base_signature[1],
-                "stress": base_signature[2],
-                "strength": base_signature[3],
-                "lifestyle": base_signature[4],
-            }
-        )
-
-    with col_seed:
-        st.markdown("**series_seed (single integer summarizing 30 days)**")
-        st.write(series_seed)
-
-        st.markdown("**Augmented Signature (used as initial_state)**")
-        st.write(augmented_signature)
-
-        st.markdown("**Minimal stored object (`mse_storage`)**")
-        st.json(mse_storage)
-
-    # ---------------------------------------------------------
-    # Section 2.5: Live File Size Comparison
-    # ---------------------------------------------------------
-    # Run engine once here so we can use schemas for size estimation
-    schemas_by_t = run_engine_with_tabledata(engine, steps=30)
-
-    # Size of minimal seed (JSON)
-    seed_json = json.dumps(mse_storage, separators=(",", ":"))
-    seed_bytes = len(seed_json.encode("utf-8"))
-    seed_kb = seed_bytes / 1024.0
-
-    # Size of a "standard" full database:
-    # - raw 30-day stats
-    # - plus 30 Mongo-style docs (one per day)
-    days_json = json.dumps(days, separators=(",", ":"))
-    days_bytes = len(days_json.encode("utf-8"))
-
-    mongo_total_bytes = 0
-    for t, schema_t in schemas_by_t.items():
-        mongo_doc = format_mongo(schema_t, profile, base_signature, series_seed, t)
-        mongo_total_bytes += len(mongo_doc.encode("utf-8"))
-
-    full_bytes = days_bytes + mongo_total_bytes
-    full_kb = full_bytes / 1024.0
-
-    ratio = full_kb / seed_kb if seed_kb > 0 else 0.0
-
-    # Nice centered highlight
-    st.markdown("### 2.5 Live Storage Footprint Comparison")
-    st.markdown(
-        f"""
-        <div style="display:flex; justify-content:center; margin-top:10px; margin-bottom:25px;">
-          <div style="background:linear-gradient(135deg,#111827,#1f2937); 
-                      border-radius:18px; padding:28px 32px; 
-                      text-align:center; max-width:700px; 
-                      box-shadow:0 12px 30px rgba(0,0,0,0.45);">
-            <div style="font-size:25px; font-weight:600; color:#e5e7eb; letter-spacing:0.04em; text-transform:uppercase;">
-              Storage Comparison (Live)
-            </div>
-            <div style="margin-top:14px; font-size:35px; font-weight:700; color:#fbbf24;">
-              MSE Seed: {seed_kb:.2f} KB &nbsp;&nbsp;vs&nbsp;&nbsp; Full DB: {full_kb:.2f} KB
-            </div>
-            <div style="margin-top:10px; font-size:18px; color:#9ca3af;">
-              ≈ <span style="font-weight:600; color:#a5b4fc;">{ratio:,.0f}×</span> smaller using the MSE minimal seed
-            </div>
-            <div style="margin-top:8px; font-size:14px; color:#6b7280;">
-              Updates automatically as you edit the 30-day stats above.
-            </div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-    # ---------------------------------------------------------
-    # Section 2.6: Multi-user storage projection
-    # ---------------------------------------------------------
-    def format_size(bytes_val: float) -> str:
-        units = ["B", "KB", "MB", "GB", "TB"]
-        size = float(bytes_val)
-        unit_idx = 0
-        while size >= 1024 and unit_idx < len(units) - 1:
-            size /= 1024.0
-            unit_idx += 1
-        return f"{size:.2f} {units[unit_idx]}"
-
-    user_counts = [10_000, 100_000, 1_000_000]
-    rows_html = ""
-
-    for n in user_counts:
-        seed_total = seed_bytes * n
-        full_total = full_bytes * n
-        ratio_n = (full_total / seed_total) if seed_total > 0 else 0.0
-
-        rows_html += f"""
-          <tr>
-            <td style="padding:8px 12px; text-align:left; font-weight:600; color:#e5e7eb;">
-              {n:,} users
-            </td>
-            <td style="padding:8px 12px; text-align:right; color:#bbf7d0;">
-              {format_size(seed_total)}
-            </td>
-            <td style="padding:8px 12px; text-align:right; color:#fee2e2;">
-              {format_size(full_total)}
-            </td>
-            <td style="padding:8px 12px; text-align:right; color:#a5b4fc;">
-              {ratio_n:,.0f}×
-            </td>
-          </tr>
-        """
-
-    st.markdown(
-        f"""
-        <div style="display:flex; justify-content:center; margin-top:5px; margin-bottom:30px;">
-          <div style="background:linear-gradient(135deg,#020617,#111827); 
-                      border-radius:18px; padding:20px 26px; 
-                      text-align:center; max-width:800px; 
-                      box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-            <div style="font-size:22px; font-weight:600; color:#e5e7eb; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:10px;">
-              At Scale (Per Current Stats & Schema)
-            </div>
-            <table style="width:100%; border-collapse:collapse; font-size:20px;">
-              <thead>
-                <tr>
-                  <th style="padding:8px 12px; text-align:left; color:#9ca3af; font-weight:600; border-bottom:1px solid #374151;">
-                    Users
-                  </th>
-                  <th style="padding:8px 12px; text-align:right; color:#9ca3af; font-weight:600; border-bottom:1px solid #374151;">
-                    Total MSE Storage
-                  </th>
-                  <th style="padding:8px 12px; text-align:right; color:#9ca3af; font-weight:600; border-bottom:1px solid #374151;">
-                    Total Full DB Storage
-                  </th>
-                  <th style="padding:8px 12px; text-align:right; color:#9ca3af; font-weight:600; border-bottom:1px solid #374151;">
-                    Savings
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows_html}
-
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-    # ---------------------------------------------------------
-    # Section 3: Choose format + preview + EXPORT button
-    # ---------------------------------------------------------
-    st.subheader("3. View & Export Data")
-
-    col_controls, _ = st.columns([1, 3])
-
-    with col_controls:
-        db_choice = st.selectbox(
-            "Output Format",
-            options=[
-                "MSE (30-day stats table)",
-                "MongoDB (30-day stats table)",
-                "Firebase (30-day stats table)",
-                "DynamoDB (30-day stats table)",
-                "SQL (30-day stats table)",
-            ],
-            index=0,
-        )
-
-    # Build schema from the actual 30-day stats
-    stats_schema = build_stats_schema(days, profile)
-
-    # Determine content + filename based on selection
-    if db_choice == "MSE (30-day stats table)":
-        formatted_output = json.dumps(mse_storage, indent=4)
-        filename = f"{profile['user_id']}_mse_minimal_seed.json"
-        language = "json"
-        preview_title = "**MSE Stored Object (`mse_storage`)**"
-
-    else:
-        # All four DB formats use the 30-day stats table
-        if db_choice.startswith("SQL"):
-            formatted_output = format_sql(stats_schema, profile, base_signature, series_seed)
-            filename = f"{profile['user_id']}_30day_stats.sql"
-            language = "sql"
-            preview_title = "**SQL Representation (30-Day Statistics)**"
-
-        elif db_choice.startswith("MongoDB"):
-            formatted_output = format_mongo(stats_schema, profile, base_signature, series_seed, t=0)
-            filename = f"{profile['user_id']}_30day_stats_mongo.json"
-            language = "json"
-            preview_title = "**MongoDB Document (30-Day Statistics)**"
-
-        elif db_choice.startswith("Firebase"):
-            formatted_output = format_firebase(stats_schema, profile, base_signature, series_seed, t=0)
-            filename = f"{profile['user_id']}_30day_stats_firebase.json"
-            language = "json"
-            preview_title = "**Firebase / Firestore Document (30-Day Statistics)**"
-
-        elif db_choice.startswith("DynamoDB"):
-            formatted_output = format_dynamo(stats_schema, profile, base_signature, series_seed, t=0)
-            filename = f"{profile['user_id']}_30day_stats_dynamo.json"
-            language = "json"
-            preview_title = "**DynamoDB Item (30-Day Statistics)**"
-
-    # -------------------------
-    # Preview + export button
-    # -------------------------
-    st.markdown(preview_title)
-    st.code(formatted_output, language=language)
-
-    st.download_button(
-        label="📥 Export File",
-        data=formatted_output.encode("utf-8"),
-        file_name=filename,
-        mime="application/json" if filename.endswith(".json") else "text/plain",
-        use_container_width=True,
-    )
-
-
-    # # ---------------------------------------------------------
-    # # Section 4: Full 30-Day Exports (Files on Disk)
-    # # ---------------------------------------------------------
-    # st.subheader("4. Export Files to Disk (Local Backend Exports)")
-
-    # st.markdown(
-    #     "These export the **30-day statistical data** (treadmill, steps, calories, protein, sleep) "
-    #     "or the **minimal stored object** for the MSE to local files under "
-    #     "`modules/databases/*_output` (relative to this app file)."
-    # )
-
-    # stats_schema = build_stats_schema(days, profile)
-    # app_root = os.path.dirname(os.path.abspath(__file__))
-    # db_root = os.path.join(app_root, "modules", "databases", "output")
-
-    # mse_dir      = os.path.join(db_root, "mse_output")
-    # mongo_dir    = os.path.join(db_root, "mongo_output")
-    # firebase_dir = os.path.join(db_root, "firebase_output")
-    # dynamo_dir   = os.path.join(db_root, "dynamodb_output")
-    # sql_dir      = os.path.join(db_root, "sql_output")
-
-    # os.makedirs(mse_dir, exist_ok=True)
-    # os.makedirs(mongo_dir, exist_ok=True)
-    # os.makedirs(firebase_dir, exist_ok=True)
-    # os.makedirs(dynamo_dir, exist_ok=True)
-    # os.makedirs(sql_dir, exist_ok=True)
-
-    # col_exp1, col_exp2, col_exp3, col_exp4, col_exp5 = st.columns(5)
-
-    # with col_exp1:
-    #     if st.button("Export MSE Minimal Seed"):
-    #         filename = f"{profile['user_id']}_mse_minimal_seed.json"
-    #         path = os.path.join(mse_dir, filename)
-
-    #         mse_full_export = {
-    #             "mse_storage": mse_storage,                # minimal seed object
-    #             "profile": profile,                        # aggregated stats
-    #             "base_signature": base_signature,
-    #             "augmented_signature": augmented_signature,
-    #             "series_seed": series_seed,
-    #         }
-
-    #         try:
-    #             with open(path, "w", encoding="utf-8") as f:
-    #                 json.dump(mse_full_export, f, indent=4)
-    #             st.success(f"MSE minimal seed exported to:\n`{path}`")
-    #         except Exception as e:
-    #             st.error(f"Failed to export MSE minimal seed: {e}")
-
-    # with col_exp2:
-    #     if st.button("Export Mongo"):
-    #         filename = f"{profile['user_id']}_30day_stats_mongo.json"
-    #         path = os.path.join(mongo_dir, filename)
-    #         try:
-    #             formatted = format_mongo(stats_schema, profile, base_signature, series_seed, t=0)
-    #             with open(path, "w", encoding="utf-8") as f:
-    #                 f.write(formatted)
-    #             st.success(f"MongoDB stats exported to:\n`{path}`")
-    #         except Exception as e:
-    #             st.error(f"Failed to export MongoDB stats: {e}")
-
-    # with col_exp3:
-    #     if st.button("Export Firebase"):
-    #         filename = f"{profile['user_id']}_30day_stats_firebase.json"
-    #         path = os.path.join(firebase_dir, filename)
-    #         try:
-    #             formatted = format_firebase(stats_schema, profile, base_signature, series_seed, t=0)
-    #             with open(path, "w", encoding="utf-8") as f:
-    #                 f.write(formatted)
-    #             st.success(f"Firebase stats exported to:\n`{path}`")
-    #         except Exception as e:
-    #             st.error(f"Failed to export Firebase stats: {e}")
-
-    # with col_exp4:
-    #     if st.button("Export DynamoDB"):
-    #         filename = f"{profile['user_id']}_30day_stats_dynamo.json"
-    #         path = os.path.join(dynamo_dir, filename)
-    #         try:
-    #             formatted = format_dynamo(stats_schema, profile, base_signature, series_seed, t=0)
-    #             with open(path, "w", encoding="utf-8") as f:
-    #                 f.write(formatted)
-    #             st.success(f"DynamoDB stats exported to:\n`{path}`")
-    #         except Exception as e:
-    #             st.error(f"Failed to export DynamoDB stats: {e}")
-
-    # with col_exp5:
-    #     if st.button("Export SQL"):
-    #         filename = f"{profile['user_id']}_30day_stats.sql"
-    #         path = os.path.join(sql_dir, filename)
-    #         try:
-    #             formatted = format_sql(stats_schema, profile, base_signature, series_seed)
-    #             with open(path, "w", encoding="utf-8") as f:
-    #                 f.write(formatted)
-    #             st.success(f"SQL stats exported to:\n`{path}`")
-    #         except Exception as e:
-    #             st.error(f"Failed to export SQL stats: {e}")
-
-    st.markdown("---")
-    st.caption("Morphic Semantic Engine • One seed → four databases → live storage savings.")
-
+            )
+
+        try:
+            import pandas as pd
+            df = pd.DataFrame(rows)
+            st.dataframe(df)
+        except ImportError:
+            # Fallback simple text if pandas not available
+            st.text("index | original | reconstructed | diff")
+            for row in rows:
+                st.text(f"{row['index']:3d} | {row['original']:.4f} | {row['reconstructed']:.4f} | {row['diff']:.4f}")
+
+
+# ============================================================
+# 9. Main
+# ============================================================
 
 if __name__ == "__main__":
-    main()
+    if HAS_STREAMLIT:
+        # Run as a Streamlit app if streamlit is installed and you do:
+        #   streamlit run mse_seed_app.py
+        run_streamlit_app()
+    else:
+        # Fallback: plain CLI mode
+        run_cli_demo()
