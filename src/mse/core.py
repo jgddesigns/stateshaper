@@ -78,7 +78,7 @@ class MorphicSemanticEngine:
             **self.constants,
         )
         self.t += 1
-        return int(token)
+        return token
 
 
     def next_token(self) -> str:
