@@ -8,31 +8,30 @@ import streamlit as st
 
 
 # ============================================================
-# 1. Simple "MSE-style" NPC Seed Structures
+# 1. Smart Home "Personality" Traits & Storage Model
 # ============================================================
 
-NPC_TRAITS = [
-    "Aggression",
-    "Curiosity",
-    "Loyalty",
-    "Greed",
-    "Wisdom",
-    "Bravery",
-    "Playfulness",
-    "Patience",
+HOME_TRAITS = [
+    "Early Riser",        # high = early morning activity
+    "Night Owl",          # high = late activity
+    "Work From Home",     # high = home daytime occupancy
+    "Energy Saving",      # high = prefers lower energy usage
+    "Comfort Priority",   # high = stable temps, dim lights
+    "Security Focus",     # high = more security events
+    "Weekend Social",     # high = more evening activity weekends
+    "Kids in Home",       # high = earlier lights, more schedule structure
 ]
 
-# Storage model assumptions (rough, illustrative)
-BYTES_PER_FLOAT = 4       # e.g. float32 for game state
-BYTES_PER_CHAR = 1        # approx per character in seed string
+BYTES_PER_FLOAT = 4   # e.g. float32 for scheduling parameters
+BYTES_PER_CHAR = 1    # approximated per character in seed string
 
 
 @dataclass
-class NPCSeed:
-    """Tiny, shareable representation of an NPC behavior profile."""
-    seed_code: str                # e.g. "NPC-8FA12C"
+class HomeSeed:
+    """Tiny, shareable representation of smart home behavior profile."""
+    seed_code: str                # e.g. "HOME-9A23BC"
     vector: np.ndarray            # normalized trait vector (local only)
-    raw_traits: Dict[str, float]  # original slider values (local only)
+    raw_traits: Dict[str, float]  # original sliders (local only)
 
 
 # ============================================================
@@ -40,7 +39,6 @@ class NPCSeed:
 # ============================================================
 
 def normalize_vector(v: np.ndarray) -> np.ndarray:
-    """Normalize vector to unit length; if zero, return zero vector."""
     norm = np.linalg.norm(v)
     if norm == 0:
         return v
@@ -48,107 +46,21 @@ def normalize_vector(v: np.ndarray) -> np.ndarray:
 
 
 def hash_vector_to_code(prefix: str, v: np.ndarray) -> str:
-    """
-    Turn a numeric vector into a short deterministic seed code.
-    In a real MSE, this would be a proper morphic seed; here it's a simple hash.
-    """
-    q = np.round(v * 100).astype(int)  # quantize for stability
+    """Turn vector into a short deterministic seed code (demo-style)."""
+    q = np.round(v * 100).astype(int)
     raw = ",".join(map(str, q.tolist())).encode("utf-8")
     digest = hashlib.sha256(raw).hexdigest()[:6].upper()
     return f"{prefix}-{digest}"
 
 
-def build_npc_seed(traits: Dict[str, float]) -> NPCSeed:
-    """Create an NPCSeed from trait slider values."""
-    vec = np.array([traits[t] for t in NPC_TRAITS], dtype=float)
+def build_home_seed(traits: Dict[str, float]) -> HomeSeed:
+    vec = np.array([traits[t] for t in HOME_TRAITS], dtype=float)
     vec_norm = normalize_vector(vec)
-    seed_code = hash_vector_to_code("NPC", vec_norm)
-    return NPCSeed(seed_code=seed_code, vector=vec_norm, raw_traits=traits)
-
-
-# ============================================================
-# 3. Behavior Tendencies (demo logic)
-# ============================================================
-
-def clamp01(x: float) -> float:
-    return max(0.0, min(1.0, x))
-
-
-def compute_behavior_tendencies(seed: NPCSeed) -> pd.DataFrame:
-    """
-    Map trait vector to a few demo behaviors with likelihood scores.
-    This is just illustrative; in a real MSE you'd morph the seed
-    into a complex behavior policy or state machine.
-    """
-    # Pull traits in a stable order
-    traits = seed.raw_traits
-    aggr = traits["Aggression"]
-    curi = traits["Curiosity"]
-    loy  = traits["Loyalty"]
-    greed = traits["Greed"]
-    wis   = traits["Wisdom"]
-    brav  = traits["Bravery"]
-    play  = traits["Playfulness"]
-    pat   = traits["Patience"]
-
-    # Scale 0–10 sliders to 0–1
-    def s(x): return x / 10.0
-
-    # Simple heuristic scores for demo behaviors
-    behaviors = []
-
-    attack_score = clamp01(0.6 * s(aggr) + 0.4 * s(brav) - 0.3 * s(pat))
-    behaviors.append(("Attack on sight", attack_score))
-
-    trade_score = clamp01(0.5 * s(greed) + 0.5 * s(curi) - 0.2 * s(aggr))
-    behaviors.append(("Offer trade", trade_score))
-
-    help_score = clamp01(0.5 * s(loy) + 0.5 * s(wis) - 0.3 * s(greed))
-    behaviors.append(("Offer help / quest hint", help_score))
-
-    joke_score = clamp01(0.7 * s(play) + 0.2 * s(curi) - 0.2 * s(aggr))
-    behaviors.append(("Tell a joke / banter", joke_score))
-
-    avoid_score = clamp01(0.6 * s(pat) + 0.4 * s(wis) - 0.4 * s(aggr))
-    behaviors.append(("Avoid conflict / flee", avoid_score))
-
-    sneak_score = clamp01(0.5 * s(brav) + 0.3 * s(curi) + 0.2 * s(greed) - 0.3 * s(pat))
-    behaviors.append(("Sneak / ambush", sneak_score))
-
-    # Build DataFrame
-    rows = [
-        {
-            "Behavior": name,
-            "Likelihood (0–100)": round(score * 100, 1),
-        }
-        for name, score in behaviors
-    ]
-    df = pd.DataFrame(rows).sort_values(by="Likelihood (0–100)", ascending=False).reset_index(drop=True)
-    return df
-
-
-# ============================================================
-# 4. Storage & Bandwidth Estimation Helpers
-# ============================================================
-
-def estimate_storage_bytes_per_npc_profile(num_traits: int) -> int:
-    """
-    Estimate bytes for storing a raw NPC behavior profile:
-    one float per trait (very simplified).
-    """
-    return num_traits * BYTES_PER_FLOAT
-
-
-def estimate_storage_bytes_per_npc_seed(seed_code: str) -> int:
-    """
-    Estimate bytes for storing just the seed string
-    (could be much smaller with a binary encoding).
-    """
-    return len(seed_code) * BYTES_PER_CHAR
+    seed_code = hash_vector_to_code("HOME", vec_norm)
+    return HomeSeed(seed_code=seed_code, vector=vec_norm, raw_traits=traits)
 
 
 def human_readable_bytes(n: int) -> str:
-    """Format bytes into KB/MB/GB nicely."""
     if n < 1024:
         return f"{n} B"
     kb = n / 1024
@@ -165,137 +77,274 @@ def human_readable_bytes(n: int) -> str:
 
 
 # ============================================================
+# 3. Schedule Generation from HomeSeed (Demo Logic)
+# ============================================================
+
+def clamp(x, lo, hi):
+    return max(lo, min(hi, x))
+
+
+def build_daily_schedule(seed: HomeSeed) -> pd.DataFrame:
+    """
+    Generate a simple hourly schedule for:
+      - lights (0-100)
+      - thermostat temp (°F)
+      - appliance activity (0-100)
+      - security sensitivity (0-100)
+
+    based on the HomeSeed traits.
+    """
+
+    traits = seed.raw_traits
+    # Normalize slider 0–10 to 0–1
+    s = lambda name: traits[name] / 10.0
+
+    early = s("Early Riser")
+    night = s("Night Owl")
+    wfh = s("Work From Home")
+    energy = s("Energy Saving")
+    comfort = s("Comfort Priority")
+    security = s("Security Focus")
+    weekend = s("Weekend Social")
+    kids = s("Kids in Home")
+
+    hours = list(range(24))
+    rows = []
+
+    for h in hours:
+        # Base occupancy probability curve
+        if 6 <= h < 9:
+            # morning
+            occ_base = 0.5 + 0.5 * early
+        elif 9 <= h < 17:
+            # day
+            occ_base = 0.2 + 0.6 * wfh
+        elif 17 <= h < 22:
+            # evening prime time
+            occ_base = 0.4 + 0.5 * (night + weekend) / 2.0 + 0.1 * kids
+        else:
+            # night
+            occ_base = 0.1 + 0.4 * night - 0.3 * early
+        occ = clamp(occ_base, 0.0, 1.0)
+
+        # Lights: more when occupancy + kids + evening or dark hours
+        is_dark = (h < 7 or h >= 19)
+        lights = 0.0
+        lights += 70 * occ
+        if is_dark:
+            lights += 20
+        lights += 10 * kids
+        lights *= (0.6 + 0.4 * comfort)   # comfort amplifies lights
+        lights *= (1.0 - 0.3 * energy)    # energy saving reduces lights
+        lights = clamp(lights, 0, 100)
+
+        # Thermostat: base comfortable range: 70°F ± 6
+        # comfort = likes it stable and cozy
+        # energy saving = allows larger swings
+        base_temp = 70.0
+        # Variation by time (cooler at night, warmer in evening)
+        temp_variation = 0.0
+        if 0 <= h < 6:
+            temp_variation = -2.0
+        elif 6 <= h < 9:
+            temp_variation = 0.0
+        elif 9 <= h < 17:
+            temp_variation = -1.0
+        elif 17 <= h < 22:
+            temp_variation = 1.0
+        else:
+            temp_variation = -1.5
+
+        # Comfort = keep near base; energy = allow bigger drops at night
+        temp = base_temp + temp_variation
+        temp -= 3.0 * energy * (1.0 - comfort)  # more energy saving, less comfort => cooler
+        temp = clamp(temp, 62, 78)
+
+        # Appliances: cooking, laundry, dishwasher, etc.
+        # More active mornings & evenings, especially with kids or weekend social.
+        app = 0.0
+        if 7 <= h < 9:
+            app += 50  # breakfast window
+        if 17 <= h < 21:
+            app += 60  # dinner/evening
+        app += 20 * kids
+        app += 30 * weekend
+        app *= occ
+        app *= (1.0 - 0.5 * energy)  # energy saving reduces appliance use
+        app = clamp(app, 0, 100)
+
+        # Security sensitivity: higher when home is empty, or at night, or security focused.
+        empty_factor = (1.0 - occ)
+        sec = 40 * empty_factor + 30 * security
+        if h < 6 or h >= 22:
+            sec += 20  # nights
+        sec = clamp(sec, 0, 100)
+
+        rows.append(
+            {
+                "Hour": f"{h:02d}:00",
+                "Occupancy (0-100)": round(occ * 100, 1),
+                "Lights (0-100)": round(lights, 1),
+                "Thermostat (°F)": round(temp, 1),
+                "Appliances (0-100)": round(app, 1),
+                "Security Sensitivity (0-100)": round(sec, 1),
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    return df
+
+
+# ============================================================
+# 4. Storage & Bandwidth Estimates
+# ============================================================
+
+def estimate_storage_bytes_per_home_profile(num_traits: int, schedule_length: int) -> int:
+    """
+    Assume:
+    - raw traits: num_traits floats
+    - schedule: for each hour a few floats (lights, temp, etc.)
+    For the demo, we only show trait side in detail, but we can
+    count schedule as additional floats if desired.
+    """
+    # traits only here; you can add schedule floats if you want it stricter
+    return num_traits * BYTES_PER_FLOAT
+
+
+def estimate_storage_bytes_per_home_seed(seed_code: str) -> int:
+    return len(seed_code) * BYTES_PER_CHAR
+
+
+# ============================================================
 # 5. Streamlit UI
 # ============================================================
 
 st.set_page_config(
-    page_title="MSE NPC Behavior Demo",
+    page_title="MSE Smart Home Scheduling Demo",
     page_icon="🧬",
     layout="wide",
 )
 
-st.title("🧬 MSE NPC Behavior & Seed Compression Demo")
+st.title("🧬 MSE Smart Home Scheduling & Seed Compression Demo")
 
 st.write(
     """
-This demo shows how an **MSE-style NPC seed** can:
+This demo shows how an **MSE-style seed** can represent a home's
+**behavior & schedule preferences**, and how that saves **storage and bandwidth**.
 
-- Encode an NPC's **behavior personality** into a tiny code,  
-- Drive **behavior tendencies** (attack, trade, help, joke, flee, etc.),  
-- Dramatically reduce **storage & bandwidth** compared to raw behavior profiles.
-
-Think of this as a simplified example of:
-
-> **Full behavior model → tiny deterministic seed → regenerated on demand.**
+- You control a **smart home personality** (traits) via sliders.
+- The app builds a tiny **HomeSeed** from those traits.
+- That seed generates a **daily smart home schedule** (lights, thermostat, appliances, security).
+- We then estimate **storage/bandwidth savings** for seeds vs raw profiles.
 """
 )
 
-# ------------------------------------------------------------
-# Sidebar: NPC behavior trait sliders
-# ------------------------------------------------------------
-st.sidebar.header("🧍 NPC Behavior Traits")
+# Sidebar: traits
+st.sidebar.header("🏠 Smart Home Traits")
 
-st.sidebar.write("Set this NPC's tendencies (0 = not at all, 10 = very strong).")
+st.sidebar.write("Set the home's behavior tendencies (0 = not at all, 10 = very strong).")
 
 default_traits = {
-    "Aggression": 4.0,
-    "Curiosity": 6.0,
-    "Loyalty": 5.0,
-    "Greed": 3.0,
-    "Wisdom": 5.0,
-    "Bravery": 7.0,
-    "Playfulness": 4.0,
-    "Patience": 3.0,
+    "Early Riser": 6.0,
+    "Night Owl": 4.0,
+    "Work From Home": 7.0,
+    "Energy Saving": 5.0,
+    "Comfort Priority": 6.0,
+    "Security Focus": 5.0,
+    "Weekend Social": 3.0,
+    "Kids in Home": 5.0,
 }
 
 trait_values: Dict[str, float] = {}
-for trait in NPC_TRAITS:
+for trait in HOME_TRAITS:
     trait_values[trait] = st.sidebar.slider(trait, 0.0, 10.0, float(default_traits[trait]), 0.5)
 
 show_raw_profile = st.sidebar.checkbox("Show raw trait profile (local only)", value=True)
-show_vector = st.sidebar.checkbox("Show normalized behavior vector (debug)", value=False)
+show_vector = st.sidebar.checkbox("Show normalized preference vector (debug)", value=False)
 
-# ------------------------------------------------------------
-# Build NPC seed and behavior tendencies
-# ------------------------------------------------------------
-npc_seed = build_npc_seed(trait_values)
-behavior_df = compute_behavior_tendencies(npc_seed)
+# Build seed and schedule
+home_seed = build_home_seed(trait_values)
+schedule_df = build_daily_schedule(home_seed)
 
-# ------------------------------------------------------------
-# Layout
-# ------------------------------------------------------------
-col_left, col_right = st.columns([1.1, 1.4])
+# Layout columns
+col_left, col_right = st.columns([1.1, 1.6])
 
 with col_left:
-    st.subheader("🧬 NPCSeed & Behavior Encoding")
+    st.subheader("🧬 HomeSeed & Preference Encoding")
 
     st.markdown(
         f"""
-**Step 1 – Traits → NPCSeed**
+**Step 1 – Traits → HomeSeed**
 
-- The sliders define the NPC's **behavior traits**.
-- Traits are converted into a normalized vector.
+- The sliders define the home's **behavior traits**:
+  - when people are active,
+  - how much they value energy saving vs comfort,
+  - how security-conscious they are,
+  - how kid-focused / structured the schedule is.
+
+- These traits become a **normalized vector**.
 - That vector is encoded into a tiny seed:
 
-> **NPCSeed:** `{npc_seed.seed_code}`
+> **HomeSeed:** `{home_seed.seed_code}`
 
-In a full MSE implementation, this seed would be enough to regenerate:
+In a full MSE system, the seed would be enough to regenerate:
 
-- Personality curves,
-- Response scripts,
-- State machine parameters,
-- Even synthetic dialogue or routines.
+- preferred lighting patterns,  
+- thermostat automation rules,  
+- appliance usage windows,  
+- security sensitivity curves,  
+- and even adaptive policies over days/seasons.
 
-But what would be stored/transmitted is just the **seed**, not the full trait profile.
+But what you store/transmit is just the **seed**, not the full profile.
 """
     )
 
     if show_raw_profile:
-        st.markdown("**Local raw traits (stay in memory / editor only):**")
-        st.json(npc_seed.raw_traits)
+        st.markdown("**Local raw traits (stay in app / on device):**")
+        st.json(home_seed.raw_traits)
 
     if show_vector:
-        st.markdown("**Normalized behavior vector (for engine):**")
-        st.write(npc_seed.vector)
+        st.markdown("**Normalized preference vector:**")
+        st.write(home_seed.vector)
 
     st.markdown("---")
 
     st.markdown(
         """
-**Step 2 – From Seed to Behavior Tendencies**
+**Step 2 – From Seed to Daily Schedule**
 
-The engine uses the seed's vector to estimate how likely the NPC is to:
+The engine uses the HomeSeed to derive a **24-hour schedule** for:
 
-- attack,
-- trade,
-- help,
-- crack a joke,
-- avoid conflict,
-- or attempt a sneak/ambush.
+- occupancy likelihood,  
+- lighting level,  
+- thermostat setpoint,  
+- appliance activity,  
+- security sensitivity.
 
-This is just a simple scoring function for the demo; in a real system, the
-MSE would morph the seed into more complex behavior policies or scripts.
+This demo uses simple heuristics, but the real MSE would use
+more complex morphic functions and learned behaviors.
 """
     )
 
 with col_right:
-    st.subheader("🎭 Behavior Tendencies (Demo)")
+    st.subheader("📅 Generated Daily Smart Home Schedule (Hourly)")
 
     st.write(
         """
-These are **derived behaviors** from the current NPCSeed. Scores can be mapped to event functions and modified as the game progresses. Higher scores mean the NPC is more likely to choose that behavior in encounters.
+This table shows the **hour-by-hour behavior** implied by the current HomeSeed.
+You can tweak traits and immediately see how the schedule responds. In real-world applications, these values can be adjusted over time as inhabitant use changes. 
 """
     )
-
-    st.dataframe(behavior_df, use_container_width=True)
+    st.dataframe(schedule_df, use_container_width=True)
 
     st.markdown(
         """
-You can quickly prototype NPC types:
+Examples:
 
-- High **Aggression + Bravery** → more likely to attack or ambush.
-- High **Loyalty + Wisdom** → more helpful, less greedy.
-- High **Playfulness + Curiosity** → more jokes, more trade, less violence.
+- Increase **Early Riser** → earlier occupancy & lights.  
+- Increase **Work From Home** → more daytime occupancy and appliance usage.  
+- Increase **Energy Saving** → lower light levels & cooler temps.  
+- Increase **Security Focus** → higher security sensitivity when the home is empty or at night.
 """
     )
 
@@ -305,110 +354,106 @@ st.markdown("---")
 # 6. Storage & Bandwidth Savings
 # ============================================================
 
-st.subheader("💾 Storage & 📡 Bandwidth Savings for NPCs")
+st.subheader("💾 Storage & 📡 Bandwidth Savings for Smart Home Profiles")
 
-# Per-NPC storage estimates
-raw_bytes_per_npc = estimate_storage_bytes_per_npc_profile(len(NPC_TRAITS))
-seed_bytes_per_npc = estimate_storage_bytes_per_npc_seed(npc_seed.seed_code)
+# Per-home storage
+raw_bytes_per_home = estimate_storage_bytes_per_home_profile(len(HOME_TRAITS), schedule_length=24)
+seed_bytes_per_home = estimate_storage_bytes_per_home_seed(home_seed.seed_code)
 
 st.markdown(
     f"""
-### Per NPC
+### Per Home
 
-**Raw behavior profile storage**
+**Raw behavior profile storage (traits only)**
 
-- {len(NPC_TRAITS)} traits × {BYTES_PER_FLOAT} bytes/float  
-- ≈ **{raw_bytes_per_npc} bytes** per NPC
+- {len(HOME_TRAITS)} traits × {BYTES_PER_FLOAT} bytes/float  
+- ≈ **{raw_bytes_per_home} bytes** per home
 
 **Seed-only behavior storage**
 
-- `{npc_seed.seed_code}` → {len(npc_seed.seed_code)} characters × {BYTES_PER_CHAR} byte/char  
-- ≈ **{seed_bytes_per_npc} bytes** per NPC
+- `{home_seed.seed_code}` → {len(home_seed.seed_code)} characters × {BYTES_PER_CHAR} byte/char  
+- ≈ **{seed_bytes_per_home} bytes** per home
 
-So for this example, the seed is about **{raw_bytes_per_npc / max(seed_bytes_per_npc,1):.1f}× smaller**  
-than storing the raw traits directly.
+So in this simplified example, the seed is about **{raw_bytes_per_home / max(seed_bytes_per_home,1):.1f}× smaller**  
+than storing the raw trait profile directly.
+
+If you also encoded schedules, routines, scenes, and learned behaviors into the seed,
+the savings multiply further.
 """
 )
 
-# Scale up to many NPCs
-scale_npcs = [1_000, 1_000_000, 100_000_000]
+# Scale for many homes
+scale_homes = [1_000, 1_000_000, 100_000_000]
 rows_storage = []
-for n_npcs in scale_npcs:
-    raw_total = raw_bytes_per_npc * n_npcs
-    seed_total = seed_bytes_per_npc * n_npcs
+for n_homes in scale_homes:
+    raw_total = raw_bytes_per_home * n_homes
+    seed_total = seed_bytes_per_home * n_homes
     savings = 1.0 - (seed_total / raw_total) if raw_total > 0 else 0.0
     rows_storage.append(
         {
-            "NPCs": f"{n_npcs:,}",
+            "Homes": f"{n_homes:,}",
             "Raw Profile Storage": human_readable_bytes(raw_total),
             "Seed-Only Storage": human_readable_bytes(seed_total),
             "Storage Saved": f"{savings*100:.1f}%",
         }
     )
 
-st.markdown("### At Scale (Storage for Many NPCs)")
+st.markdown("### At Scale (Storage Across Many Homes)")
 st.dataframe(pd.DataFrame(rows_storage), use_container_width=True)
 
 st.markdown(
     """
-In a real game, an NPC’s full state might include:
+Real smart home systems may store:
 
-- stats,  
-- skills,  
-- equipment,  
-- long-term memory,  
-- schedule,  
-- relationships,  
+- multiple daily/weekly schedules per device,  
+- logs of occupancy/activity,  
+- per-room preferences,  
+- historical patterns for learning.
 
-and more.
-
-If the MSE can encode much of that into a small **behavior seed + a few extra parameters**,  
-you multiply these storage savings across your entire world.
+If the MSE encodes much of that into a **single HomeSeed (+ a few deltas)**,
+you compress *years* of behavior into something small enough to sync anywhere.
 """
 )
 
-# Bandwidth estimates per update
-st.markdown("### Bandwidth Per NPC Update / Replication")
+# Bandwidth section
+st.markdown("### Bandwidth Per Sync / Cloud Round Trip")
 
 st.markdown(
     """
-Now imagine syncing NPC behavior across:
+Now imagine syncing behavior between:
 
-- client ↔ server,  
-- shards, or  
-- save/load systems.
+- Phone app ↔ Smart home hub,  
+- Hub ↔ Cloud AI model,  
+- Multiple hubs in a multi-property setup.
 
-Instead of sending the whole behavior profile every time, you can send just:
+Instead of shipping full profiles and schedules, you can ship:
 
-- the **NPCSeed**, or  
-- a seed + tiny delta updates.
-
-Below is a rough comparison of sending the full trait vector vs just the seed.
+- **HomeSeed** (and occasionally small updates),
+- Let each side regenerate the behavior model when needed.
 """
 )
 
-updates_per_second = st.slider("Assumed NPC updates per second (for replication)", 1, 60, 10)
-npcs_in_scene = st.slider("Number of active NPCs in scene", 10, 10_000, 500, 10)
+syncs_per_day = st.slider("Assumed behavior syncs per home per day", 1, 200, 20)
+homes_in_network = st.slider("Number of homes in network", 10, 5_000_000, 50_000, step=10)
 
-# bandwidth per update step
-raw_payload_per_step = raw_bytes_per_npc * npcs_in_scene
-seed_payload_per_step = seed_bytes_per_npc * npcs_in_scene
-raw_per_second = raw_payload_per_step * updates_per_second
-seed_per_second = seed_payload_per_step * updates_per_second
-savings_per_second = 1.0 - (seed_per_second / raw_per_second) if raw_per_second > 0 else 0.0
+raw_payload_per_sync = raw_bytes_per_home * homes_in_network
+seed_payload_per_sync = seed_bytes_per_home * homes_in_network
+raw_per_day = raw_payload_per_sync * syncs_per_day
+seed_per_day = seed_payload_per_sync * syncs_per_day
+savings_per_day = 1.0 - (seed_per_day / raw_per_day) if raw_per_day > 0 else 0.0
 
 rows_bandwidth = [
     {
-        "Scenario": "Per update step",
-        "Raw Behavior Payload": human_readable_bytes(raw_payload_per_step),
-        "Seed Payload": human_readable_bytes(seed_payload_per_step),
-        "Bandwidth Saved": f"{(1 - seed_payload_per_step / raw_payload_per_step)*100:.1f}%" if raw_payload_per_step > 0 else "0%",
+        "Scenario": "Per sync",
+        "Raw Profile Payload": human_readable_bytes(raw_payload_per_sync),
+        "Seed Payload": human_readable_bytes(seed_payload_per_sync),
+        "Bandwidth Saved": f"{(1 - seed_payload_per_sync / raw_payload_per_sync)*100:.1f}%" if raw_payload_per_sync > 0 else "0%",
     },
     {
-        "Scenario": "Per second",
-        "Raw Behavior Payload": human_readable_bytes(int(raw_per_second)),
-        "Seed Payload": human_readable_bytes(int(seed_per_second)),
-        "Bandwidth Saved": f"{savings_per_second*100:.1f}%",
+        "Scenario": "Per day (all homes)",
+        "Raw Profile Payload": human_readable_bytes(int(raw_per_day)),
+        "Seed Payload": human_readable_bytes(int(seed_per_day)),
+        "Bandwidth Saved": f"{savings_per_day*100:.1f}%",
     },
 ]
 
@@ -416,29 +461,15 @@ st.dataframe(pd.DataFrame(rows_bandwidth), use_container_width=True)
 
 st.markdown(
     """
-With hundreds or thousands of NPCs:
+With thousands or millions of homes, **seed-based behavior modeling**:
 
-- Seed-based syncing greatly reduces bandwidth for **multiplayer**,  
-- Makes cross-platform or cloud streaming more efficient,  
-- And allows NPC behavior to be **regenerated deterministically** on each client.
+- cuts storage for historical behavior/schedules,  
+- slashes bandwidth for sync and AI updates,  
+- lets you move intelligence to the edge (on-device HomeSeed),  
+- and still allows sophisticated, personalized automation.
 
-You can even keep most behavior logic on the client, with the server only
-sending **seed updates** or **seed morphs** when the NPC evolves.
-"""
-)
+This is the smart-home version of:
 
-st.markdown("---")
-
-st.subheader("🔚 Summary")
-
-st.markdown(
-    """
-- The **NPCSeed** is a compact, deterministic handle on rich behavior.  
-- It supports both **procedural generation** and **state compression**.  
-- Storage and bandwidth savings scale massively with world size.  
-
-This is exactly where an **MSE-based NPC system** shines:
-
-> **Infinite-feeling behavior, finite tiny seeds.**
+> **Infinite personalized scheduling, finite tiny seeds.**
 """
 )
