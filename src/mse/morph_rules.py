@@ -20,7 +20,7 @@ def morph_state_default(
     n = len(state)
     new_state = [0] * n
     for i in range(n):
-        left = state[i - 1]  # wraparound by Python indexing
+        left = state[i - 1]  # wraparound by Python index
         center = state[i]
         new_state[i] = (a * center + b * left + c * t + d) % mod
-    return new_state
+    return  new_state
