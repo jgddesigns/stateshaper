@@ -12,7 +12,7 @@ if SRC_ROOT not in sys.path:
     sys.path.insert(0, SRC_ROOT)
 
 
-
+## once the mapping rules have been used, only the seed is needed
 class MappingRules:
 
 

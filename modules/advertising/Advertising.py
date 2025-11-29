@@ -1,6 +1,6 @@
 from random import randint
-from AdLinks import AdLinks
-from MappingRules import MappingRules
+from modules.advertising.classes.AdLinks import AdLinks
+from modules.advertising.classes.MappingRules import MappingRules
 from mse.core import MorphicSemanticEngine
 
 import os

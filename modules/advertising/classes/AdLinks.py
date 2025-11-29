@@ -14,6 +14,7 @@ class AdLinks:
     def __init__(self, **kwargs):
         super(AdLinks, self).__init__(**kwargs)
 
+        ## in a real world scenario this would point to a bank of ads
         self.links = {
             "reading": [
                 {"link": "images/reading/001.png", "attributes": ["gaming", "painting", "movies"]},
