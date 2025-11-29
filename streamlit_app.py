@@ -8,28 +8,28 @@ import streamlit as st
 
 
 # ============================================================
-# 1. Routine "Personality" Traits & Storage Model
+# 1. ML Training "Personality" Traits & Storage Model
 # ============================================================
 
-ROUTINE_TRAITS = [
-    "Morning Productivity",   # high = prefers deep work in morning
-    "Evening Productivity",   # high = prefers deep work in evening
-    "Fitness Focus",          # high = consistent exercise
-    "Social / Family Focus",  # high = wants time with people
-    "Learning / Growth",      # high = time for study/skills
-    "Errands / Admin",        # high = structured chores/admin
-    "Relaxation Priority",    # high = protects downtime
-    "Weekend Warrior",        # high = shifts more to weekends
+TRAINING_TRAITS = [
+    "Data Richness Preference",     # high = wants large datasets
+    "Accuracy Priority",            # high = maximize metrics
+    "Training Speed Priority",      # high = finish quickly
+    "Regularization Strength",      # high = more reg
+    "Augmentation Intensity",       # high = heavy aug
+    "Experimentation Breadth",      # high = many runs/sweeps
+    "On-Device / Edge Focus",       # high = smaller/lighter models
+    "Interpretability Priority",    # high = simpler models, logs
 ]
 
-BYTES_PER_FLOAT = 4   # e.g. float32
+BYTES_PER_FLOAT = 4   # e.g. float32 for config values
 BYTES_PER_CHAR = 1    # approx per character in seed string
 
 
 @dataclass
-class RoutineSeed:
-    """Tiny, shareable representation of a daily routine style."""
-    seed_code: str                # e.g. "R-9A23BC"
+class TrainingSeed:
+    """Tiny, shareable representation of an ML training style."""
+    seed_code: str                # e.g. "ML-9A23BC"
     vector: np.ndarray            # normalized trait vector (local only)
     raw_traits: Dict[str, float]  # original sliders (local only)
 
@@ -53,11 +53,11 @@ def hash_vector_to_code(prefix: str, v: np.ndarray) -> str:
     return f"{prefix}-{digest}"
 
 
-def build_routine_seed(traits: Dict[str, float]) -> RoutineSeed:
-    vec = np.array([traits[t] for t in ROUTINE_TRAITS], dtype=float)
+def build_training_seed(traits: Dict[str, float]) -> TrainingSeed:
+    vec = np.array([traits[t] for t in TRAINING_TRAITS], dtype=float)
     vec_norm = normalize_vector(vec)
-    seed_code = hash_vector_to_code("ROUT", vec_norm)
-    return RoutineSeed(seed_code=seed_code, vector=vec_norm, raw_traits=traits)
+    seed_code = hash_vector_to_code("ML", vec_norm)
+    return TrainingSeed(seed_code=seed_code, vector=vec_norm, raw_traits=traits)
 
 
 def human_readable_bytes(n: int) -> str:
@@ -77,124 +77,173 @@ def human_readable_bytes(n: int) -> str:
 
 
 # ============================================================
-# 3. Routine Generation from RoutineSeed (Demo Logic)
+# 3. Training Plan Generation from TrainingSeed (Demo Logic)
 # ============================================================
 
 def clamp(x, lo, hi):
     return max(lo, min(hi, x))
 
 
-def build_daily_routine(seed: RoutineSeed, is_weekend: bool) -> pd.DataFrame:
+def build_training_plan(seed: TrainingSeed) -> pd.DataFrame:
     """
-    Generate a simple hourly schedule with intensities for:
-      - deep_work (0-100)
-      - fitness (0-100)
-      - social_family (0-100)
-      - admin_errands (0-100)
-      - rest_relax (0-100)
-    based on RoutineSeed traits.
+    Generate a training plan with phases and rough hyperparam styles:
+      - dataset size scale
+      - model size
+      - epochs
+      - batch size
+      - learning rate scale
+      - augmentation level
+      - regularization level
+      - experiments count
+    based on TrainingSeed traits.
     """
-
     traits = seed.raw_traits
 
     # 0–10 -> 0–1
     s = lambda name: traits[name] / 10.0
 
-    morn = s("Morning Productivity")
-    eve = s("Evening Productivity")
-    fit = s("Fitness Focus")
-    social = s("Social / Family Focus")
-    learn = s("Learning / Growth")
-    admin = s("Errands / Admin")
-    relax = s("Relaxation Priority")
-    weekend = s("Weekend Warrior")
+    data_rich = s("Data Richness Preference")
+    acc = s("Accuracy Priority")
+    speed = s("Training Speed Priority")
+    reg = s("Regularization Strength")
+    aug = s("Augmentation Intensity")
+    exp = s("Experimentation Breadth")
+    edge = s("On-Device / Edge Focus")
+    interp = s("Interpretability Priority")
 
-    weekend_factor = weekend if is_weekend else 0.0
+    # Base ranges (interpretation)
+    # dataset: small (0.2) to huge (1.5)
+    # model size: small (0.3) to huge (1.5)
+    # epochs: 5–200
+    # batch size: 16–2048
+    # lr scale: 0.2–2.0
+    # aug/reg: 0–100
+    # experiments: 1–100
 
-    hours = list(range(24))
-    rows = []
+    def dataset_scale(multiplier: float = 1.0) -> float:
+        base = 0.2 + 1.3 * data_rich
+        return round(base * multiplier, 2)
 
-    for h in hours:
-        # Basic time windows
-        is_morning = 6 <= h < 11
-        is_midday = 11 <= h < 16
-        is_evening = 16 <= h < 22
-        is_night = (h >= 22 or h < 6)
+    def model_scale(multiplier: float = 1.0) -> float:
+        # high accuracy → bigger; high edge → smaller
+        base = 0.3 + 1.2 * acc
+        base *= (0.7 + 0.3 * (1.0 - edge))
+        return round(base * multiplier, 2)
 
-        # Deep work
-        deep = 0.0
-        if is_morning:
-            deep += 70 * morn
-        if is_evening:
-            deep += 70 * eve
-        if is_midday:
-            deep += 30 * (morn + eve) / 2.0
-        # weekend factor: shift some deep work into weekend if weekend warrior
-        deep *= (0.6 + 0.4 * (1.0 - weekend_factor))
-        deep = clamp(deep, 0, 100)
+    def epoch_count(base: int, scale_factor: float = 1.0) -> int:
+        # speed trades off with acc and reg
+        base_epochs = base + int(80 * acc + 40 * reg - 60 * speed)
+        base_epochs = clamp(base_epochs, 5, 200)
+        return int(base_epochs * scale_factor)
 
-        # Fitness: morning/evening + weekend boost
-        fit_int = 0.0
-        if 6 <= h < 9:
-            fit_int += 60 * fit
-        if 17 <= h < 20:
-            fit_int += 50 * fit
-        fit_int += 20 * weekend_factor * fit
-        fit_int = clamp(fit_int, 0, 100)
+    def batch_size() -> int:
+        # high speed & edge focus: larger batch (if GPU), otherwise moderate
+        base_bs = 32 + int(512 * speed + 256 * edge)
+        return int(clamp(base_bs, 16, 2048))
 
-        # Social/Family: evenings + weekend boost
-        soc_int = 0.0
-        if is_evening:
-            soc_int += 60 * social
-        if is_midday and is_weekend:
-            soc_int += 40 * social
-        soc_int += 20 * weekend_factor * social
-        soc_int = clamp(soc_int, 0, 100)
+    def lr_scale() -> float:
+        # more reg/aug → can tolerate higher LR; high accuracy → moderate LR
+        lr = 0.2 + 1.0 * speed + 0.5 * aug + 0.3 * reg - 0.5 * acc
+        return round(clamp(lr, 0.2, 2.0), 2)
 
-        # Admin/Errands: midday + early evening
-        adm_int = 0.0
-        if 9 <= h < 12:
-            adm_int += 50 * admin
-        if 13 <= h < 17:
-            adm_int += 40 * admin
-        if is_weekend and 10 <= h < 14:
-            adm_int += 20 * admin
-        adm_int = clamp(adm_int, 0, 100)
+    def aug_level(multiplier: float = 1.0) -> int:
+        # interpretability often prefers simpler schemes
+        val = 100 * aug * multiplier * (0.7 + 0.3 * (1.0 - interp))
+        return int(clamp(val, 0, 100))
 
-        # Learning: often early morning, late evening, or midday blocks
-        learn_int = 0.0
-        if 6 <= h < 8:
-            learn_int += 40 * learn
-        if 20 <= h < 22:
-            learn_int += 40 * learn
-        if 12 <= h < 14:
-            learn_int += 30 * learn
-        learn_int = clamp(learn_int, 0, 100)
+    def reg_level(multiplier: float = 1.0) -> int:
+        val = 100 * reg * multiplier
+        return int(clamp(val, 0, 100))
 
-        # Rest / Relaxation: nights + free windows + driven by relax priority
-        rest_int = 0.0
-        if is_night:
-            rest_int += 70
-        if is_evening:
-            rest_int += 30 * relax
-        # subtract time already taken by other stuff
-        busy = (deep + fit_int + soc_int + adm_int + learn_int) / 100.0
-        rest_int += (1.0 - clamp(busy, 0.0, 1.0)) * 50 * relax
-        rest_int = clamp(rest_int, 0, 100)
+    def exp_count(multiplier: float = 1.0) -> int:
+        base_exp = 1 + int(90 * exp * multiplier)
+        return int(clamp(base_exp, 1, 100))
 
-        rows.append(
+    phases = []
+
+    # Phase 1: Base model / backbone
+    phases.append(
+        {
+            "Phase": "Base Pretraining / Backbone",
+            "Dataset Scale (×)": dataset_scale(1.0),
+            "Model Size (×)": model_scale(1.0),
+            "Epochs": epoch_count(20, 1.0),
+            "Batch Size": batch_size(),
+            "LR Scale": lr_scale(),
+            "Augmentation (0–100)": aug_level(0.7),
+            "Regularization (0–100)": reg_level(0.6),
+            "Experiments (runs)": exp_count(0.4),
+            "Notes": "Core representation learning; large-ish dataset if data-rich.",
+        }
+    )
+
+    # Phase 2: Domain fine-tuning
+    phases.append(
+        {
+            "Phase": "Domain Fine-Tuning",
+            "Dataset Scale (×)": dataset_scale(0.4),
+            "Model Size (×)": model_scale(1.0),
+            "Epochs": epoch_count(10, 0.8),
+            "Batch Size": batch_size(),
+            "LR Scale": round(lr_scale() * 0.6, 2),
+            "Augmentation (0–100)": aug_level(1.0),
+            "Regularization (0–100)": reg_level(0.8),
+            "Experiments (runs)": exp_count(0.6),
+            "Notes": "Task-specific data, heavier aug/reg when accuracy is high priority.",
+        }
+    )
+
+    # Phase 3: Hyperparam sweep / experimentation
+    phases.append(
+        {
+            "Phase": "Hyperparam Sweep",
+            "Dataset Scale (×)": dataset_scale(0.3),
+            "Model Size (×)": model_scale(1.0),
+            "Epochs": epoch_count(5, 0.7),
+            "Batch Size": batch_size(),
+            "LR Scale": lr_scale(),
+            "Augmentation (0–100)": aug_level(0.8),
+            "Regularization (0–100)": reg_level(0.7),
+            "Experiments (runs)": exp_count(1.0),
+            "Notes": "Multiple configs; experimentation breadth controls number of runs.",
+        }
+    )
+
+    # Phase 4: Distillation / edge deployment (if edge high)
+    if traits["On-Device / Edge Focus"] > 2.0:
+        phases.append(
             {
-                "Hour": f"{h:02d}:00",
-                "Deep Work (0-100)": round(deep, 1),
-                "Fitness (0-100)": round(fit_int, 1),
-                "Social / Family (0-100)": round(soc_int, 1),
-                "Admin / Errands (0-100)": round(adm_int, 1),
-                "Learning (0-100)": round(learn_int, 1),
-                "Rest / Relax (0-100)": round(rest_int, 1),
+                "Phase": "Distillation / Edge Model",
+                "Dataset Scale (×)": dataset_scale(0.2),
+                "Model Size (×)": round(model_scale(0.5), 2),
+                "Epochs": epoch_count(8, 0.7),
+                "Batch Size": batch_size(),
+                "LR Scale": round(lr_scale() * 0.8, 2),
+                "Augmentation (0–100)": aug_level(0.6),
+                "Regularization (0–100)": reg_level(0.9),
+                "Experiments (runs)": exp_count(0.5),
+                "Notes": "Compress to smaller model; more reg; suitable for on-device.",
             }
         )
 
-    df = pd.DataFrame(rows)
+    # Phase 5: Interpretability / monitoring (if high priority)
+    if traits["Interpretability Priority"] > 4.0:
+        phases.append(
+            {
+                "Phase": "Interpretability & Monitoring",
+                "Dataset Scale (×)": dataset_scale(0.2),
+                "Model Size (×)": model_scale(0.8),
+                "Epochs": epoch_count(5, 0.5),
+                "Batch Size": batch_size(),
+                "LR Scale": round(lr_scale() * 0.5, 2),
+                "Augmentation (0–100)": aug_level(0.4),
+                "Regularization (0–100)": reg_level(0.5),
+                "Experiments (runs)": exp_count(0.3),
+                "Notes": "Calibrate, log-rich models, simpler variants for explainability.",
+            }
+        )
+
+    df = pd.DataFrame(phases)
     return df
 
 
@@ -202,15 +251,16 @@ def build_daily_routine(seed: RoutineSeed, is_weekend: bool) -> pd.DataFrame:
 # 4. Storage & Bandwidth Estimates
 # ============================================================
 
-def estimate_storage_bytes_per_routine_profile(num_traits: int) -> int:
+def estimate_storage_bytes_per_training_profile(num_traits: int, approx_config_params: int = 40) -> int:
     """
-    Assume you store one float per trait for the "routine personality".
-    Schedules themselves could be derived on the fly from the seed.
+    Assume you store:
+    - one float per trait
+    - plus ~approx_config_params floats for concrete hyperparams, thresholds, etc.
     """
-    return num_traits * BYTES_PER_FLOAT
+    return (num_traits + approx_config_params) * BYTES_PER_FLOAT
 
 
-def estimate_storage_bytes_per_routine_seed(seed_code: str) -> int:
+def estimate_storage_bytes_per_training_seed(seed_code: str) -> int:
     return len(seed_code) * BYTES_PER_CHAR
 
 
@@ -219,135 +269,133 @@ def estimate_storage_bytes_per_routine_seed(seed_code: str) -> int:
 # ============================================================
 
 st.set_page_config(
-    page_title="MSE Routine Planner Demo",
+    page_title="MSE ML Training Seed Demo",
     page_icon="🧬",
     layout="wide",
 )
 
-st.title("🧬 MSE Routine Planner & Seed Compression Demo")
+st.title("🧬 MSE ML Training & Seed Compression Demo")
 
 st.write(
     """
-This demo shows how an **MSE-style RoutineSeed** can represent a person's
-**daily planning style**, and how that saves **storage and bandwidth**.
+This demo shows how an **MSE-style TrainingSeed** can represent an ML team's
+**training style & hyperparam tendencies**, and how that saves **storage and bandwidth**.
 
-- You control **routine traits** via sliders.
-- The app builds a tiny **RoutineSeed** from those traits.
-- That seed generates a **24-hour routine** (deep work, exercise, social, errands, rest).
-- Then we estimate **storage/bandwidth savings** for seeds vs raw profiles.
+- You control **training traits** via sliders.
+- The app builds a tiny **TrainingSeed** from those traits.
+- That seed generates a **multi-phase training plan**.
+- Then we estimate **storage/bandwidth savings** for seeds vs full configs.
 """
 )
 
 # Sidebar: traits
-st.sidebar.header("🧑‍💼 Routine Traits")
+st.sidebar.header("🤖 Training Traits")
 
-st.sidebar.write("Set your routine tendencies (0 = not at all, 10 = very strong).")
+st.sidebar.write("Set your ML training preferences (0 = not at all, 10 = very strong).")
 
 default_traits = {
-    "Morning Productivity": 7.0,
-    "Evening Productivity": 4.0,
-    "Fitness Focus": 5.0,
-    "Social / Family Focus": 5.0,
-    "Learning / Growth": 6.0,
-    "Errands / Admin": 4.0,
-    "Relaxation Priority": 5.0,
-    "Weekend Warrior": 3.0,
+    "Data Richness Preference": 7.0,
+    "Accuracy Priority": 8.0,
+    "Training Speed Priority": 4.0,
+    "Regularization Strength": 6.0,
+    "Augmentation Intensity": 5.0,
+    "Experimentation Breadth": 7.0,
+    "On-Device / Edge Focus": 3.0,
+    "Interpretability Priority": 5.0,
 }
 
 trait_values: Dict[str, float] = {}
-for trait in ROUTINE_TRAITS:
+for trait in TRAINING_TRAITS:
     trait_values[trait] = st.sidebar.slider(trait, 0.0, 10.0, float(default_traits[trait]), 0.5)
 
-is_weekend = st.sidebar.checkbox("Generate weekend routine", value=False)
-show_raw_profile = st.sidebar.checkbox("Show raw trait profile (local only)", value=True)
-show_vector = st.sidebar.checkbox("Show normalized routine vector (debug)", value=False)
+show_raw_profile = st.sidebar.checkbox("Show raw training trait profile (local only)", value=True)
+show_vector = st.sidebar.checkbox("Show normalized training style vector (debug)", value=False)
 
-# Build seed and schedule
-routine_seed = build_routine_seed(trait_values)
-routine_df = build_daily_routine(routine_seed, is_weekend=is_weekend)
+# Build seed and training plan
+training_seed = build_training_seed(trait_values)
+plan_df = build_training_plan(training_seed)
 
 # Layout columns
-col_left, col_right = st.columns([1.1, 1.6])
+col_left, col_right = st.columns([1.1, 1.7])
 
 with col_left:
-    st.subheader("🧬 RoutineSeed & Preference Encoding")
+    st.subheader("🧬 TrainingSeed & Style Encoding")
 
     st.markdown(
         f"""
-**Step 1 – Traits → RoutineSeed**
+**Step 1 – Traits → TrainingSeed**
 
-- The sliders define your **routine personality**:
-  - when you're most productive,
-  - how much you care about fitness,
-  - how important social/family time is,
-  - how structured your admin/errands time is,
-  - how much you protect rest and relaxation.
+- The sliders define your ML **training style**:
+  - how much data you prefer to use,
+  - whether you prioritize accuracy vs speed,
+  - how strong your regularization & augmentation are,
+  - whether you push hard on experimentation,
+  - whether you care about edge devices and interpretability.
 
 - These traits become a **normalized vector**.
 - That vector is encoded into a tiny seed:
 
-> **RoutineSeed:** `{routine_seed.seed_code}`
+> **TrainingSeed:** `{training_seed.seed_code}`
 
 In a full MSE system, this seed could regenerate:
 
-- your preferred daily/weekly schedule,  
-- task block templates,  
-- focus vs shallow work balance,  
-- how you adjust routines on weekends or busy days.
+- default hyperparam configs,  
+- training curricula,  
+- experiment templates,  
+- resource allocations (GPU/TPU),  
+- on-device vs server model variants.
 
-What you persist/sync is just the **seed**, not the full detailed schedule.
+What you persist/sync is just the **seed**, not a huge config file each time.
 """
     )
 
     if show_raw_profile:
-        st.markdown("**Local raw traits (stay in the planner / on device):**")
-        st.json(routine_seed.raw_traits)
+        st.markdown("**Local raw training traits (stay in orchestrator / config UI):**")
+        st.json(training_seed.raw_traits)
 
     if show_vector:
-        st.markdown("**Normalized routine vector:**")
-        st.write(routine_seed.vector)
+        st.markdown("**Normalized training style vector:**")
+        st.write(training_seed.vector)
 
     st.markdown("---")
 
     st.markdown(
         """
-**Step 2 – From Seed to Daily Routine**
+**Step 2 – From Seed to Training Plan**
 
-The engine uses the RoutineSeed to derive a **24-hour plan**:
+The engine uses the TrainingSeed to derive a **multi-phase plan**, including:
 
-- Deep work blocks  
-- Exercise windows  
-- Social/family time  
-- Admin/errand blocks  
-- Learning slots  
-- Rest/relaxation
+- Base pretraining / backbone choices,  
+- Domain fine-tuning settings,  
+- Hyperparam sweep style,  
+- Optional distillation for edge deployment,  
+- Optional interpretability/monitoring passes.
 
-This demo uses simple heuristics; an actual MSE implementation would use
-richer morphic rules and context-aware adjustments (meetings, travel, deadlines).
+This demo uses simple heuristics; a real MSE implementation would encode
+much richer morphic rules and auto-derived settings.
 """
     )
 
 with col_right:
-    st.subheader("📅 Generated Daily Routine (Hourly)")
+    st.subheader("📋 Generated Training Plan (Phases)")
 
-    routine_type = "Weekend" if is_weekend else "Weekday"
     st.write(
-        f"""
-This table shows the **hour-by-hour routine** implied by the current RoutineSeed  
-for a **{routine_type.lower()}** day. Tweak traits and watch the routine reshape itself. In real-world applications, these can be adjusted based on user preference.
+        """
+This table shows an **end-to-end training strategy** implied by the current TrainingSeed.
+Tweak traits and watch the configuration reshuffle.
 """
     )
-    st.dataframe(routine_df, use_container_width=True)
+    st.dataframe(plan_df, use_container_width=True)
 
     st.markdown(
         """
 Examples:
 
-- Increase **Morning Productivity** → more deep work in the morning hours.  
-- Increase **Evening Productivity** → more deep work later in the day.  
-- Increase **Fitness Focus** → stronger morning/evening exercise slots.  
-- Increase **Social / Family Focus** → more evening and weekend social time.  
-- Increase **Relaxation Priority** → more protected downtime, especially nights.
+- Increase **Accuracy Priority** → more epochs, slightly bigger models, more runs.  
+- Increase **Training Speed Priority** → fewer epochs, more aggressive LR.  
+- Increase **On-Device / Edge Focus** → more emphasis on distillation and smaller models.  
+- Increase **Experimentation Breadth** → more hyperparam sweep runs.  
+- Increase **Interpretability Priority** → extra monitoring/interpretability phase.
 """
     )
 
@@ -357,105 +405,110 @@ st.markdown("---")
 # 6. Storage & Bandwidth Savings
 # ============================================================
 
-st.subheader("💾 Storage & 📡 Bandwidth Savings for Routine Profiles")
+st.subheader("💾 Storage & 📡 Bandwidth Savings for Training Configs")
 
-# Per-user storage
-raw_bytes_per_routine = estimate_storage_bytes_per_routine_profile(len(ROUTINE_TRAITS))
-seed_bytes_per_routine = estimate_storage_bytes_per_routine_seed(routine_seed.seed_code)
+approx_config_params = 40  # rough guess of how many floats/params a config might have
+raw_bytes_per_training = estimate_storage_bytes_per_training_profile(len(TRAINING_TRAITS), approx_config_params)
+seed_bytes_per_training = estimate_storage_bytes_per_training_seed(training_seed.seed_code)
 
 st.markdown(
     f"""
-### Per User
+### Per Training Profile
 
-**Raw routine profile storage (traits only)**
+**Raw training profile storage (traits + config params)**
 
-- {len(ROUTINE_TRAITS)} traits × {BYTES_PER_FLOAT} bytes/float  
-- ≈ **{raw_bytes_per_routine} bytes** per user
+- {len(TRAINING_TRAITS)} traits + ~{approx_config_params} config params  
+- total ~{len(TRAINING_TRAITS) + approx_config_params} floats × {BYTES_PER_FLOAT} bytes/float  
+- ≈ **{raw_bytes_per_training} bytes** per profile
 
-**Seed-only routine storage**
+**Seed-only training storage**
 
-- `{routine_seed.seed_code}` → {len(routine_seed.seed_code)} characters × {BYTES_PER_CHAR} byte/char  
-- ≈ **{seed_bytes_per_routine} bytes** per user
+- `{training_seed.seed_code}` → {len(training_seed.seed_code)} characters × {BYTES_PER_CHAR} byte/char  
+- ≈ **{seed_bytes_per_training} bytes** per profile
 
-So in this simplified example, the seed is about **{raw_bytes_per_routine / max(seed_bytes_per_routine,1):.1f}× smaller**  
-than storing the raw routine traits directly.
+So in this simplified example, the seed is about **{raw_bytes_per_training / max(seed_bytes_per_training,1):.1f}× smaller**  
+than storing a full trait+config bundle directly.
 
-If you also encode template schedules, blocked tasks, and historical adjustments into the seed,
-the savings get even bigger.
+In a real MSE system, the seed could also implicitly encode:
+- model families,
+- curriculum choices,
+- resource tiers,
+- and experiment graph structure.
 """
 )
 
-# Scale for many users
-scale_users = [1_000, 1_000_000, 100_000_000]
+# Scale for many projects / experiments
+scale_profiles = [100, 10_000, 1_000_000]
 rows_storage = []
-for n_users in scale_users:
-    raw_total = raw_bytes_per_routine * n_users
-    seed_total = seed_bytes_per_routine * n_users
+for n_profiles in scale_profiles:
+    raw_total = raw_bytes_per_training * n_profiles
+    seed_total = seed_bytes_per_training * n_profiles
     savings = 1.0 - (seed_total / raw_total) if raw_total > 0 else 0.0
     rows_storage.append(
         {
-            "Users": f"{n_users:,}",
-            "Raw Profile Storage": human_readable_bytes(raw_total),
+            "Training Profiles": f"{n_profiles:,}",
+            "Raw Config Storage": human_readable_bytes(raw_total),
             "Seed-Only Storage": human_readable_bytes(seed_total),
             "Storage Saved": f"{savings*100:.1f}%",
         }
     )
 
-st.markdown("### At Scale (Storage Across Many Users)")
+st.markdown("### At Scale (Storage Across Many Experiments / Teams)")
 st.dataframe(pd.DataFrame(rows_storage), use_container_width=True)
 
 st.markdown(
     """
-Real routine planners can store:
+Large orgs often have:
 
-- many custom routines,  
-- daily logs,  
-- completion history,  
-- task metadata,  
-- focus analytics.
+- many projects,  
+- many variants per project,  
+- multiple environments (dev, staging, prod),  
+- long-lived config histories.
 
-If the MSE encodes most of the *pattern* into a **RoutineSeed (+ a few deltas)**,
-you can sync routine intelligence everywhere (phone, desktop, watch) with minimal storage.
+Encoding much of that into **TrainingSeeds (+ small deltas)** keeps the config surface lean.
 """
 )
 
 # Bandwidth section
-st.markdown("### Bandwidth Per Sync Across Devices")
+st.markdown("### Bandwidth for Orchestrator ↔ Workers / Cloud")
 
 st.markdown(
     """
-Now imagine syncing your routine planner between:
+Now imagine sending training configs to:
 
-- phone ↔ laptop,  
-- laptop ↔ cloud,  
-- cloud ↔ watch or tablet.
+- distributed workers,  
+- remote clusters,  
+- AutoML / experiment services.
 
-Instead of sending full profiles & schedules each time, you send:
+Instead of pushing full configs each time, you can:
 
-- **RoutineSeed** (and occasional small updates),
-- Let each device regenerate the daily/weekly view on its own.
+- send a **TrainingSeed**,  
+- let workers regenerate the full config locally.
+
+Below is a rough comparison of sending full configs vs seeds when dispatching jobs.
 """
 )
 
-syncs_per_day = st.slider("Assumed routine syncs per user per day", 1, 200, 20)
-users_in_system = st.slider("Number of users in the routine app", 10, 5_000_000, 100_000, step=10)
+jobs_per_day = st.slider("Assumed training jobs dispatched per day", 10, 500_000, 10_000, step=10)
+workers_in_fleet = st.slider("Number of workers receiving configs per day", 10, 100_000, 1_000, step=10)
 
-raw_payload_per_sync = raw_bytes_per_routine * users_in_system
-seed_payload_per_sync = seed_bytes_per_routine * users_in_system
-raw_per_day = raw_payload_per_sync * syncs_per_day
-seed_per_day = seed_payload_per_sync * syncs_per_day
+# Simple model: each job sends its config to one worker
+raw_payload_per_job = raw_bytes_per_training
+seed_payload_per_job = seed_bytes_per_training
+raw_per_day = raw_payload_per_job * jobs_per_day
+seed_per_day = seed_payload_per_job * jobs_per_day
 savings_per_day = 1.0 - (seed_per_day / raw_per_day) if raw_per_day > 0 else 0.0
 
 rows_bandwidth = [
     {
-        "Scenario": "Per sync",
-        "Raw Profile Payload": human_readable_bytes(raw_payload_per_sync),
-        "Seed Payload": human_readable_bytes(seed_payload_per_sync),
-        "Bandwidth Saved": f"{(1 - seed_payload_per_sync / raw_payload_per_sync)*100:.1f}%" if raw_payload_per_sync > 0 else "0%",
+        "Scenario": "Per job dispatched",
+        "Raw Config Payload": human_readable_bytes(raw_payload_per_job),
+        "Seed Payload": human_readable_bytes(seed_payload_per_job),
+        "Bandwidth Saved": f"{(1 - seed_payload_per_job / raw_payload_per_job)*100:.1f}%" if raw_payload_per_job > 0 else "0%",
     },
     {
-        "Scenario": "Per day (all users)",
-        "Raw Profile Payload": human_readable_bytes(int(raw_per_day)),
+        "Scenario": "Per day (all jobs)",
+        "Raw Config Payload": human_readable_bytes(int(raw_per_day)),
         "Seed Payload": human_readable_bytes(int(seed_per_day)),
         "Bandwidth Saved": f"{savings_per_day*100:.1f}%",
     },
@@ -465,14 +518,15 @@ st.dataframe(pd.DataFrame(rows_bandwidth), use_container_width=True)
 
 st.markdown(
     """
-With hundreds of thousands or millions of users, **seed-based routines**:
+In practice, **seed-based ML training** lets you:
 
-- keep storage light for long-term usage patterns,  
-- reduce sync overhead for multi-device setups,  
-- allow on-device planners to be smarter without constant heavy network calls.
+- reuse structured training recipes across teams and models,  
+- version and diff seeds instead of giant YAMLs,  
+- sync high-level behavior (e.g., "aggressive experimentation, edge-focused")
+  across fleets with a few bytes.
 
-This is the routine-planning version of:
+This is the ML-training version of your MSE idea:
 
-> **Infinite personalized planning, finite tiny seeds.**
+> **Rich training strategies, tiny deterministic seeds.**
 """
 )
