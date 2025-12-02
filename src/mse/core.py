@@ -1,6 +1,6 @@
 from typing import List, Dict, Sequence
-from .morph_rules import morph_state_default
-from .semantic_mapper import SemanticMapper
+from .tools.morph_rules import morph_state_default
+from .tools.semantic_mapper import SemanticMapper
 
 
 class MorphicSemanticEngine:
