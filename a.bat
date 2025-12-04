@@ -1,1 +1,1 @@
-python src\mse\classes\Vocab.py
+python src\mse\classes\connector\Vocab.py
