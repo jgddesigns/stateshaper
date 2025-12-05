@@ -1,37 +1,39 @@
 from random import randint
 
-## used to define terms used in the mse.
+## used to define_vocab terms used in the mse.
 
-## parameter format is dict/json with the following key/value pairs:
+## data parameter format is dict/json with the following key/value pairs:
 
     # {
     #       "input": [],    ## list/array (the data to be called while the engine is running.)
-    #       "rules": "",    ## string value (rating, compound, random or token. defines how the input will be mapped to the engine's vocab parameter.)          
+    #       "rules": "",    ## string value (rating, compound, random or token. define_vocabs how the input will be mapped to the engine's vocab parameter.)          
     #       "length": None,  ## int (if none, uses all input.)
     #       "compound_length": None ## int (for combining compound vocab)
-    #       "compound_rules": "random" string (further rules for compounding vocab. default is random.),
+    #       "compound_rules": "random" string (further rules for compounding vocab. default is random. like groups can be specified for data to be generated),
+    #       "compound_groups": groups included in the compound map. can be used along with compound_rules. by default only values within a group will be matched.,
     # }
     
 
 class Vocab:
 
-    rule_types = None
 
     def __init__(self, data=None, **kwargs):
         super().__init__(**kwargs)
 
+        self.rule_types = None
         self.debug = True
         self.data = data if data else self.test_data()
 
-        ## rating (personalization) - create a chain based on personalization derived from preference based 1-100 ratings 
-
-        ## compound (synthetic data) - use a bank of terms and put them together based on the 'compound rules' parameter as the mse runs. uses 'compound_vocab' function in the mse 'tools' directory. 
-
-        ## random (synthetic) - use a bank of defined terms to generate arbitrary output
-
-        ## token (events, compression) - the vocab terms are used to call events in the program based on the data sequence 
-
         self.rule_types = ["random", "rating", "compound", "token"]
+
+        self.rules_explained = {
+            "random": "The vocab consists of any terms within the input. If the length value is define_vocabd, the vocab list will include that many random values from the initial input data.",
+            "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocabd, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
+            "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of the MSE engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
+            "token": "The vocab list will consist of objects or functions that are called during MSE iterations. This will be based on a number ranking. If a length value is specified, the vocab list will be limited to that number. "
+        }
+
+        self.compound_rules = ["random"] ##need more compound rules. matching terms? rating based?
 
         self.mapping_types = {
             "random": self.random_mapping,
@@ -44,105 +46,71 @@ class Vocab:
         self.data_map = {}
         self.vocab = []
 
+
+        
+
+    def set_data(self, data):
+        self.data = data
+        self.valid_data()
+        self.define_vocab(self.data["rules"])
+
+
+    def valid_data(self):
+        if self.data["rules"] and self.valid_rule(self.data["rules"]) == False:
+            print("The rule chosen is not valid. Valid types are 'rating', 'compound', 'random', or 'token'. The rule will be defaulted to 'random'.")
+            self.data["rules"] = "random"
+
+        if (self.data["rules"] == "compound" and self.data["compound_length"] and isinstance(self.data["compound_length"], int) == False) or not self.data["compound_length"]:
+            print("\n\nThe 'compound' rule has been chosen, but no compound length has been assigned. Using default compound length of 2.")
+            self.data["compound_length"] = 2
+
+        if (self.data["rules"] == "compound" and self.data["compound_rules"] and (isinstance(self.data["compound_rules"], int) == False or self.valid_compound_rules() == False)) or not self.data["compound_rules"]:
+            print("\n\nThe 'compound' rule has been chosen, but no compound rules have been assigned, or the assigned rule is invalid. Using default compound rule'random'.")
+            self.data["compound_rules"] = "random"
+
+        if self.data["rules"] == "compound" and (self.data["compound_groups"] and  self.valid_compound_groups() == False) or not self.data["compound_groups"]:
+            print("\n\nThe 'compound' rule has been chosen, but no compound rules have been assigned, or the assigned rule is invalid. Using default compound rule'random'.")
+            self.data["compound_rules"] = "random"
+
+        if self.data["length"] and isinstance(self.data["length"], int) == False:
+            print("The length value is not an integer. Length will be set to input list size.")
+            self.data["length"] = len(self.data["input"])
+
         print("\n\n")
         if isinstance(self.data, dict) == False:
             print("Data passed is in incorrect format. Please make sure it is a dict/json with keys 'input' (list) and 'rules' (string).")
             
-
         elif isinstance(self.data["input"], list) == False:
             print("The input list isn't formatted correctly. Please ensure it is formatted as a list/array.")
             
+        elif self.data["rules"] == "random" and self.valid_random() == False:
+            print("The 'random' rule has been chosen, but the input list is invalid. Please make sure each value in the input data set is in the following format:\n\n{'data': values here}.")
 
-        elif self.data["rules"] and self.valid_rule(self.data["rules"]) == False:
-            print("The rule chosen is not valid. Valid types are 'rating', 'compound', 'random', or 'token'.")
-            
-        
         elif self.data["rules"] == "rating" and self.valid_ratings() == False:
-            print("The 'rating' rule has been chosen, but not all rules are defined. Please make sure each value in the input data set is in the following format:\n\n{'data': values here, 'rating': 0/100 rating here}.")
-               
-        
-        elif self.data["length"] and isinstance(self.data["length"], int) == False:
-            print("The length value is not an integer. Length will be set to input list size.")
-            self.data["length"] = len(self.data["input"])
-        
+            print("The 'rating' rule has been chosen, but the input list is invalid. Please make sure each value in the input data set is in the following format:\n\n{'data': values here, 'rating': 0/100 rating here}.")
+
+        elif self.data["rules"] == "compound" and self.valid_compound() == False:
+            print("The 'compound' rule has been chosen, but the input list is invalid. Please make sure each value in the input data set is in the following format:\n\n{'data': values here, 'group': your specified group type, int or str}.")
+
+        elif self.data["rules"] == "token" and self.valid_tokens() == False:
+            print("The 'token' rule has been chosen, but not all rules are define_vocabd. Please make sure each value in the input data set is in the following format:\n\n{'data': use an object, function call etc to call base on the value in the mse array, 'rank': int in event calling order preference (1, 2, 3).")
+      
         else:
-            print("\n\nData has been accepted. Processing input to enter into the MSE...")
-            self.define() if not self.data["rules"]  and not self.debug else self.define(self.data["rules"]) if not self.debug else self.test()
+            print("The data has been accepted. Processing input to enter into the MSE...")
+            self.define_vocab() if not self.data["rules"]  and not self.debug else self.define_vocab(self.data["rules"]) if not self.debug else self.test()
         print("\n\n")
 
-        
-    def test_data(self):
-        print("\n\nrunning test function.\n\n")
-        return {
-            "input": [
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": 123,
-                    "rating": 45,
-                },
-                {
-                    "data": 456,
-                    "rating": 88,
-                },
-                {
-                    "data": 789,
-                    "rating": 35,
-                },
-                {
-                    "data": 1673,
-                    "rating": 75,
-                },
-                {
-                    "data": 1238,
-                    "rating": 65,
-                },
-                {
-                    "data": 1213,
-                    "rating": 25,
-                },
-                {
-                    "data": 4526,
-                    "rating": 92,
-                },
-                {
-                    "data": 7849,
-                    "rating": 3,
-                },
-                {
-                    "data": 1073,
-                    "rating": 55,
-                },
-                {
-                    "data": 18,
-                    "rating": 77,
-                },
-            ],
-            
-            "rules": "compound",
-            "length": 10
-        }
-
-
-    def test(self):
-        self.define(self.data["rules"])
-        
 
     def valid_rule(self, rule):
         if rule not in self.rule_types:
-            print("\nRule in data set is not in list of defined rules.")
+            print("\nRule in data set is not in list of define_vocabd rules.")
         return rule in self.rule_types
     
+
+    def valid_map(self):
+        ##combine all validity checks into one function
+        pass
+
     
     def valid_ratings(self):
         i = 0
@@ -161,18 +129,53 @@ class Vocab:
             if isinstance(item["rating"], int) == False:
                     print(f"Rating is not an integer in object {i}.\n")
                     return False
-        print("Input 'rating' data is valid.\n")
-        print("Length: " + str(self.data["length"]) + "\n")
+        print("Input 'rating' data is valid.\n\n")
+        print("Length: " + str(self.data["length"]) + "\n\n")
         return True
 
+
+    def valid_compound(self):
+        i = 0
+        for item in self.data["input"]:
+            i += 1
+            if "data" not in item.keys() or "group" not in item.keys() and len(item.keys()) == 2:
+                print(f"Bad keys in object {i}.\n")
+                return False
+            if len(item.keys()) > 2:
+                print(f"Too many keys in object {i}.\n")
+                return False
+            if (isinstance(item["group"], int) == False and isinstance(item["group"], str) == False):
+                (f"Group is invalid in object {i}. Please make sure the group id is an int or str variable type.")
+                return False
+        print("Input 'compound' data is valid.\n\n")
+        print("Length: " + str(self.data["length"]) + "\n\n")
+        return True
+    
+
+    def valid_compound_rules(self):
+        return self.data["compound_rules"] in self.compound_rules
+    
+
+    def valid_compound_groups(self):
+        i = 0
+        for item in self.data["input"]:
+            i += 1
+            if "group" not in item.keys() or not item["group"]:
+                print(f"Compound rule is invalid in object {i}.\n")
+                return False
+        print("Compound groups are valid.\n\n")
+        print("Length: " + str(self.data["length"]) + "\n\n")
+        return True         
+    
  
     def valid_tokens(self):
         i = 0
         for item in self.data["input"]:
-            if "data" not in item.keys() or "rank" not in item.keys()or "event" not in item.keys() and len(item.keys()) == 3:
+            i += 1
+            if "data" not in item.keys() or "rank" not in item.keys() and len(item.keys()) == 2:
                 print(f"Bad keys in object {i}.\n")
                 return False
-            if len(item.keys()) > 3:
+            if len(item.keys()) > 2:
                 print(f"Too many keys in object {i}.\n")
                 return False
             if not item["rank"]:
@@ -181,11 +184,8 @@ class Vocab:
             if item["rank"] and isinstance(item["rank"], int) == False:
                 print(f"Rank value is not an integer in object {i}.\n")
                 return False
-            if not item["event"]:
-                print(f"Event value is not valid in object {i}.\n")
-                return False
-        print("Rule 'token' data is valid.\n")
-        print("Length: " + str(self.data["length"]) + "\n")
+        print("Rule 'token' data is valid.\n\n")
+        print("Length: " + str(self.data["length"]) + "\n\n")
         return True      
 
 
@@ -194,11 +194,14 @@ class Vocab:
             self.data["length"] = len(self.data["input"]) if self.data["length"] > len(self.data["input"]) else None
 
     
-    def define(self, rules=None):
+    def define_vocab(self, rules=None):
         if not rules:
             self.random_mapping() 
         else:
             self.mapping_method()
+
+        self.print_map()
+        return self.vocab
 
         
     def mapping_method(self):
@@ -222,7 +225,7 @@ class Vocab:
 
         self.vocab = included
 
-        print(f"\nMSE vocab parameter successfully set with 'rating' rule. Length: " + str(self.data["length"]))
+        print(f"\nMSE vocab parameter successfully set with 'rating' rule.")
 
 
     def sort_ratings(self):
@@ -232,6 +235,7 @@ class Vocab:
     def compound_mapping(self):
         self.vocab = "compound_mapping"
         self.compound_vocab = self.data["input"] if self.data["length"] == len(self.data["input"]) else self.compound_map()
+        
         print(f"\nMSE vocab parameter successfully set with 'compound' rule. Length: " + str(self.data["length"]))
 
 
@@ -242,17 +246,106 @@ class Vocab:
             data = self.data["input"][randint(0, len(self.data["input"])-1)]
             included.append(data) if data not in included else None
 
-        print(included)
         return included
 
 
     def token_mapping(self):
+        print("\n\nStarting token based mapping. Events will be called based on number ranking.\n")
 
-        pass
+        included = []
+        input = self.sort_token()
+
+        i = 0
+        while len(included) < self.data["length"]:
+            included.append(input[i]["data"])
+            i+=1
+
+        self.vocab = included
+
+        print(f"\nMSE vocab parameter successfully set with 'token' rule. Length: " + str(self.data["length"]))
 
 
     def sort_token(self):
-        return sorted(self.data["input"], key=lambda x: x["rank"], reverse=True)        
+        return sorted(self.data["input"], key=lambda x: x["rank"], reverse=False)        
+
+
+    def print_map(self):
+        print("\n\nThe vocab list is set. Items:\n\n")
+
+        for item in self.vocab:
+            print(str(item))
+
+        print(f"\n\nThe vocab will be called based on the '{str(self.current_rule)}' rule:\n")
+        print(self.rules_explained[self.current_rule])
+
+
+    def test(self):
+        self.define_vocab(self.data["rules"])
+
+
+    def test_data(self):
+        print("\n\nRunning test function.")
+        return {
+            "input": [
+                {
+                    "data": "asdf",
+                    "rank": 14
+                }, 
+                {
+                    "data": "asdf",
+                    "rank": 14
+                }, 
+                {
+                    "data": "asdf",
+                    "rank": 14
+                }, 
+                {
+                    "data": 123,
+                    "rank": 45,
+                },
+                {
+                    "data": 456,
+                    "rank": 88,
+                },
+                {
+                    "data": 789,
+                    "rank": 35,
+                },
+                {
+                    "data": 1673,
+                    "rank": 75,
+                },
+                {
+                    "data": 1238,
+                    "rank": 65,
+                },
+                {
+                    "data": 1213,
+                    "rank": 25,
+                },
+                {
+                    "data": 4526,
+                    "rank": 92,
+                },
+                {
+                    "data": 7849,
+                    "rank": 3,
+                },
+                {
+                    "data": 1073,
+                    "rank": 55,
+                },
+                {
+                    "data": 18,
+                    "rank": 77,
+                },
+            ],
+            
+            "rules": "token",
+            "length": 10,
+            "compound_length": 3,
+            "compound_rules": "dfdfdf"
+        }
 
 
 Vocab()

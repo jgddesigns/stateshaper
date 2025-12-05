@@ -34,7 +34,7 @@ class MorphicSemanticEngine:
             "b": int(constants.get("b", 5)),
             "c": int(constants.get("c", 7)),
             "d": int(constants.get("d", 11)),
-        }
+        } if not constants else constants
 
         self.mapper = SemanticMapper(vocab=vocab)
         self._prev_token_index = 0
