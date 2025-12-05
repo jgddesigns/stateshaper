@@ -1,7 +1,8 @@
-from Vocab import Vocab
-from mse.core import MorphicSemanticEngine
 
 
+
+
+from mse.classes.connector.Vocab import Vocab
 
 
 class Connector:
@@ -27,7 +28,7 @@ class Connector:
         self.mod = mod
 
         self.vocab = None
-        self.data = data if self.debug == False else self.test_data()
+        self.data = data 
         self.token_count = token_count
 
         if data and isinstance(data, dict) == False: 
@@ -45,14 +46,14 @@ class Connector:
     def start_connect(self):
         self.build_seed()
 
-        self.engine = MorphicSemanticEngine(
-            state = self.state,
-            vocab = self.vocab,
-            constants = self.constants,
-            mod = self.mod
-        )
+        self.engine = {
+            "state": self.state,
+            "vocab": self.vocab,
+            "constants": self.constants,
+            "mod": self.mod
+        }
 
-        self.engine.generate_tokens(self.token_count)
+        return self.engine
 
 
     def build_seed(self):
@@ -64,6 +65,7 @@ class Connector:
 
     def get_state(self):
         return [66, 5, 354, 3, 34]
+
 
     def get_vocab(self):
         self.vocab = Vocab(self.data)
@@ -94,69 +96,7 @@ class Connector:
         self.token_count = token
 
 
-    def test_data(self):
-        print("\n\nRunning test function from Connector class.")
-        return {
-            "input": [
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": 123,
-                    "rank": 45,
-                },
-                {
-                    "data": 456,
-                    "rank": 88,
-                },
-                {
-                    "data": 789,
-                    "rank": 35,
-                },
-                {
-                    "data": 1673,
-                    "rank": 75,
-                },
-                {
-                    "data": 1238,
-                    "rank": 65,
-                },
-                {
-                    "data": 1213,
-                    "rank": 25,
-                },
-                {
-                    "data": 4526,
-                    "rank": 92,
-                },
-                {
-                    "data": 7849,
-                    "rank": 3,
-                },
-                {
-                    "data": 1073,
-                    "rank": 55,
-                },
-                {
-                    "data": 18,
-                    "rank": 77,
-                },
-            ],
-            
-            "rules": "token",
-            "length": 10,
-            "compound_length": 3,
-            "compound_rules": "dfdfdf"
-        }
+
     
 
-Connector()
+# Connector()
