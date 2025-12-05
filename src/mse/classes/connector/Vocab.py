@@ -235,7 +235,7 @@ class Vocab:
     def compound_mapping(self):
         self.vocab = "compound_mapping"
         self.compound_vocab = self.data["input"] if self.data["length"] == len(self.data["input"]) else self.compound_map()
-        
+
         print(f"\nMSE vocab parameter successfully set with 'compound' rule. Length: " + str(self.data["length"]))
 
 
@@ -284,7 +284,7 @@ class Vocab:
 
 
     def test_data(self):
-        print("\n\nRunning test function.")
+        print("\n\nRunning test function from Vocab class.")
         return {
             "input": [
                 {
@@ -348,4 +348,4 @@ class Vocab:
         }
 
 
-Vocab()
+# Vocab()
