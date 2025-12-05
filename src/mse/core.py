@@ -1,6 +1,6 @@
 from typing import List, Dict, Sequence
-from .tools.morph_rules import morph_state_default
-from .tools.semantic_mapper import SemanticMapper
+from tools.morph_rules import morph_state_default
+from tools.semantic_mapper import SemanticMapper
 
 
 class MorphicSemanticEngine:
@@ -59,6 +59,8 @@ class MorphicSemanticEngine:
         """
         return sum(self.state) % len(self.mapper.vocab)
 
+
+    #based on the seed, morphs the array and gets a token from the vocab.
     def step(self) -> str:
         """Advance the engine by one step and return the next token."""
         base = self._base_code()
@@ -76,6 +78,8 @@ class MorphicSemanticEngine:
             **self.constants,
         )
         self.t += 1
+        # print("\nToken generated:\n")
+        # print(str(token))
         return token
 
     def next_token(self) -> str:

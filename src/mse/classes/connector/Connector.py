@@ -1,14 +1,20 @@
+from classes.connector.Vocab import Vocab
+
+import os
+import sys
 
 
+# Find project root (two levels up from this file: modules/personalization/.. /..)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ))
+SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
 
-
-from mse.classes.connector.Vocab import Vocab
-
+if SRC_ROOT not in sys.path:
+    sys.path.insert(0, SRC_ROOT)
 
 class Connector:
 
 
-    def __init__(self, data=None, token_count=30, constants=None, mod=None, **kwargs):
+    def __init__(self, data=None, token_count=10, constants=None, mod=None, **kwargs):
         super().__init__(**kwargs)
 
         self.debug = True
@@ -24,8 +30,8 @@ class Connector:
         self.engine = None
         self.state = None
         self.vocab = None
-        self.constants = constants
-        self.mod = mod
+        self.constants = constants if constants else self.default_constants
+        self.mod = mod if mod else self.default_mod
 
         self.vocab = None
         self.data = data 
@@ -34,18 +40,15 @@ class Connector:
         if data and isinstance(data, dict) == False: 
             print("\nData input is invalid. The input requires 'dict' format.")
 
-        elif constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
+        if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
             print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
 
-        else:
-            self.start_connect()
 
 
 
 
     def start_connect(self):
         self.build_seed()
-
         self.engine = {
             "state": self.state,
             "vocab": self.vocab,
@@ -59,28 +62,29 @@ class Connector:
     def build_seed(self):
         self.vocab = self.get_vocab()
         self.state = self.get_state()
-        self.constants = self.get_constants()
-        self.mod = self.get_mod()
+        # self.constants = self.get_constants()
+        # self.mod = self.get_mod()
 
 
     def get_state(self):
-        return [66, 5, 354, 3, 34]
+        return [66, 67, 54, 3, 34]
 
 
     def get_vocab(self):
         self.vocab = Vocab(self.data)
         return self.vocab.define_vocab()
 
+
     def get_constants(self):
         if not self.constants:
-            self.constants = self.assign_constants()
+            self.constants = self.default_constants
 
 
-    def assign_constants(self, constants):
+    def assign_constants(self, constants=None):
         new_constants = {}
         for key in self.default_constants.keys():
-            new_constants[key] = constants[len(new_constants)]
-        return new_constants
+            new_constants[key] = constants[len(new_constants)] if constants else None
+        return new_constants if constants else self.default_constants
         
 
     def get_mod(self):

@@ -1,6 +1,6 @@
 from classes.connector.Connector import Connector
 
-from mse.core import MorphicSemanticEngine
+from core import MorphicSemanticEngine
 
 
 
@@ -9,7 +9,7 @@ class RunEngine:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.connector = Connector(self.test_data)
+        self.connector = Connector(self.test_data())
 
         self.engine = None
 
@@ -30,74 +30,82 @@ class RunEngine:
 
         self.tokens = self.engine.generate_tokens(self.connector.token_count)
 
+        print("\n\nTokens successfully generated from vocab.\n")
         print(self.tokens)
-
+        print()
+        # print("\n\nRunning engine...\n")
+        # i = 0
+        # while i < 5:
+        #     self.engine.step()
+        #     i+=1
 
     def test(self):
-        # self.define_vocab(self.data["rules"])
         pass
 
 
     def test_data(self):
-        print("\n\nRunning test function from Vocab class.")
+        print("\n\nRunning test function from run class.")
         return {
             "input": [
                 {
                     "data": "asdf",
-                    "rank": 14
+                    "rating": 14
                 }, 
                 {
                     "data": "asdf",
-                    "rank": 14
+                    "rating": 14
                 }, 
                 {
                     "data": "asdf",
-                    "rank": 14
+                    "rating": 14
                 }, 
                 {
                     "data": 123,
-                    "rank": 45,
+                    "rating": 45,
                 },
                 {
                     "data": 456,
-                    "rank": 88,
+                    "rating": 88,
                 },
                 {
                     "data": 789,
-                    "rank": 35,
+                    "rating": 35,
                 },
                 {
                     "data": 1673,
-                    "rank": 75,
+                    "rating": 75,
                 },
                 {
                     "data": 1238,
-                    "rank": 65,
+                    "rating": 65,
                 },
                 {
                     "data": 1213,
-                    "rank": 25,
+                    "rating": 25,
                 },
                 {
                     "data": 4526,
-                    "rank": 92,
+                    "rating": 92,
                 },
                 {
                     "data": 7849,
-                    "rank": 3,
+                    "rating": 3,
                 },
                 {
                     "data": 1073,
-                    "rank": 55,
+                    "rating": 55,
                 },
                 {
                     "data": 18,
-                    "rank": 77,
+                    "rating": 77,
                 },
             ],
             
-            "rules": "token",
+            "rules": "rating",
             "length": 10,
             "compound_length": 3,
             "compound_rules": "dfdfdf"
         }
+    
+
+RunEngine()

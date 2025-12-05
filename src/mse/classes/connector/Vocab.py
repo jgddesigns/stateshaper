@@ -20,6 +20,8 @@ class Vocab:
     def __init__(self, data=None, **kwargs):
         super().__init__(**kwargs)
 
+        print(data)
+
         self.rule_types = None
         self.debug = True
         self.data = data if data else self.test_data()
@@ -194,11 +196,9 @@ class Vocab:
             self.data["length"] = len(self.data["input"]) if self.data["length"] > len(self.data["input"]) else None
 
     
-    def define_vocab(self, rules=None):
-        if not rules:
-            self.random_mapping() 
-        else:
-            self.mapping_method()
+    def define_vocab(self):
+
+        self.mapping_method()
 
         self.print_map()
         return self.vocab
@@ -347,5 +347,3 @@ class Vocab:
             "compound_rules": "dfdfdf"
         }
 
-
-# Vocab()
