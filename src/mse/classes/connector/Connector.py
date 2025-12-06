@@ -37,8 +37,8 @@ class Connector:
         self.data = data 
         self.token_count = token_count
 
-        if data and isinstance(data, dict) == False: 
-            print("\nData input is invalid. The input requires 'dict' format.")
+        if data and isinstance(data, dict) == False and isinstance(data, list) == False: 
+            print("\nData input is invalid. The input requires 'dict' or 'list' format.")
 
         if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
             print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
@@ -71,8 +71,11 @@ class Connector:
 
 
     def get_vocab(self):
-        self.vocab = Vocab(self.data)
-        return self.vocab.define_vocab()
+        if isinstance(self.data, dict):
+            self.vocab = Vocab(self.data)  
+            return self.vocab.define_vocab()
+        else:   
+            return self.data
 
 
     def get_constants(self):

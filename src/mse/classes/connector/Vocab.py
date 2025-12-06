@@ -197,7 +197,6 @@ class Vocab:
 
     
     def define_vocab(self):
-
         self.mapping_method()
 
         self.print_map()

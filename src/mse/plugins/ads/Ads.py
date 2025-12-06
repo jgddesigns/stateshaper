@@ -1,9 +1,11 @@
 import random
-from ad_list import ad_list
+from plugins.ads.ad_list import ad_list
+from random import randint
+
+
+
 
 class Ads:
-
-
 
 
     def __init__(self, user_id=None, **kwargs):
@@ -11,21 +13,34 @@ class Ads:
 
         self.user_id = user_id
         self.interests = None
-        self.top_interests = None
+        self.top_interests = ["reading", "traveling", "cooking"]
+        self.most_relevant = 0
 
         self.data_format = {
-            "input": [],
+            "input": None,
             "rules": "rating",
             "length": 10
         }
 
-        if user_id:
-            print("\nFetching user based on entered user ID.")
-            self.get_user()
-        else:
-            print("\nCreating new user.")
-            self.create_user()
+        # self.test()
 
+        # if user_id:
+        #     print("\nFetching user based on entered user ID.")
+        #     self.get_user()
+        # else:
+        #     print("\nCreating new user.")
+        #     self.create_user()
+
+
+    def test(self):
+        print("running test\n\n")
+        # print(self.get_ads())
+        self.random_interests()
+        print(self.interests)
+        print()
+        self.set_interests()
+        return self.get_ads()
+        print()
 
     ## get user seed from database.
     def get_user(self):
@@ -107,7 +122,7 @@ class Ads:
 
 
     def random_interests(self):
-        return {
+        self.interests = {
             "reading": random.randint(1, 100),
             "traveling": random.randint(1, 100),
             "cooking": random.randint(1, 100),
@@ -150,13 +165,37 @@ class Ads:
 
 
     def set_interests(self, length=3):
-        self.top_interests = sorted(self.interests, key=lambda x: x, reverse=True)[:length]
+        self.top_interests = sorted(self.interests, key=lambda x: self.interests[x], reverse=True)[:length]
+
+        print(self.top_interests)
 
 
     # build a list of the ads to be shown. contains actual url. for demo, some images will be included in this directory.
-    def get_ads(self):
-        ads = []
+    def get_ads(self, ad_count=10):
+        ads = [] 
+        side = []
 
-        for item in ad_list.items():
-            included = [i for i in item if self.matching_interests() > 1]
+        for interest in ad_list.items():         
+            for item in interest[1]:
+                if len(ads) < ad_count:
+                    ads.append(item["link"]) if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0 else side.append(item["link"])
+                    self.most_relevant = self.most_relevant + 1 if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0 else self.most_relevant
 
+        print(f"\n\n{self.most_relevant} highly relevant ads\n")
+
+        while len(ads) < ad_count:
+            ads.append(side[randint(0, len(side)-1)]) if len(side) > 0 else None
+
+        print("\nselected ads")
+        print(ads)
+        
+        return ads
+
+
+
+    def define_data(self):
+        pass
+
+
+
+# Ads()

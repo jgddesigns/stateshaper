@@ -1,6 +1,7 @@
 from classes.connector.Connector import Connector
 
 from core import MorphicSemanticEngine
+from plugins.ads.Ads import Ads
 
 
 
@@ -9,30 +10,32 @@ class RunEngine:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.connector = Connector(self.test_data())
+        self.plugin = Ads()
+        self.connector = Connector(self.plugin.test())
 
         self.engine = None
 
-        self.engine_data = None
+        self.seed = None
 
         self.run_engine()
 
 
     def run_engine(self):
-        self.engine_data = self.connector.start_connect()
+        self.seed = self.connector.start_connect()
 
         self.engine = MorphicSemanticEngine(
-            self.engine_data["state"],
-            self.engine_data["vocab"],
-            self.engine_data["constants"],
-            self.engine_data["mod"],
+            self.seed["state"],
+            self.seed["vocab"],
+            self.seed["constants"],
+            self.seed["mod"],
         )
 
         self.tokens = self.engine.generate_tokens(self.connector.token_count)
 
         print("\n\nTokens successfully generated from vocab.\n")
         print(self.tokens)
-        print()
+        print("\n\nSeed:\n")
+        print(self.seed)
         # print("\n\nRunning engine...\n")
         # i = 0
         # while i < 5:
