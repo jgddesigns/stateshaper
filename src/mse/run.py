@@ -1,7 +1,7 @@
-from classes.connector.Connector import Connector
+from .classes.connector.Connector import Connector
 
-from core import MorphicSemanticEngine
-from plugins.ads.Ads import Ads
+from .core import MorphicSemanticEngine
+from .plugins.ads.Ads import Ads
 
 
 
@@ -11,18 +11,20 @@ class RunEngine:
         super().__init__(**kwargs)
 
         self.plugin = Ads()
-        self.connector = Connector(self.plugin.test())
+        self.connector = Connector(self.plugin.get_data())
 
         self.engine = None
 
         self.seed = None
+        self.compressed_seed = None
 
+        # self.asdf = "asdf"
         self.run_engine()
 
 
     def run_engine(self):
         self.seed = self.connector.start_connect()
-
+        self.compressed_seed = self.compress_seed()
         self.engine = MorphicSemanticEngine(
             self.seed["state"],
             self.seed["vocab"],
@@ -31,11 +33,12 @@ class RunEngine:
         )
 
         self.tokens = self.engine.generate_tokens(self.connector.token_count)
+        
 
         print("\n\nTokens successfully generated from vocab.\n")
-        print(self.tokens)
-        print("\n\nSeed:\n")
-        print(self.seed)
+        # print(self.tokens)
+        # print("\n\nSeed:\n")
+        # print(self.seed)
         # print("\n\nRunning engine...\n")
         # i = 0
         # while i < 5:
@@ -110,5 +113,8 @@ class RunEngine:
             "compound_rules": "dfdfdf"
         }
     
+    def compress_seed(self):
+        self.seed["vocab"] = [self.plugin.compressed_vocab, self.plugin.subset_seed]
 
-RunEngine()
+
+# RunEngine()

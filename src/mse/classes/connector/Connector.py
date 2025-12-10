@@ -1,10 +1,8 @@
-from classes.connector.Vocab import Vocab
-
+from Vocab import Vocab
 import os
 import sys
 
 
-# Find project root (two levels up from this file: modules/personalization/.. /..)
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ))
 SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
 
@@ -43,8 +41,7 @@ class Connector:
         if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
             print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
 
-
-
+        self.start_connect()
 
 
     def start_connect(self):
@@ -56,18 +53,16 @@ class Connector:
             "mod": self.mod
         }
 
+        print("\n\n\nMSE Seed has been created:\n")
+        print(self.engine)
+        print("\n")
+
         return self.engine
 
 
     def build_seed(self):
         self.vocab = self.get_vocab()
         self.state = self.get_state()
-        # self.constants = self.get_constants()
-        # self.mod = self.get_mod()
-
-
-    def get_state(self):
-        return [66, 67, 54, 3, 34]
 
 
     def get_vocab(self):
@@ -75,7 +70,12 @@ class Connector:
             self.vocab = Vocab(self.data)  
             return self.vocab.define_vocab()
         else:   
-            return self.data
+            self.vocab = Vocab()  
+            self.vocab.test()
+        
+
+    def get_state(self):
+        return [66, 67, 54, 3, 34]
 
 
     def get_constants(self):
@@ -106,4 +106,4 @@ class Connector:
 
     
 
-# Connector()
+Connector()

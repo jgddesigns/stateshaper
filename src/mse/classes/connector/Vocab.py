@@ -20,8 +20,6 @@ class Vocab:
     def __init__(self, data=None, **kwargs):
         super().__init__(**kwargs)
 
-        print(data)
-
         self.rule_types = None
         self.debug = True
         self.data = data if data else self.test_data()
@@ -279,7 +277,9 @@ class Vocab:
 
 
     def test(self):
-        self.define_vocab(self.data["rules"])
+        if not self.data["rules"]:
+            self.data = self.test_data()
+        self.define_vocab()
 
 
     def test_data(self):

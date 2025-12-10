@@ -1,6 +1,6 @@
 from typing import List, Dict, Sequence
-from tools.morph_rules import morph_state_default
-from tools.semantic_mapper import SemanticMapper
+from .tools.morph_rules import morph_state_default
+from .tools.semantic_mapper import SemanticMapper
 
 
 class MorphicSemanticEngine:
@@ -78,8 +78,6 @@ class MorphicSemanticEngine:
             **self.constants,
         )
         self.t += 1
-        # print("\nToken generated:\n")
-        # print(str(token))
         return token
 
     def next_token(self) -> str:
