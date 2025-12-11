@@ -1,4 +1,4 @@
-from Vocab import Vocab
+from .Vocab import Vocab
 import os
 import sys
 

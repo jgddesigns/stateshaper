@@ -1,1 +1,0 @@
-python src\mse\classes\connector\Connector.py

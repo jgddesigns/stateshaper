@@ -1,9 +1,9 @@
 
-from plugins.ads.Ads import Ads
+from demos.ads.Ads import Ads
 
 
 
-class Debug:
+class Demo:
 
 
     def __init__(self, user_id=None, **kwargs):
@@ -18,4 +18,4 @@ class Debug:
         self.ads.get_data()
 
 
-Debug()
+Demo()

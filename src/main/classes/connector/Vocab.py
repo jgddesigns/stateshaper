@@ -1,17 +1,17 @@
 from random import randint
 
-## used to define_vocab terms used in the mse.
+# Used to define the vocab terms used in the MSE.
 
-## data parameter format is dict/json with the following key/value pairs:
+# Data parameter format is dict/json with the following key/value pairs:
 
-    # {
-    #       "input": [],    ## list/array (the data to be called while the engine is running.)
-    #       "rules": "",    ## string value (rating, compound, random or token. define_vocabs how the input will be mapped to the engine's vocab parameter.)          
-    #       "length": None,  ## int (if none, uses all input.)
-    #       "compound_length": None ## int (for combining compound vocab)
-    #       "compound_rules": "random" string (further rules for compounding vocab. default is random. like groups can be specified for data to be generated),
-    #       "compound_groups": groups included in the compound map. can be used along with compound_rules. by default only values within a group will be matched.,
-    # }
+# {
+#       "input": [],    ## list/array (the data to be called while the engine is running.)
+#       "rules": "",    ## string value (rating, compound, random or token. define_vocabs how the input will be mapped to the engine's vocab parameter.)          
+#       "length": None,  ## int (if none, uses all input.)
+#       "compound_length": None ## int (for combining compound vocab)
+#       "compound_rules": "random" string (further rules for compounding vocab. default is random. like groups can be specified for data to be generated),
+#       "compound_groups": groups included in the compound map. can be used along with compound_rules. by default only values within a group will be matched.,
+# }
     
 
 class Vocab:

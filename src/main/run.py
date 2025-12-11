@@ -1,7 +1,7 @@
+from .demos.ads.Ads import Ads
 from .classes.connector.Connector import Connector
-
 from .core import MorphicSemanticEngine
-from .plugins.ads.Ads import Ads
+
 
 
 
@@ -17,8 +17,6 @@ class RunEngine:
 
         self.seed = None
         self.compressed_seed = None
-
-        # self.asdf = "asdf"
         self.run_engine()
 
 
@@ -29,21 +27,13 @@ class RunEngine:
             self.seed["state"],
             self.seed["vocab"],
             self.seed["constants"],
-            self.seed["mod"],
+            self.seed["mod"]
         )
 
         self.tokens = self.engine.generate_tokens(self.connector.token_count)
         
-
         print("\n\nTokens successfully generated from vocab.\n")
-        # print(self.tokens)
-        # print("\n\nSeed:\n")
-        # print(self.seed)
-        # print("\n\nRunning engine...\n")
-        # i = 0
-        # while i < 5:
-        #     self.engine.step()
-        #     i+=1
+
 
     def test(self):
         pass
