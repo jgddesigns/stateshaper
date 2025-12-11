@@ -6,5 +6,5 @@ REM Make src a top-level import location so `import mse` works
 set PYTHONPATH=%cd%\src;%PYTHONPATH%
 
 REM Run the module
-streamlit run "E:\coding\mse project\morphic_semantic_engine\streamlit_app.py"
+streamlit run "streamlit_app.py"
 pause

@@ -6,7 +6,7 @@ import streamlit as st
 # Streamlit Page Setup
 # -------------------------------------------------
 st.set_page_config(
-    page_title="MSE JSON Seed Compressor",
+    page_title="Tiny MSE Compression Demo",
     page_icon="🧬",
     layout="centered",
 )
@@ -17,7 +17,7 @@ st.set_page_config(
 st.markdown(
     """
     <h1 style='font-size:42px; font-weight:700; margin-bottom:0.1em;'>
-        Morphic Semantic Engine – JSON Seed Compressor
+        Morphic Semantic Engine – Tiny MSE Format
     </h1>
     <h3 style='font-size:20px; font-style:italic; color:#666; margin-top:0;'>
         Enter a seed, prefix, or full code — generate JSON deterministically.
@@ -29,15 +29,15 @@ st.markdown(
 st.markdown(
     """
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-weight:500; color:#444;">Store complete JSON using only compact reversible codes.</div>
-        <div style="text-align:right; font-weight:600; color:#333;">
-            Contact: <a href="mailto:jasongdunn@outlook.com">jasongdunn@outlook.com</a>
-        </div>
+        <div><div style="font-weight:500; color:#444;">Store complete JSON dictionaries using only compact reversible codes.</div><br><div>The MSE already reduces the need to store information in databases. The standard seed is enough to generate enormous amounts of data in real-time. Using <i>Tiny MSE</i> format, the space used is reduced even further.</div>
+        <br>
     </div>
     <hr>
+    
     """,
     unsafe_allow_html=True
 )
+
 
 # -------------------------------------------------
 # Shared Series Mode
@@ -251,3 +251,12 @@ with right:
 
 
 
+st.markdown(
+    """
+        <br><br><br><br><br>
+        <div style="text-align:right; font-weight:600; color:#333;">
+            Contact: <a href="mailto:jasongdunn@outlook.com">jasongdunn@outlook.com</a>
+        </div>
+    """,
+    unsafe_allow_html=True
+)
