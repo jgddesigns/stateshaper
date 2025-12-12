@@ -1,5 +1,6 @@
 import random
-
+import os
+import sys
 from src.main.tools.tiny_mse.TinyMSE import TinyMSE
 
 sys.path.append(os.path.dirname(__file__))
@@ -9,8 +10,7 @@ from random import randint
 import hashlib
 import random
 import string
-import os
-import sys
+
 
 
 
