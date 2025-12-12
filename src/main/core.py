@@ -1,6 +1,12 @@
+import os
+import sys
+
 from typing import List, Dict, Sequence
-from .tools.morph_rules import morph_state_default
-from .tools.semantic_mapper import SemanticMapper
+
+sys.path.append(os.path.dirname(__file__))
+
+from tools.morph_rules import morph_state_default
+from tools.semantic_mapper import SemanticMapper
 
 
 class MorphicSemanticEngine:

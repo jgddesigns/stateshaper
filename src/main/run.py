@@ -1,13 +1,13 @@
 import sys
 import os
 
-# Add the repo root to sys.path so run.py can import classes
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 
+sys.path.append(os.path.dirname(__file__))
+
 from classes.Connector import Connector
-from .demos.ads.Ads import Ads
-# from classes.connector.Connector import Connector
-from .core import MorphicSemanticEngine
+from demos.ads.Ads import Ads
+from core import MorphicSemanticEngine
 
 
 

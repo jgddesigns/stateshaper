@@ -2,7 +2,9 @@ import random
 
 from src.main.tools.tiny_mse.TinyMSE import TinyMSE
 
-from .ad_list import ad_list
+sys.path.append(os.path.dirname(__file__))
+
+from ad_list import ad_list
 from random import randint
 import hashlib
 import random
