@@ -28,6 +28,7 @@ app.add_middleware(
 class Input(BaseModel):
     message: str
 
+
 @app.post("/api/start")
 def process():
     ads = run.plugin.get_data()
