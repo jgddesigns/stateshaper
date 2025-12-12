@@ -1,6 +1,6 @@
-from .demos.ads.Ads import Ads
-from .classes.connector.Connector import Connector
-from .core import MorphicSemanticEngine
+from demos.ads.Ads import Ads
+from classes.connector.Connector import Connector
+from core import MorphicSemanticEngine
 
 
 
