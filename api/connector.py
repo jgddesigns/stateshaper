@@ -5,7 +5,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../src/main"))
+sys.path.append(os.getcwd())
+sys.path.append(os.path.join(os.getcwd(), "src/main"))
 
 from classes.connector.Connector import Connector
 from run import RunEngine

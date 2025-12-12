@@ -3,10 +3,14 @@
   "functions": {
     "api/connector.py": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 15
     }
   },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/connector.py/$1" }
+  "routes": [
+    { "src": "/api/health", "dest": "/api/connector.py" },
+    { "src": "/api/start", "dest": "/api/connector.py" },
+    { "src": "/api/process", "dest": "/api/connector.py" },
+    { "src": "/api/docs", "dest": "/api/connector.py" },
+    { "src": "/api/openapi.json", "dest": "/api/connector.py" }
   ]
 }
