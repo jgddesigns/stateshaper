@@ -46,6 +46,11 @@ def process(input: Input):
     return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
 
 
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
+
+
 def clean_input(input):
     for item in input.items():
         input[item[0]] = int(item[1])
