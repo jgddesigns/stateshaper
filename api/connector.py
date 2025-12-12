@@ -1,10 +1,10 @@
 import json
 import os
 import sys
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
+# from fastapi import FastAPI
+# from fastapi.responses import HTMLResponse
+# from pydantic import BaseModel
+# from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "src/main"))
@@ -12,26 +12,26 @@ sys.path.append(os.path.join(os.getcwd(), "src/main"))
 from classes.connector.Connector import Connector
 from run import RunEngine
 
-app = FastAPI(
-    title="Vercel + FastAPI",
-    description="Vercel + FastAPI",
-    version="1.0.0",
-)
+# app = FastAPI(
+#     title="Vercel + FastAPI",
+#     description="Vercel + FastAPI",
+#     version="1.0.0",
+# )
 
 run = RunEngine()
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
-class Input(BaseModel):
-    message: str
+# class Input(BaseModel):
+#     message: str
 
 from typing import Any, Dict
 
