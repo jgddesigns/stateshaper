@@ -3,7 +3,6 @@ import os
 import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
-from mangum import Mangum
 from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../src/main"))
@@ -30,7 +29,7 @@ class Input(BaseModel):
 
 
 @app.post("/api/start")
-def process():
+def start():
     ads = run.plugin.get_data()
     run.connector = Connector(ads)
     run.run_engine()
@@ -50,6 +49,3 @@ def process(input: Input):
 def clean_input(input):
     for item in input.items():
         input[item[0]] = int(item[1])
-
-
-handler = Mangum(app)

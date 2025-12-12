@@ -1,5 +1,4 @@
 fastapi
 pydantic
-mangum
 uvicorn
 python-multipart
