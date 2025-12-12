@@ -1,5 +1,5 @@
-fastapi==0.111.1
-pydantic==1.10.10
-mangum==0.18.0
-uvicorn==0.23.2
-python-multipart==0.0.6
+fastapi
+pydantic
+mangum
+uvicorn
+python-multipart
