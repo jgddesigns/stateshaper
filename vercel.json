@@ -1,9 +1,13 @@
 {
   "version": 2,
   "functions": {
-    "api/connector.py": { "runtime": "python3.11" }
+    "api/connector.py": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "includeFiles": "src/main/**"
+    }
   },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "api/connector.py/$1" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/connector.py" }
   ]
 }
