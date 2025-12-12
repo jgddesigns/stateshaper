@@ -4,9 +4,9 @@ from mangum import Mangum
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from .classes.connector.Connector import Connector
+from src.main.classes.connector.Connector import Connector
 
-from .run import RunEngine
+from src.main.run import RunEngine
 import json
 
 run = RunEngine()

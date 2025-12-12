@@ -15,18 +15,18 @@ class MorphicSemanticEngine:
 
     def __init__(
         self,
-        initial_state: Sequence[int],
+        seed: Sequence[int],
         vocab: Sequence[str],
         constants: Dict[str, int],
         mod: int = 9973,
     ) -> None:
-        if not initial_state:
-            raise ValueError("initial_state must be non-empty")
+        if not seed:
+            raise ValueError("seed must be non-empty")
         if not vocab:
             raise ValueError("vocab must be non-empty")
 
         self.mod = mod
-        self.state = [int(x) % mod for x in initial_state]
+        self.seed = [int(x) % mod for x in seed]
         self.t = 0  # iteration counter
 
         self.constants = {
@@ -48,7 +48,7 @@ class MorphicSemanticEngine:
         This mixes position and value to provide a stable but evolving summary.
         """
         total = 0
-        for i, val in enumerate(self.state):
+        for i, val in enumerate(self.seed):
             total += (i + 1) * val
         return (total + self.t) % 27
 
@@ -57,7 +57,7 @@ class MorphicSemanticEngine:
 
         This helps keep mapping dynamic even if base_code repeats.
         """
-        return sum(self.state) % len(self.mapper.vocab)
+        return sum(self.seed) % len(self.mapper.vocab)
 
 
     #based on the seed, morphs the array and gets a token from the vocab.
@@ -71,8 +71,8 @@ class MorphicSemanticEngine:
         self._prev_token_index = idx
 
         # evolve state deterministically
-        self.state = morph_state_default(
-            state=self.state,
+        self.seed = morph_state_default(
+            seed=self.seed,
             t=self.t,
             mod=self.mod,
             **self.constants,

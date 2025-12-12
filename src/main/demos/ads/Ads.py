@@ -29,7 +29,7 @@ class Ads:
     def __init__(self, user_id=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.tiny_mse = TinyMSE(5)
+        self.tiny_mse = TinyMSE(10)
 
         self.seed_store = {}
         self.seed = ""
@@ -43,6 +43,7 @@ class Ads:
         self.ads = None
         self.top_interests = ["reading", "traveling", "cooking"]
         self.most_relevant = 0
+        self.partially_relevant = 0
 
         self.data_format = {
             "input": None,
@@ -175,9 +176,11 @@ class Ads:
     # build a list of the ads to be shown. contains actual url. for demo, some images will be included in this directory.
     def get_ads(self):
         ads = [] 
+        partial = []
         side = []
+        final_ads = []
         seed = ""
-        relevant = ""
+        relevant_seed = ""
         side_seed = ""
 
         for interest in ad_list.items():         
@@ -187,30 +190,53 @@ class Ads:
                     idx2 = interest[1].index(item)
 
                     seed = seed + f"{idx1:02d}{idx2:02d}"
+
                     if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0:
-                        ads.append(item["link"])
-                        self.most_relevant = self.most_relevant + 1
-                        relevant = relevant + f"{idx1:02d}{idx2:02d}"
-                    else:
-                        side.append(item["link"])
-                        side_seed = side_seed + f"{idx1:02d}{idx2:02d}"
+                        ads.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+                        final_ads.append(item["link"])
+                        relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
+                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0 and len([y for y in self.top_interests if interest[0] == y]) > 0:
+                        partial.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0:
+                        side.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+
+
+        self.most_relevant = len(ads)
+        self.partially_relevant = len(partial)
 
         print(f"\n\n\n{self.most_relevant} highly relevant ads have been added to the ad list:\n")
 
         print(ads)
 
-        self.seed = relevant = relevant + side_seed[:self.tiny_mse.subset_size-len(relevant)]
+        print(f"\n\n{self.partially_relevant} partially relevant ads have been added to the ad list:\n")
+
+        print(partial)
+
+        while len(ads) < self.tiny_mse.list_count:
+            side_place = randint(0, len(side)-1)
+            side_ad = side[side_place]["ad"]
+            seed2 = side[side_place]["index"]
+
+            if len(partial) > 0:
+                ads.append(partial[0])
+                final_ads.append(partial[0]["ad"])
+                relevant_seed = relevant_seed + partial[0]["index"]
+                partial.pop(0) 
+            else:
+                ads.append(side_ad)
+                final_ads.append(side_ad)
+                relevant_seed = relevant_seed + seed2
+            
+        self.seed = relevant_seed 
+
+        if len(self.seed) < self.tiny_mse.list_count:
+            self.seed = self.seed + side_seed[:self.tiny_mse.subset_size-len(self.seed)]
 
         self.compressed_vocab = self.tiny_mse.compress(seed)
 
-        self.subset_seed = self.tiny_mse.encode_subset_seed(seed, relevant)
+        self.subset_seed = self.tiny_mse.encode_subset_seed(seed, relevant_seed)
 
         self.decoded_subset = self.tiny_mse.decode_subset_seed(seed, self.subset_seed)
-
-        i = 0
-        while len(ads) < self.tiny_mse.list_count:
-            ads.append(side[i]) if len(side) > 0 else None
-            i+=1
 
         print("\n\n\nFull ad list based on ratings profile:\n")
         print(ads)
@@ -225,7 +251,11 @@ class Ads:
         print(self.rebuild_ads())
         print("\n\n")
         
-        return ads
+        print("\nCompare to final ad list:\n")
+        print(final_ads)
+        print("\n\n")
+
+        return final_ads
     
 
     def rebuild_ads(self):
