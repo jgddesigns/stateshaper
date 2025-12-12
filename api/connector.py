@@ -1,17 +1,16 @@
+import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mangum import Mangum
-
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.main.classes.connector.Connector import Connector
-
 from src.main.run import RunEngine
-import json
+
+app = FastAPI()
 
 run = RunEngine()
 
-app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
