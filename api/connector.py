@@ -1,10 +1,14 @@
 import json
+import os
+import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mangum import Mangum
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.main.classes.connector.Connector import Connector
+sys.path.append(os.path.join(os.path.dirname(__file__), "../src/main"))
+
+from classes.connector.Connector import Connector
 from src.main.run import RunEngine
 
 app = FastAPI()
