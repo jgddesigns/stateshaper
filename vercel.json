@@ -1,5 +1,3 @@
-
-
 {
   "version": 2,
   "functions": {
@@ -8,7 +6,7 @@
       "maxDuration": 10
     }
   },
-  "routes": [
-    { "src": "/(.*)", "dest": "api/connector.py" }
+  "rewrites": [
+    { "source": "/api/(.*)", "dest": "/api/connector.py" }
   ]
 }
