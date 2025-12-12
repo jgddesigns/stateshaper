@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../src/main"))
 
-from src.main.classes.connector.Connector import Connector
-from src.main.run import RunEngine
+from classes.connector.Connector import Connector
+from run import RunEngine
 
 app = FastAPI()
 
