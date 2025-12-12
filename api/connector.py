@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../src/main"))
 from classes.connector.Connector import Connector
 from run import RunEngine
 
-app = FastAPI()
+app = FastAPI(redirect_slashes=False)
 
 run = RunEngine()
 
