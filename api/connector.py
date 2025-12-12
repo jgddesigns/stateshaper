@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,7 +12,11 @@ sys.path.append(os.path.join(os.getcwd(), "src/main"))
 from classes.connector.Connector import Connector
 from run import RunEngine
 
-app = FastAPI(redirect_slashes=False)
+app = FastAPI(
+    title="Vercel + FastAPI",
+    description="Vercel + FastAPI",
+    version="1.0.0",
+)
 
 run = RunEngine()
 
@@ -28,23 +33,28 @@ app.add_middleware(
 class Input(BaseModel):
     message: str
 
+from typing import Any, Dict
 
-@app.post("/api/start")
-def start():
-    ads = run.plugin.get_data()
-    run.connector = Connector(ads)
-    run.run_engine()
-    return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
+def handler(request) -> Dict[str, Any]:
+    return {"hello": "world"}
 
 
-@app.post("/api/process")
-def process(input: Input):
-    input = json.loads(input.message)
-    clean_input(input)
-    new_data = run.plugin.change_data(input)
-    run.connector = Connector(new_data)
-    run.run_engine()
-    return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
+# @app.post("/api/start")
+# def start():
+#     ads = run.plugin.get_data()
+#     run.connector = Connector(ads)
+#     run.run_engine()
+#     return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
+
+
+# @app.post("/api/process")
+# def process(input: Input):
+#     input = json.loads(input.message)
+#     clean_input(input)
+#     new_data = run.plugin.change_data(input)
+#     run.connector = Connector(new_data)
+#     run.run_engine()
+#     return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
 
 
 def clean_input(input):
