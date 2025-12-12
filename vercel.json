@@ -1,16 +1,9 @@
 {
   "version": 2,
   "functions": {
-    "api/connector.py": {
-      "memory": 1024,
-      "maxDuration": 15
-    }
+    "api/connector.py": { "runtime": "python3.11" }
   },
   "routes": [
-    { "src": "/api/health", "dest": "/api/connector.py" },
-    { "src": "/api/start", "dest": "/api/connector.py" },
-    { "src": "/api/process", "dest": "/api/connector.py" },
-    { "src": "/api/docs", "dest": "/api/connector.py" },
-    { "src": "/api/openapi.json", "dest": "/api/connector.py" }
+    { "src": "/api/(.*)", "dest": "api/connector.py/$1" }
   ]
 }
