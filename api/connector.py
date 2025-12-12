@@ -24,9 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class Input(BaseModel):
     message: str
-
 
 @app.post("/api/start")
 def process():

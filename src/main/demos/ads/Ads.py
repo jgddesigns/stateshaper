@@ -2,7 +2,7 @@ import random
 
 from src.main.tools.tiny_mse.TinyMSE import TinyMSE
 
-from ad_list import ad_list
+from .ad_list import ad_list
 from random import randint
 import hashlib
 import random
