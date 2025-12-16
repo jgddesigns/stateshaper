@@ -55,6 +55,14 @@ pip install -r requirements.txt
 ```
 
 
+Basic use will input values at random. The MSE class needs to be called as follows.
+
+
+
+
+
+For other uses a plugin class will be required. There are default ratings based, procedural, and structured output classes. 
+
 
 ---
 

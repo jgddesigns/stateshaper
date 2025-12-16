@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from mangum import Mangum
-
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.main.classes.connector.Connector import Connector
@@ -43,9 +41,16 @@ def process(input: Input):
     return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
 
 
+@app.post("/api/test_run")
+def process(input: Input):
+    return json.loads(input.message)
+
+
 def clean_input(input):
     for item in input.items():
         input[item[0]] = int(item[1])
 
 
-handler = Mangum(app)
+
+    
+
