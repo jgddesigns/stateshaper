@@ -1,6 +1,6 @@
 from typing import List, Dict, Sequence
-from .tools.morph_rules import morph_state_default
-from .tools.semantic_mapper import SemanticMapper
+from tools.morph_rules import morph_state_default
+from tools.semantic_mapper import SemanticMapper
 
 
 class MorphicSemanticEngine:
@@ -28,10 +28,10 @@ class MorphicSemanticEngine:
         self.seed = [int(x) % mod for x in seed]
         self.vocab = vocab
         self.constants = {
-            "a": int(constants.get("a", 3)),
-            "b": int(constants.get("b", 5)),
-            "c": int(constants.get("c", 7)),
-            "d": int(constants.get("d", 11)),
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11,
         } if not constants else constants
         self.mod = mod
        
