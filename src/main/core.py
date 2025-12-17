@@ -17,7 +17,7 @@ class MorphicSemanticEngine:
         self,
         seed: Sequence[int],
         vocab: Sequence[str],
-        constants: Dict[str, int],
+        constants: Dict[str, int] = None,
         mod: int = 9973,
     ) -> None:
         if not seed:
@@ -25,20 +25,32 @@ class MorphicSemanticEngine:
         if not vocab:
             raise ValueError("vocab must be non-empty")
 
-        self.mod = mod
         self.seed = [int(x) % mod for x in seed]
-        self.t = 0  # iteration counter
-
+        self.vocab = vocab
         self.constants = {
             "a": int(constants.get("a", 3)),
             "b": int(constants.get("b", 5)),
             "c": int(constants.get("c", 7)),
             "d": int(constants.get("d", 11)),
         } if not constants else constants
+        self.mod = mod
+       
+        self.t = 0  # iteration counter
 
         self.mapper = SemanticMapper(vocab=vocab)
         self._prev_token_index = 0
 
+        self.seed_format = {
+            "seed": None,
+            "vocab": None,
+            "constants": {
+                "a": 3,
+                "b": 5,
+                "c": 7,
+                "d": 11
+            }, 
+            "mod": 9973
+        }
     # ---------------------------
     # Core stepping logic
     # ---------------------------

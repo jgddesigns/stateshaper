@@ -1,5 +1,5 @@
 
-from demos.ads.Ads import Ads
+from demos.markov.Markov import Markov
 
 
 
@@ -9,13 +9,13 @@ class Demo:
     def __init__(self, user_id=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.ads = Ads()
+        self.markov = Markov()
 
-        self.test()
+        self.start()
 
 
-    def test(self):
-        self.ads.get_data()
+    def start(self):
+        self.markov.run("standard")
 
 
 Demo()
