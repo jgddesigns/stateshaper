@@ -229,6 +229,9 @@ class Ads:
             
         self.seed = relevant_seed 
 
+        print("\n\nSeed number")
+        print(seed)
+
         if len(self.seed) < self.tiny_mse.list_count:
             self.seed = self.seed + side_seed[:self.tiny_mse.subset_size-len(self.seed)]
 
