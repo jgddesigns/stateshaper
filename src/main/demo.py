@@ -15,7 +15,7 @@ class Demo:
 
 
     def start(self):
-        self.markov.run("standard")
+        self.markov.run("personal")
 
 
 Demo()

@@ -108,7 +108,10 @@ class Markov:
             "Lightning": random.randint(1, 100)
         }
 
-        
+        sorted= dict(sorted(data.items(), key=lambda x: x[1], reverse=True)) 
+
+        print("\n\nsorted")
+        print(sorted)
 
 
         # Markov generates values based on rating, with no memory. if only personalized values are used, the values are still generated randomly. there is no memory...no way to build the same chain every time.
