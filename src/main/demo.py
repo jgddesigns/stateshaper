@@ -1,6 +1,7 @@
 
 from demos.markov.Markov import Markov
 from connector.Connector import Connector
+from tools.tiny_state.TinyState import TinyState
 
 
 class Demo:
@@ -9,10 +10,12 @@ class Demo:
     def __init__(self, user_id=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.markov = Markov()
+        # self.markov = Markov()
         self.connector = None
 
-        self.connector_test()
+        self.tiny_state = TinyState()
+
+        # self.connector_test()
 
 
     def markov_test(self):
