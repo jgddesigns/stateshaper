@@ -290,6 +290,14 @@ class TinyState:
         return self.decode_subset_seed(full_grid, subset_seed)
     
 
+    def set_preferences(self, length=3):
+        self.top_preferences = sorted(self.preferences, key=lambda x: self.preferences[x], reverse=True)[:length]
+
+        print("\n\nMSE TARGETED AD DEMO\n\nThis demonstration shows how app related storage data can be reduced by over 80%.\n\n")
+        print("\n\nRandom interest list has been generated. The highest rated preferences are:\n")
+        print(self.top_preferences)
+
+
     def get_seed(self, data):
         start = [] 
         partial = []
@@ -307,13 +315,13 @@ class TinyState:
 
                     seed = seed + f"{idx1:02d}{idx2:02d}"
 
-                    if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0:
+                    if len([x for x in item["attributes"] if x in self.top_preferences and interest[0] == self.top_preferences[0]]) > 0:
                         start.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
                         export.append(item["value"])
                         relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
-                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0 and len([y for y in self.top_interests if interest[0] == y]) > 0:
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if interest[0] == y]) > 0:
                         partial.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
-                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0:
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
                         side.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
 
 
