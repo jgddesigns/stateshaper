@@ -1,5 +1,7 @@
 import os
 import sys
+import random
+from random import randint
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
@@ -286,3 +288,97 @@ class TinyState:
         """
         full_grid = self.decode(layout_seed)  # strict full grid
         return self.decode_subset_seed(full_grid, subset_seed)
+    
+
+    def get_seed(self, data):
+        start = [] 
+        partial = []
+        side = []
+        export = []
+        seed = ""
+        relevant_seed = ""
+        side_seed = ""
+
+        for interest in data.items():         
+            for item in interest[1]:
+                if len(start) < self.list_count:
+                    idx1 = list(data.keys()).index(interest[0])
+                    idx2 = interest[1].index(item)
+
+                    seed = seed + f"{idx1:02d}{idx2:02d}"
+
+                    if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0:
+                        start.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
+                        export.append(item["value"])
+                        relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
+                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0 and len([y for y in self.top_interests if interest[0] == y]) > 0:
+                        partial.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
+                    elif len([x for x in item["attributes"] if x in self.top_interests]) > 0:
+                        side.append({"data": item["value"], "index": f"{idx1:02d}{idx2:02d}"})
+
+
+        self.most_relevant = len(start)
+        self.partially_relevant = len(partial)
+
+        print(f"\n\n\n{self.most_relevant} highly relevant data have been added to the list:\n")
+
+        print(start)
+
+        print(f"\n\n{self.partially_relevant} partially relevant data have been added to the list:\n")
+
+        print(partial)
+
+        while len(start) < self.list_count:
+            side_place = randint(0, len(side)-1)
+            side_ad = side[side_place]["data"]
+            seed2 = side[side_place]["index"]
+
+            if len(partial) > 0:
+                start.append(partial[0])
+                export.append(partial[0]["data"])
+                relevant_seed = relevant_seed + partial[0]["index"]
+                partial.pop(0) 
+            else:
+                start.append(side_ad)
+                export.append(side_ad)
+                relevant_seed = relevant_seed + seed2
+            
+        self.seed = relevant_seed 
+
+        if len(self.seed) < self.list_count:
+            self.seed = self.seed + side_seed[:self.subset_size-len(self.seed)]
+
+        self.compressed_vocab = self.compress(seed)
+
+        self.subset_seed = self.encode_subset_seed(seed, relevant_seed)
+
+        self.decoded_subset = self.decode_subset_seed(seed, self.subset_seed)
+
+        print("\n\n\nFull list based on ratings profile:\n")
+        print(start)
+
+        print("\n\n\nCompressed Tiny State format for entire list:\n")
+        print(self.compressed_vocab)
+
+        print("\n\n\nCompressed seed for chosen data set:\n")
+        print(self.subset_seed)
+
+        print("\n\n\n List rebuilt from extracted seed:\n")
+        print(self.rebuild_data())
+        print("\n\n")
+        
+        print("\nCompare to final list:\n")
+        print(export)
+        print("\n\n")
+
+        return export
+    
+
+    def rebuild_data(self, data):
+        export = []
+        while len(export)<self.list_count:
+            parent = self.decoded_subset[:2]
+            child = self.decoded_subset[2:4]
+            export.append(data[list(data.keys())[int(parent)]][int(child)]["value"])
+            self.decoded_subset = self.decoded_subset[4:]
+        return export

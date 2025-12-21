@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.main.classes.connector.Connector import Connector
+from src.main.connector.Connector import Connector
 
 from src.main.run import RunEngine
 import json
