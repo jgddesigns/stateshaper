@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "functions": {
+    "api/connector.py": {
+      "runtime": "python3.11"
+    }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "api/connector.py" }
+  ]
+}

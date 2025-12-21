@@ -3,8 +3,8 @@
 ## 0.1.0 — Initial Public Release
 
 - Core Morphic Semantic Engine in Python
-- Deterministic morphing state rule
-- Semantic mapping layer with feedback
-- Basic text and synthetic data examples
-- Simple web demo scaffold
-- Documentation stubs (design, math, API, seeds)
+- Connector Class for Custom Plugins
+- Personalized Ad Content Demo
+- Tiny State Compression Demo 
+- Tests for Determinism, Consistency, Reproduction
+- PYPI stateshaper and tiny-state packages
