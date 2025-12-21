@@ -1,4 +1,4 @@
-# Morphic Semantic Engine (MSE)
+# Stateshaper
 
 **Compress data and generate content using small seeds.**
 
@@ -7,7 +7,7 @@
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
 
-Using a custom plugin file, events can be mapped to the array by tokenizing its values. The engine allows for the events be called for as long as needed. The events can include many types of data including strings, links, images and functions. Due to the nature of the algorithm, the mapped events can be condensed and extracted as the MSE runs.
+Using a custom plugin file, events can be mapped to the array by tokenizing its values. The engine allows for the events be called for as long as needed. The events can include many types of data including strings, links, images and functions. Due to the nature of the algorithm, the mapped events can be condensed and extracted as Stateshaper runs.
 
 This idea was improved upon with some help from ChatGPT, and has become the Morphic Semantic Engine.
 
@@ -49,13 +49,13 @@ This repository contains a reference implementation in Python, example scripts, 
 Clone this repository:
 
 ```bash
-git clone https://github.com/jgddesigns/mse.git
-cd mse
+git clone https://github.com/jgddesigns/stateshaper.git
+cd stateshaper
 pip install -r requirements.txt
 ```
 
 
-Basic use will input values at random. The MSE class needs to be called as follows.
+Basic use will input values at random. The Stateshaper class needs to be called as follows.
 
 
 
@@ -70,11 +70,11 @@ For other uses a plugin class will be required. There are default ratings based,
 
 ## Basic Example
 
-The MSE uses an evolving array of numbers that can be tokenized to call events or variables. 
+Stateshaper uses an evolving array of numbers that can be tokenized to call events or variables. 
 
 
 ```python
-from main.core import MorphicSemanticEngine
+from main.core import Stateshaper
 from main.plugin import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
@@ -84,7 +84,7 @@ seed = [12, 7, 4, 19, 3, 11, 5, 8, 2]
 vocab = [1, 2, 3, 6, 7, 9]
 
 # Class instantiation. The parameters are the only values that need to be stored other than your app's custom plugin file. In the most minimal cases, only the vocabulary is needed to be stored.
-engine = MSE(
+engine = Stateshaper(
     seed=seed,
     vocab=vocab,
     constants={"a": 3, "b": 5, "c": 7, "d": 11},
@@ -104,23 +104,23 @@ events = [i for plugin.get_event(i) in tokens]
 
 # Plugin Data
 
-A custom plugin can be tailored to an app's specific purpose. This is what will set the rules for what data or events are to be called as the MSE runs. All that is needed from the plugin is a final list to be used in the 'vocab' parameter. This can be compressed and all that is the only thing needed tp be stored in a database. 
+A custom plugin can be tailored to an app's specific purpose. This is what will set the rules for what data or events are to be called as Stateshaper runs. All that is needed from the plugin is a final list to be used in the 'vocab' parameter. This can be compressed and all that is the only thing needed tp be stored in a database. 
 
-The current standard is to keep several columns and rows of specific data. With the MSE, this data can be generated in real time using only the seed and the package's included calculations. 
+The current standard is to keep several columns and rows of specific data. With Stateshaper, this data can be generated in real time using only the seed and the package's included calculations. 
 
 
 ```python
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from core import MSE
+from core import Stateshaper
 import json
 
 
 class PluginData:
-   engine = MSE()
+   engine = Stateshaper()
 
-   # Here is an example of a map of events that can be called from the specified MSE vocab. They can be random, personalized, or called in a specific sequence.
+   # Here is an example of a map of events that can be called from the specified Stateshaper vocab. They can be random, personalized, or called in a specific sequence.
    event_map = {
       1: show_ad("adhost.ad_list.ad_link_001")
       2: show_ad("adhost.ad_list.ad_link_002")
@@ -133,7 +133,7 @@ class PluginData:
       9: show_ad("adhost.ad_list.ad_link_009")
    }
 
-   #The event ratings determine what ads will be put in the MSE vocab. This can be modified over time based on input such as user behavior. The ratings can stand for anything such as:
+   #The event ratings determine what ads will be put in Stateshaper vocab. This can be modified over time based on input such as user behavior. The ratings can stand for anything such as:
    #
    #  drinks = {"beer" 67, "wine": 85, "tea": 86...etc}
    #
@@ -167,17 +167,17 @@ class PluginData:
 
 # Data Formats
 
-Aside from the plugin file (which can be a template that does not include specific numbers), relevant data such as the event map and ratings can be condensed into 'Tiny MSE' and/or 'Raw MSE' format. Example:
+Aside from the plugin file (which can be a template that does not include specific numbers), relevant data such as the event map and ratings can be condensed into 'Tiny State' and/or 'Raw State' format. Example:
 
-Tiny MSE: ABC-12345
+Tiny State: ABC-12345
 
-Raw MSE: QV589JX4
+Raw State: QV589JX4
 
-These values can be encoded and decoded in the TinyMSE class within the 'tools' directory. The main data map is represented as a long string of numbers. These numbers stand for positions in the map and are encoded into Tiny MSE format. A subset of numbers from the vocab used in the engine is also kept and encoded into Raw MSE format.
+These values can be encoded and decoded in the TinyState class within the 'tools' directory. The main data map is represented as a long string of numbers. These numbers stand for positions in the map and are encoded into Tiny State format. A subset of numbers from the vocab used in the engine is also kept and encoded into Raw State format.
 
 
 ```python 
-class TinyMSE:
+class TinyState:
 
    def encode_tiny(data):
       # Encode logic
@@ -204,12 +204,12 @@ From that, all other content can be generated during run time, and be personaliz
 
 The ratings can be modified as needed, then re-encoded as a different seed. 
 
-For some uses, a longer seed may be required. Sometimes this can be because a custom initial state, mod or constants are  required. Also if a very large amount of data causes the Tiny MSE seed to need additional characters. 
+For some uses, a longer seed may be required. Sometimes this can be because a custom initial state, mod or constants are  required. Also if a very large amount of data causes the Tiny State seed to need additional characters. 
 
-In total, there are four types of data used in the MSE. They are really just strings, dicts and lists in a certain format. The specific formats are as follows:
+In total, there are four types of data used in Stateshaper. They are really just strings, dicts and lists in a certain format. The specific formats are as follows:
 
 
-Full MSE:
+Full State:
 ```python
 
 seed = {"user_id": "johnq1234", "signature": [3404,832,2194, 6734,105],"series_seed": 3404,"mod": 9973,"constants": {"a": 3,"b": 5,"c": 7,"d": 11}}
@@ -219,7 +219,7 @@ seed = {"user_id": "johnq1234", "signature": [3404,832,2194, 6734,105],"series_s
 ```
 
 
-Short MSE:
+Short State:
 ```python
 
 seed = ["user_176551",[3404,832,2194,6734,105],["ABC12345", "567yQ90T34"]]
@@ -229,7 +229,7 @@ seed = ["user_176551",[3404,832,2194,6734,105],["ABC12345", "567yQ90T34"]]
 ```
 
 
-Tiny MSE
+Tiny State
 ```python
 
 seed = "ABC12345"
@@ -238,7 +238,7 @@ seed = "ABC12345"
 
 ```
 
-Raw MSE
+Raw State
 ```python
 
 seed = "567yQ90T34"
@@ -248,7 +248,7 @@ seed = "567yQ90T34"
 ```
 
 
-The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full MSE may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
+The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full State may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
 
 
@@ -262,7 +262,7 @@ The 'seed' array, 'constants' and 'mod' value are used for calculations during e
 
 For basic use, no plugin is required. Only an array of the tokens (variables or functions) is needed. If no particular order is needed (such as generating data to stress test a system for QA, or cooking app that suggests a random recipe) this may be all that is needed.
 
-For more specialized designs, a custom plugin file can be written. This will be used along with the MSE 'Connector' class to define specific rules for the tokens included in 'vocab' list. This can be based on developer needs and can be based on attributes, sequence or frequency the tokens are called if needed.
+For more specialized designs, a custom plugin file can be written. This will be used along with Stateshaper 'Connector' class to define specific rules for the tokens included in 'vocab' list. This can be based on developer needs and can be based on attributes, sequence or frequency the tokens are called if needed.
 
 
 
@@ -275,10 +275,10 @@ If specific deterministic output is needed, these values ca be adjusted to fit w
 3. Is a Custom Morph Rule Needed?
 The math done to change the array values can also be altered. This can allow for further customization of the deterministic array.
 
-4. Call the MSE Class Object and Pass the Created Parameters. 
+4. Call Stateshaper Class Object and Pass the Created Parameters. 
 
 5. Generate the Ouput
-Create as many tokens as needed with the MSE().generate_token(x) method. This can be called all at once or during a loop.
+Create as many tokens as needed with Stateshaper().generate_token(x) method. This can be called all at once or during a loop.
 
 6. Modify the Stream if Needed 
 The data can be changed based on input such as user behavior or duration. The main class variables can be assigned new values in real time, or a new instance of the class can be created. 
@@ -331,7 +331,7 @@ Condense large amounts of data into smaller objects. Generate it in real-time ba
 ## Project Structure
 
 ```text
-mse/
+stateshaper/
 ├── src/
 │   └── main/
 │       ├── __init__.py
@@ -352,9 +352,9 @@ mse/
 │               ├── Ads.py
 │       └── tools/
 │           ├── __init__.py
-│           ├── tiny_mse/
+│           ├── tiny_state/
 │               ├── __init__.py
-│               ├── TinyMSE.py
+│               ├── TinyState.py
 │           ├── morph_rules.py
 │           ├── seeds.py
 │           ├── semantic_mapper.py

@@ -1,3 +1,3 @@
-set PYTHONPATH=E:\coding\mse project\morphic_semantic_engine
+set PYTHONPATH=D:\mse\stateshape
 
 python src\main\demo.py

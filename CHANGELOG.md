@@ -5,6 +5,6 @@
 - Core Morphic Semantic Engine in Python
 - Connector Class for Custom Plugins
 - Personalized Ad Content Demo
-- Tiny MSE Compression Demo 
+- Tiny State Compression Demo 
 - Tests for Determinism, Consistency, Reproduction
-- PYPI mse-util and tiny-mse packages
+- PYPI stateshaper and tiny-state packages

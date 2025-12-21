@@ -1,6 +1,6 @@
 from .demos.ads.Ads import Ads
 from .classes.connector.Connector import Connector
-from .core import MorphicSemanticEngine
+from .core import Stateshaper
 
 
 
@@ -23,7 +23,7 @@ class RunEngine:
     def run_engine(self):
         self.seed = self.connector.start_connect()
         self.compressed_seed = self.compress_seed()
-        self.engine = MorphicSemanticEngine(
+        self.engine = Stateshaper(
             self.seed["state"],
             self.seed["vocab"],
             self.seed["constants"],

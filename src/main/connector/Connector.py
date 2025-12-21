@@ -1,4 +1,5 @@
 from .Vocab import Vocab
+from .Modify import Modify
 import os
 import sys
 
@@ -16,7 +17,7 @@ class Connector:
         super().__init__(**kwargs)
 
         self.debug = True
-
+        self.modify = Modify(data)
         self.default_mod = 9973
         self.default_constants = {
             "a": 3,
@@ -41,7 +42,6 @@ class Connector:
         if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
             print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
 
-        self.start_connect()
 
 
     def start_connect(self):
@@ -53,7 +53,7 @@ class Connector:
             "mod": self.mod
         }
 
-        print("\n\n\nMSE Seed has been created:\n")
+        print("\n\n\nStateshaper Seed has been created:\n")
         print(self.engine)
         print("\n")
 
@@ -70,8 +70,7 @@ class Connector:
             self.vocab = Vocab(self.data)  
             return self.vocab.define_vocab()
         else:   
-            self.vocab = Vocab()  
-            self.vocab.test()
+            print("no valid data")
         
 
     def get_state(self):
@@ -103,7 +102,14 @@ class Connector:
         self.token_count = token
 
 
+    def set_value(self, key, rating):
+        self.modify.modify(key, rating)
 
-    
 
-Connector()
+    def adjust_value(self, key, adjust):
+        self.modify.adjust(key, adjust)
+
+
+    def alter_stream(self):
+        self.data["input"] = self.modify.export()
+        self.start_connect()

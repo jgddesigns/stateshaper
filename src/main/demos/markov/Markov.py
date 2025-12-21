@@ -1,8 +1,12 @@
 import random
-from core import MorphicSemanticEngine
+from core import Stateshaper
 
 import os
 import sys
+
+from tests.Tests import Tests
+
+
 
 
 
@@ -12,67 +16,112 @@ class Markov:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.tests = Tests()
+        self.print = self.tests.print
+
+        self.test_count = 1
+        self.step_count = 50
+
         self.state = "Sunny"
 
-        self.transition = {
-                    "Sunny": {
-                        "Sunny": .6,
-                        "Rainy": .3,
-                        "Cloudy": .1
-                    },
-                    "Rainy": {
-                        "Sunny": .2,
-                        "Rainy": .5,
-                        "Cloudy": .3
-                    },
-                    "Cloudy": {
-                        "Sunny": .3,
-                        "Rainy": .3,
-                        "Cloudy": .4
-                    }
-        }
+        self.transition = self.markov_standard()
 
         self.engine = None
 
         self.tokens = None
 
-        self.mse_tests = {
-            "standard": self.mse_standard,
-            "personal": self.mse_personal,
-            "structured": self.mse_structured
+        self.prev_state = None
+        self.current_seed = None
+
+        self.stateshaper_tests = {
+            "standard": self.stateshaper_standard,
+            "personal": self.stateshaper_personal
         }
 
-        self.test_count = 5
-        self.step_count = 50
+        self.stateshaper_vocab = {
+            "reversibility": self.stateshaper_reversibility,
+            "deterministic": self.stateshaper_deterministic
+        }
 
-        
+        self.markov_tests = {
+            "standard": self.markov_standard,
+            "personal": self.markov_personal
+        }
+
+    
 
 
     def run(self, test):
-        i = 1
+        self.transition = self.markov_tests[test]()
+        self.state = list(self.transition.keys())[0]
+        i = 0
+        states = []
         while i < self.test_count:
-            print(f"\n\n\nTest #{i}")
-            print("\n\nMarkov Chain Output:\n")
+            self.print.p(f"\nTest #{i+1}", True)
+            self.print.p("\n\nMarkov Chain Output:\n", True)
             for step in range(self.step_count):
-                
-                print(str(step+1) + " " + self.state)
+                self.print.p(str(step+1) + " " + self.state, True)
+                states.append(self.state)
+                self.prev_state = self.state
                 self.state = self.next_state()
-            print("\n\nMSE " + test.upper() + " Test")
-            self.mse_tests[test]()
             i+=1
+        return states
+    
+
+    def reverse(self, test):
+        self.transition = self.markov_tests[test]()
+        self.state = self.prev_state
+        i = 0
+        states = []
+        while i < self.test_count:
+            self.print.p(f"\nTest #{i+1}", True)
+            self.print.p("\n\nMarkov Chain Output (Reverse Test):\n", True)
+            for step in range(self.step_count):
+                self.print.p("#" + str(step+1) + " " + self.state, True)
+                states.append(self.state)
+                self.prev_state = self.state
+                self.state = self.next_state()
+            i+=1
+        return states
 
 
     def next_state(self):
-        states = list(self.transition[self.state].keys())
-        probs = list(self.transition[self.state].values())
+        states = list(self.transition[self.state]["data"].keys())
+        probs = list(self.transition[self.state]["data"].values())
         return random.choices(states, probs)[0]
     
 
-    def define_mse(self):
-        self.engine = MorphicSemanticEngine(
-            [56, 46, 34, 185, 4355],
-            ["Sunny", "Rainy", "Cloudy"]
-        )
+    def define_stateshaper(self, test="reversibility"):
+        self.engine = Stateshaper(
+            [random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973)],
+            self.stateshaper_vocab[test]()
+    ) if test == "reversibility" else Stateshaper([111, 222, 456, 35, 76],
+            self.stateshaper_vocab["deterministic"]())
+        
+
+    def stateshaper_reversibility(self):
+        return ["Sunny", "Rainy", "Cloudy", "Hot", "Snow", "Freeze"]
+    
+    
+    def stateshaper_deterministic(self):
+        data = {
+            "is starting to attack you!": random.randint(1, 100),
+            "assumes a guarded position!": random.randint(1, 100),
+            "is asking if you have anything to trade...": random.randint(1, 100),
+            "runs and hides when they see you!": random.randint(1, 100),
+            "asks if you want to join...": random.randint(1, 100),
+            "is offering to help with your cause...": random.randint(1, 100),
+            "wants to know where the nearest town is...": random.randint(1, 100),
+            "is asking if you can repair their wagon...": random.randint(1, 100),
+            "looks confused upon seeing you...": random.randint(1, 100),
+        }
+
+        sorted_items = dict(sorted(data.items(), key=lambda x: x[1], reverse=True))
+ 
+        self.print.p("\n\nStateshaper deterministic values\n", True)
+        self.print.p(sorted_items, True)
+
+        return list(sorted_items.keys())[:3]
 
 
     def change_engine(self, params):
@@ -82,56 +131,160 @@ class Markov:
         self.engine.mod = params["mod"]
 
 
-    def mse_standard(self):
-        self.define_mse() 
+    def stateshaper_standard(self):
+        # self.define_stateshaper() 
         self.tokens = self.engine.generate_tokens(self.step_count) 
-        self.print_tokens()
+        self.self.print.p_tokens()
 
         # Markov generates values based on rating, with no memory. 
-        # mse generates values based on seed output, with memory. always the same output given the same seed. if no particular order is needed, no need to test seed prior to setting the vocab. 
+        # stateshaper generates values based on seed output, with memory. always the same output given the same seed. if no particular order is needed, no need to test seed prior to setting the vocab. 
 
 
-    def mse_personal(self):
-        self.define_mse()
-
-        vocab = []
+    def stateshaper_personal(self):
 
         data = {
-            "Sunny": random.randint(1, 100),
-            "Rainy": random.randint(1, 100),
-            "Cloudy": random.randint(1, 100), 
-            "Foggy": random.randint(1, 100),
-            "Heatwave": random.randint(1, 100),
-            "Snow": random.randint(1, 100),
-            "Hail": random.randint(1, 100),
-            "Ice": random.randint(1, 100),
-            "Lightning": random.randint(1, 100)
+            "Sunny": 90,
+            "Rainy": 76,
+            "Cloudy": 56, 
+            "Foggy": 89,
+            "Heatwave": 45,
+            "Snow": 67,
+            "Hail": 87,
+            "Ice": 43,
+            "Lightning": 53
         }
 
-        sorted= dict(sorted(data.items(), key=lambda x: x[1], reverse=True)) 
+        sorted_items = dict(sorted(data.items(), key=lambda x: x[1], reverse=True))
+ 
+        self.print.p("\n\nStateshaper personalization values\n")
+        self.print.p(sorted_items)
 
-        print("\n\nsorted")
-        print(sorted)
-
-
-        # Markov generates values based on rating, with no memory. if only personalized values are used, the values are still generated randomly. there is no memory...no way to build the same chain every time.
-
-        # mse generates values based on seed output, with memory. always the same output given the same seed. with personalization, only the highest rated values will be generated. if no particular order is needed, no need to test seed prior to setting the vocab. 
-
-
-    def mse_structured(self):
-        pass
-        #markov is not able to build structure because there is no determinism.
-
-        #if vocab is mapped with rules to mse output array values, structure is possible. shannons law is not violated due to the mapping rules plugin, but the seed can still be compressed to a minimal size.  
+        return list(sorted_items.keys())[:3]
 
 
     def print_tokens(self):
-        print()
+        self.print.p()
         i = 1
         for token in self.tokens:
-            print(f"{str(i)} {token}")
+            self.print.p(f"{str(i)} {token}")
             i += 1
-        print("\n\n")
+        self.print.p("\n\n")
+
+
+    def markov_standard(self):
+        return {
+            "Sunny": {
+                "data":{
+                    "Sunny": .6,
+                    "Rainy": .3,
+                    "Cloudy": .1
+                }
+            },
+            "Rainy": {
+                "data":{
+                    "Sunny": .2,
+                    "Rainy": .5,
+                    "Cloudy": .3
+                }
+            },
+            "Cloudy": {
+                "data":{
+                    "Sunny": .3,
+                    "Rainy": .3,
+                    "Cloudy": .4
+                }
+            }
+        }
+
+
+    def markov_personal(self):
+        data = {
+            "is starting to attack you!": 
+            {"rating": 67},
+            "assumes a guarded position!": 
+            {"rating": 83},
+            "is asking if you have anything to trade...": 
+            {"rating": 83},
+            "runs and hides when they see you!": 
+            {"rating": 23},
+            "asks if you want to join...": 
+            {"rating": 89},
+            "is offering to help with your cause...": 
+            {"rating": 53},
+            "wants to know where the nearest town is...": 
+            {"rating": 26},
+            "is asking if you can repair their wagon...": 
+            {"rating": 98},
+            "looks confused upon seeing you...": 
+            {"rating": 56},
+        }
+
+        sorted_items = dict(sorted(data.items(), key=lambda x: x[1]["rating"], reverse=True))
+        rated_items = dict(list(sorted_items.items())[:3])
+        for item in rated_items:
+            rated_items[item]["data"] = {
+                list(rated_items.keys())[0]: .6,
+                list(rated_items.keys())[1]: .2,
+                list(rated_items.keys())[2]: .2
+            }
+        return dict(list(sorted_items.items())[:3])
+    
+
+    def reverse_test(self, length, count, markov=True):
+        self.define_stateshaper()
+        self.step_count = length
+        passed = 0 
+        i = 0
+        self.print.s(2)
+        self.print.p("REVERSIBILITY TEST (MARKOV)\n" if markov == True else "\nREVERSIBILITY TEST (STATESHAPER)\n")
+        while i < length:
+            self.define_stateshaper()
+            result = self.tests.reversibility({"compare": "markov", "forward": self.run, "reverse": self.reverse}, "standard") if markov == True else self.tests.reversibility({"compare": "stateshaper", "forward": self.engine.generate_tokens, "reverse": self.engine.reverse_tokens}, count)
+            print(result)
+            passed = passed + 1 if result == True else passed
+            i += 1
+
+        self.print.s(1)
+        self.print.p(str(passed) + " Tests Passed out of " + str(length))
+        self.print.s(2)
+
+
+    def get_names(self):
+        return random.choice(["Aelric", "Maya", "Thorin", "Jax", "Elowen", "Marcus", "Lyra", "Noah", "Kaelen", "Ava", "Rurik", "Lena", "Fenric", "Julian", "Seraphina", "Eli", "Vaelora", "Kai", "Corwin", "Mira", "Orwyn", "Talia", "Garron", "Zoe", "Sylphae", "Aelric Stone", "Maya Kepler", "Thorin Vale", "Jax Arlen", "Elowen Park", "Marcus Hale", "Lyra Ashcroft", "Noah Vance", "Kaelen Frost", "Ava Serris", "Rurik Mason", "Lena Ibarra", "Fenric Holt", "Julian Cross", "Seraphina Cole", "Eli Rowan", "Vaelora Quinn", "Kai Mercer", "Corwin Blake", "Mira Kade", "Orwyn Chen", "Talia Knox", "Garron Pierce", "Zoe Marin", "Sylphae Reed"])
+    
+    
+    def deterministic_test(self, length, count, markov=True):
+        self.define_stateshaper("deterministic")
+        self.step_count = length
+        passed = 0 
+        i = 0
+        name = self.get_names()
+        self.print.s(2)
+        self.print.p("DETERMINISTIC TEST (MARKOV)\n" if markov == True else "\nDETERMINISTIC TEST (STATESHAPER)\n")
+        while i < length:
+            self.define_stateshaper("deterministic")
+            first_run = self.engine.generate_tokens(count)
+            print(f"\n\n\nTest #{i+1}\n")
+            print("\nInitial Test:\n")
+            for action in first_run:
+                self.print.p(name + " " + action)
+            print("\n")
+            self.engine.iteration = 1
+            result = self.tests.determinism({"compare": "markov", "run": self.run}, "personal", self.run("personal")) if markov == True else self.tests.determinism({"compare": "stateshaper", "run": self.engine.generate_tokens}, count, first_run)
+            print("\nNext Test:\n")
+            for j in range(len(result[1])):
+                self.print.p(name + " " + result[1][j])
+            passed = passed + 1 if result[0] == True else passed
+            print("\nMatch: " + str(result[0]))
+            i += 1
+
+        self.print.s(1)
+        self.print.p(str(passed) + " Tests Passed out of " + str(length))
+        self.print.s(2)        
+
+
+    def compression_test(self, length):
+        self.tests.compression(length, "Markov")
+
 
 Markov()

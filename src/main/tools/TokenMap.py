@@ -1,13 +1,13 @@
 from typing import Sequence
 
 
-class SemanticMapper:
+class TokenMap:
     """Maps integer indices to tokens from a fixed vocabulary."""
 
-    def __init__(self, vocab: Sequence[str]) -> None:
+    def __init__(self, vocab):
         if not vocab:
             raise ValueError("vocab must be non-empty")
         self.vocab = list(vocab)
 
-    def index_to_token(self, idx: int) -> str:
-        return self.vocab[idx % len(self.vocab)]
+    def get_token(self, idx):
+        return self.vocab[idx]

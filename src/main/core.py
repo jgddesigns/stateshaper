@@ -1,17 +1,10 @@
+import sys
 from typing import List, Dict, Sequence
-from tools.morph_rules import morph_state_default
-from tools.semantic_mapper import SemanticMapper
+from tools.Morph import Morph
+from tools.TokenMap import TokenMap
 
 
-class MorphicSemanticEngine:
-    """Core engine: evolves a numeric state and emits semantic tokens.
-
-    This class is intentionally simple and opinionated:
-    - It keeps track of a fixed-length integer state.
-    - On each step, it morphs the state using a deterministic rule.
-    - It converts the state into an integer code.
-    - A SemanticMapper turns codes into tokens from a vocabulary.
-    """
+class Stateshaper:
 
     def __init__(
         self,
@@ -25,7 +18,13 @@ class MorphicSemanticEngine:
         if not vocab:
             raise ValueError("vocab must be non-empty")
 
+        self.token_map = TokenMap(vocab)
+        self.morph = Morph()
+
         self.seed = [int(x) % mod for x in seed]
+
+        self.original_seed = [int(x) % mod for x in seed]
+    
         self.vocab = vocab
         self.constants = {
             "a": 3,
@@ -35,14 +34,13 @@ class MorphicSemanticEngine:
         } if not constants else constants
         self.mod = mod
        
-        self.t = 0  # iteration counter
+        self.iteration = 1 
 
-        self.mapper = SemanticMapper(vocab=vocab)
-        self._prev_token_index = 0
+        self.prior_index = 0
 
         self.seed_format = {
-            "seed": None,
-            "vocab": None,
+            "seed": self.seed,
+            "vocab": self.vocab,
             "constants": {
                 "a": 3,
                 "b": 5,
@@ -51,51 +49,60 @@ class MorphicSemanticEngine:
             }, 
             "mod": 9973
         }
-    # ---------------------------
-    # Core stepping logic
-    # ---------------------------
-    def _base_code(self) -> int:
-        """Aggregate state into a small integer code (0..26 by default).
 
-        This mixes position and value to provide a stable but evolving summary.
-        """
+        self.token_array = []
+
+
+    def base_index(self):
         total = 0
         for i, val in enumerate(self.seed):
             total += (i + 1) * val
-        return (total + self.t) % 27
-
-    def _offset(self) -> int:
-        """Compute an offset based on the current state sum.
-
-        This helps keep mapping dynamic even if base_code repeats.
-        """
-        return sum(self.seed) % len(self.mapper.vocab)
+        return (total + self.iteration) % 17
 
 
-    #based on the seed, morphs the array and gets a token from the vocab.
-    def step(self) -> str:
-        """Advance the engine by one step and return the next token."""
-        base = self._base_code()
-        offs = self._offset()
-        idx = (base + offs + self._prev_token_index) % len(self.mapper.vocab)
+    def get_index(self):
+        return int(sum(self.seed)/len(self.vocab)) % len(self.vocab)
 
-        token = self.mapper.index_to_token(idx)
-        self._prev_token_index = idx
 
-        # evolve state deterministically
-        self.seed = morph_state_default(
-            seed=self.seed,
-            t=self.t,
-            mod=self.mod,
-            **self.constants,
-        )
-        self.t += 1
+    def next_token(self, n, forward=True):
+        if self.iteration < 0:
+            self.seed = self.original_seed
+
+        index = self.get_index()
+
+        token = self.token_map.get_token(index)
+
+        self.seed = self.morph.morph(self.seed_format, self.iteration) if self.iteration < n or forward == False else self.seed
+
+        self.token_array.append(self.seed[0])
+
+        if forward == True:
+            self.iteration += 1  
+        else:
+            self.iteration -= 1
+
         return token
+    
 
-    def next_token(self) -> str:
-        """Alias for step() to make intent clearer in examples."""
-        return self.step()
-
-    def generate_tokens(self, n: int) -> List[str]:
+    def generate_tokens(self, n):
         """Generate a list of n tokens."""
-        return [self.step() for _ in range(n)]
+        return [self.next_token(n) for _ in range(n)]
+    
+
+    def reverse_tokens(self, n):
+        """Generate a list of n tokens."""
+        self.iteration -= 3
+
+        return [self.next_token(n, False) for _ in range(n)]
+    
+
+    def get_array(self, length=50):
+        self.generate_tokens(length)
+        return self.token_array 
+    
+
+    def test_tokens(self, n):
+        print("\n\nmorph test\n\n")
+        print(self.generate_tokens(n))
+        print()
+        print(self.reverse_tokens(n))

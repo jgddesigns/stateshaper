@@ -1,19 +1,19 @@
-# Contributing to Morphic Semantic Engine (MSE)
+# Contributing to Stateshaper
 
-The MSE can do a lot on its own, but does even better with MSE Plugins! 
+Stateshaper can do a lot on its own, but does even better with Shaper Plugins! 
 
 Plugins are intended to define what events are called using the engine. This can be specific to each app, but can also apply to other app's with similar logic.
 
 Plugins for random events, ratings based personaliation, pure compression and structured output are planned to be released as standard universal add-ons to the library.
 
-If a user can some up with their own specialized MSE Plugin, sharing it would be appreciated! The open source aspect of the MSE is encouraged. 
+If a user can some up with their own specialized Shaper Plugin, sharing it would be appreciated! The open source aspect of Stateshaper is encouraged. 
 
 
 
 Here is an example of how a plugin is used:
 
 
-MSE can create continued meaningful output using very little memory. 
+Stateshaper can create continued meaningful output using very little memory. 
 
 The ouput created needs to be defined somehow. 
 
@@ -38,7 +38,7 @@ terms = {
     6: {"shrimp egg rolls": ingredients7, "rating": 32}
 }
 
-# A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using the MSE. The ratings allow for only certain values to be called from the master list.
+# A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using Stateshaper. The ratings allow for only certain values to be called from the master list.
 
 # In this example, the ratings used can be modified. Here is a function that listens for events used to change the ratings. This is pseudocode, assuming there is a meal tracker and a feature where users can like meals that are shown on screen. 
 
@@ -82,7 +82,7 @@ A collection of terms is created for each test case. In this case, a system that
 
 Other uses include economy simulations, uuid creation and other QA compliance uses.
 
-One of the main benefits here instead of using a hardcoded loop is that every test case (as many as needed) can be recreated from the ~225 byte MSE Seed.
+One of the main benefits here instead of using a hardcoded loop is that every test case (as many as needed) can be recreated from the ~225 byte State Seed.
 
 
 ```python
@@ -131,7 +131,7 @@ def random_attempts():
 
 vocab = [adresses, conditions, phones] 
 
-## Connector passes to the MSE. MSE generates a random test case. All test cases are memorized ansd can be extracted from the seed at any time.
+## Connector passes to Stateshaper. Program generates a random test case. All test cases are memorized ansd can be extracted from the seed at any time.
 Connector(vocab)
 
 ```
@@ -195,7 +195,7 @@ Connector(data)
 Structured Sequence
 
 
-Map a list of events or variables to pre-determined MSE output.
+Map a list of events or variables to pre-determined output.
 
 For example 
 
@@ -210,13 +210,13 @@ events = {
     3: event4
 }
 
-# The outputed MSE array is always the same based on the  seed.
+# The outputed is always the same based on the  seed.
 
 output = [145, 647, 45, 784, 567, 432...]
 
 # events are called every time their assigned number appears. one even can have several numbers mapped to it. 
 
-# An MSE Map tool is planned to be released soon. This will show the exact structure of the array generated from the MSE seed.
+# A Shaper Map tool is planned to be released soon. This will show the exact structure of the array generated from Stateshaper seed.
 
 # This will allow events to be called in the order that they are needed.
 

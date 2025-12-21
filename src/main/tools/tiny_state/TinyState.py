@@ -9,7 +9,7 @@ if SRC_ROOT not in sys.path:
 
 ###takes a dictionary of items with a keys that have list values as data 
 
-class TinyMSE:
+class TinyState:
 
     def __init__(self, list_count=10, **kwargs):
         super().__init__(**kwargs)
