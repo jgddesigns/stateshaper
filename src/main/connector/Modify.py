@@ -1,6 +1,6 @@
 
 
-## rules to alter the vocab array based on collected attributes
+
 class Modify:
 
 

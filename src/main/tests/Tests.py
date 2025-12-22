@@ -76,7 +76,7 @@ class Tests:
         other = '{"s":[0, 4, 5, 6, 2, 2, 2, 5, 6, 8], "r":' + self.get_ratings(length) + '}'
 
         self.print.s(2)
-        self.print.p("\n\nCOMPRESSION test comparison for " + str(length) + " items")
+        self.print.p("\n\nTINY_STATE test comparison for " + str(length) + " items")
         self.print.s(2)
         self.print.p("Original Data Sample Format (length varies):\n")
         self.print.p(data)

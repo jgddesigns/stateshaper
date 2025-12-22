@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="morphic-semantic-engine",
+    name="stateshaper",
     version="0.1.0",
-    description="Deterministic semantic generator from tiny numeric seeds.",
+    description="Create infinite, deterministic streams of data from a small seed.",
     author="Jason G. Dunn",
     packages=find_packages(where="src"),
     package_dir={"": "src"},

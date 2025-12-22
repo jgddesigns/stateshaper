@@ -1,1 +1,0 @@
-# Core dependencies (kept minimal on purpose)

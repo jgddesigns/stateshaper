@@ -25,10 +25,10 @@ class Input(BaseModel):
 
 @app.post("/api/start")
 def process():
-    ads = run.plugin.get_data()
-    run.connector = Connector(ads)
+    output = run.plugin.get_data()
+    run.connector = Connector(output)
     run.run_engine()
-    return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
+    return {"response": {"output": output, "ratings": run.plugin.interests, "seed": run.seed}}
 
 
 @app.post("/api/process")
@@ -38,7 +38,7 @@ def process(input: Input):
     new_data = run.plugin.change_data(input)
     run.connector = Connector(new_data)
     run.run_engine()
-    return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
+    return {"response": {"output": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
 
 
 @app.post("/api/test_run")
@@ -49,8 +49,3 @@ def process(input: Input):
 def clean_input(input):
     for item in input.items():
         input[item[0]] = int(item[1])
-
-
-
-    
-

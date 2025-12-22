@@ -51,7 +51,7 @@ In this example, the ratings used can be modified. Here is a function that liste
 
 For personalization data, the objects the logic is based on can be compressed into Tiny State format using the TinyState class. 
 
-See the **COMPRESSION.md** instructions in **src/main/tools/tiny_state**
+See the **TINY_STATE.md** instructions in **src/main/tools/tiny_state**
 
 
 ```python

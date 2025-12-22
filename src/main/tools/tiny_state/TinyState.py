@@ -289,7 +289,7 @@ class TinyState:
     def set_preferences(self, data, length=5):
         self.preferences = list(data.keys())
         self.top_preferences = sorted(self.preferences, key=lambda x: data[x]["rating"], reverse=True)[:length]
-        print("\n\nSTATESHAPER COMPRESSION DEMO\n\nThis demonstration shows how app related storage data can be reduced by over 80%.\n")
+        print("\n\nSTATESHAPER TINY_STATE DEMO\n\nThis demonstration shows how app related storage data can be reduced by over 80%.\n")
         print("\n\nInterest list has been generated. The highest rated preferences are:\n")
         print(self.top_preferences)
 

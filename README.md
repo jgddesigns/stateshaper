@@ -78,11 +78,17 @@ from main.core import Stateshaper
 from main.plugin import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
+#
 seed = [12, 7, 4, 19, 3, 11, 5, 8, 2]
 
 # Tokens that are generated during each iteration of the program. For instance, this set of numbers is chosen based on a rating system in the plugin file. When tokenized, they can call desired output from the plugin. They can be modified as the engine runs if the output needs to be changed. This allows for personalization and can be based off of variables such as user behavior. 
-vocab = [1, 2, 3, 6, 7, 9]
-
+#
+vocab = [1, 2, 3, 6, 7, 9] 
+#
+# other examples include:
+# vocab = ["string1", "string2", "string3"...]
+# vocab = [event1, event2, event3...]
+#  
 # Class instantiation. The parameters are the only values that need to be stored other than your app's custom plugin file. In the most minimal cases, only the vocabulary is needed to be stored.
 engine = Stateshaper(
     seed=seed,
@@ -102,62 +108,11 @@ events = [i for plugin.get_event(i) in tokens]
 ```
 
 
-# Plugin Data
+# Connector
 
-A custom plugin can be tailored to an app's specific purpose. This is what will set the rules for what data or events are to be called as Stateshaper runs. All that is needed from the plugin is a final list to be used in the 'vocab' parameter. This can be compressed and all that is the only thing needed tp be stored in a database. 
+The Connector class can take your data and compress it into seed format, making it usable in the Stateshaper engine. Right now this is mostly for personalization purposes, but may be modified going forward. 
 
-The current standard is to keep several columns and rows of specific data. With Stateshaper, this data can be generated in real time using only the seed and the package's included calculations. 
-
-
-```python
-from fastapi import FastAPI
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-from core import Stateshaper
-import json
-
-
-class PluginData:
-   engine = Stateshaper()
-
-   # Here is an example of a map of events that can be called from the specified Stateshaper vocab. They can be random, personalized, or called in a specific sequence.
-   event_map = {
-      1: show_ad("adhost.ad_list.ad_link_001")
-      2: show_ad("adhost.ad_list.ad_link_002")
-      3: show_ad("adhost.ad_list.ad_link_003")
-      4: show_ad("adhost.ad_list.ad_link_004")
-      5: show_ad("adhost.ad_list.ad_link_005")
-      6: show_ad("adhost.ad_list.ad_link_006")
-      7: show_ad("adhost.ad_list.ad_link_007")
-      8: show_ad("adhost.ad_list.ad_link_008")
-      9: show_ad("adhost.ad_list.ad_link_009")
-   }
-
-   #The event ratings determine what ads will be put in Stateshaper vocab. This can be modified over time based on input such as user behavior. The ratings can stand for anything such as:
-   #
-   #  drinks = {"beer" 67, "wine": 85, "tea": 86...etc}
-   #
-   # They can then be used to call ads for those preferences. 
-   ratings = {
-      1: 45,
-      2: 78,
-      3: 3,
-      4: 43,
-      5: 98,
-      6: 67,
-      7: 89,
-      8: 54,
-      9: 92,
-   }
-
-   def adjust_ratings(rating, input):
-      self.ratings[rating] += input
-
-   #Stopped drinking beer for a week and drank more tea.
-   adjust_ratings("beer", -5)
-   adjust_ratings("tea", 3)
-
-```
+For more ino, see the **CONNECTOR.md** file located in **src/main/connector**.
 
 
 
@@ -253,6 +208,8 @@ seed = "567yQ90T34"
 
 The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full State may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
+
+For more info, see the **TINY_STATE.md** file located in **src/tools/tiny_state/TINY_STATE.md**.
 
 
 ---

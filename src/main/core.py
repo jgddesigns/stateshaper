@@ -99,10 +99,3 @@ class Stateshaper:
     def get_array(self, length=50):
         self.generate_tokens(length)
         return self.token_array 
-    
-
-    def test_tokens(self, n):
-        print("\n\nmorph test\n\n")
-        print(self.generate_tokens(n))
-        print()
-        print(self.reverse_tokens(n))
