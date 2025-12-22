@@ -179,19 +179,22 @@ These values can be encoded and decoded in the TinyState class within the 'tools
 ```python 
 class TinyState:
 
-   def encode_tiny(data):
+   # return: Coded dataset. 
+   # return[0]: Tiny State seed. Reperesents the compressed values for the master data set.
+   # return[1]: Raw State seed. Represents the subset of personalized values chosen for the specific instance.
+   def get_seed(data):
       # Encode logic
       # This is the value that will be kept in the database. It is where most of the compression happens. 
-      # This value 
-      return "ABC-12345"
+      return ["ABC-12345", "QV589JX4"]
 
-   def decode(data):
+   # return: personalized events for the specific user/instance.
+   def rebuild_data(master_seed, subset_seed):
       # Decode logic.
-      # These values stand for key/value pairs from the event or ratings maps and are kept in groups of four in data sets length 100 or less. If more length is needed the group size can be increased.
+      # Numbers values from the seeds stand for key/value pairs from the master dataset and are kept in groups of four in data sets length 100 or less. If more length is needed the group size can be increased.
       #
       # Example: 0214 stands for key #3, value #15 
 
-      return 0011011202130314...
+      return ["event1", "event2", "event3"...]
 
 ```
 

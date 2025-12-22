@@ -1,5 +1,6 @@
 # Contributing to Stateshaper
 
+
 Stateshaper can do a lot on its own, but does even better with Shaper Plugins! 
 
 Plugins are intended to define what events are called using the engine. This can be specific to each app, but can also apply to other app's with similar logic.
@@ -20,12 +21,17 @@ The ouput created needs to be defined somehow.
 This can be based on preference (ex. using a rating system), at random, as a specific sequence, or a combination of these. 
 
 
-Preference based For a specific app:
+
+
+-------
+
+
+Personalization Example:
 
 
 Define entire dataset for terms used in app. 
 
-For this example, a meal planner. This type of plugin can also be used for applications like fitness routine, gaming npc behavior and personalized content.
+For this example, a meal planner. This type of plugin can also be used for applications like fitness routine, gaming npc behavior and personalized content. Here is an example with a small dataset. 
 
 ```python
 terms = {
@@ -37,12 +43,18 @@ terms = {
     5: {"macaroni and cheese": ingredients6, "rating": 15},
     6: {"shrimp egg rolls": ingredients7, "rating": 32}
 }
+```
 
-# A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using Stateshaper. The ratings allow for only certain values to be called from the master list.
+A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using Stateshaper. The ratings allow for only certain values to be called from the master list.
 
-# In this example, the ratings used can be modified. Here is a function that listens for events used to change the ratings. This is pseudocode, assuming there is a meal tracker and a feature where users can like meals that are shown on screen. 
+In this example, the ratings used can be modified. Here is a function that listens for events used to change the ratings. This is pseudocode, assuming there is a meal tracker and a feature where users can like meals that are shown on screen.  
+
+For personalization data, the objects the logic is based on can be compressed into Tiny State format using the TinyState class. 
+
+See the **COMPRESSION.md** instructions in **src/main/tools/tiny_state**
 
 
+```python
 
 # @param event 
 #
@@ -74,13 +86,15 @@ def modify(rating, change):
 ```
 
 
+-------
+
 
 Random data for fintech market QA
 
 
 A collection of terms is created for each test case. In this case, a system that stress tests an app's ability to detect fraud. 
 
-Other uses include economy simulations, uuid creation and other QA compliance uses.
+Other uses include economy simulations, UUID creation and other QA compliance uses.
 
 One of the main benefits here instead of using a hardcoded loop is that every test case (as many as needed) can be recreated from the ~225 byte State Seed.
 
@@ -137,6 +151,9 @@ Connector(vocab)
 ```
 
 
+-------
+
+
 Procedural Generation
 
 Functions are called during each iteration of the engine. The parameters accept the current array value and create content based on their values. 
@@ -191,6 +208,8 @@ Connector(data)
 ```
 
 
+-------
+
 
 Structured Sequence
 
@@ -210,7 +229,7 @@ events = {
     3: event4
 }
 
-# The outputed is always the same based on the  seed.
+# The outputed is always the same based on the seed.
 
 output = [145, 647, 45, 784, 567, 432...]
 

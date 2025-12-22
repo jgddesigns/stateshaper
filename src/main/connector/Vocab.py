@@ -107,11 +107,6 @@ class Vocab:
         return rule in self.rule_types
     
 
-    def valid_map(self):
-        ##combine all validity checks into one function
-        pass
-
-    
     def valid_ratings(self):
         i = 0
         for item in self.data["input"]:
