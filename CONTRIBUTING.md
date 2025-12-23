@@ -3,9 +3,9 @@
 
 *Stateshaper* can do a lot on its own, but does even better with Shaper Plugins! 
 
-Plugins are intended to define what events are called using the engine. This can be specific to each app, but can also apply to other app's with similar logic.
+Plugins are designed to define what data from apps are used as parameters for the engine. This can be specific to each app, but can also apply to other apps with similar logic.
 
-Plugins for random events, ratings based personaliation, pure compression and structured output are planned to be released as standard universal add-ons to the library.
+Standard plugins for compression, ratings based personaliation, procedural generation, structured sequences, and synthetic data are planned to be released as add-ons to the library.
 
 If a user can some up with their own specialized plugin, sharing it would be appreciated! The open source aspect of *Stateshaper* is encouraged. Maybe other uses can be thought of for this library as well. 
 
@@ -22,8 +22,8 @@ This can be based on preference (ex. using a rating system), at random, as a spe
 
 
 
-
 -------
+
 
 
 **Personalization Example**
@@ -33,7 +33,10 @@ Define entire dataset for terms used in app.
 
 For this example, a meal planner. This type of plugin can also be used for applications like fitness routine, gaming npc behavior and personalized content. Here is an example with a small dataset. 
 
+
+
 ```python
+
 terms = {
     0: {"steak and eggs": ingredients1, "rating": 76},
     1: {"enchiladas": ingredients2, "rating": 61},
@@ -43,7 +46,10 @@ terms = {
     5: {"macaroni and cheese": ingredients6, "rating": 15},
     6: {"shrimp egg rolls": ingredients7, "rating": 32}
 }
+
 ```
+
+
 
 A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using *Stateshaper*. The ratings allow for only certain values to be called from the master list.
 
@@ -51,7 +57,7 @@ In this example, the ratings used can be modified. Here is a function that liste
 
 For personalization data, the objects the logic is based on can be compressed into *Tiny State* format using the *TinyState* class. 
 
-For more ino, see the [`TINY_STATE.md`](src/main/tiny_state/TINY_STATE.md) file.  
+For more info, see the [`TINY_STATE.md`](src/main/tiny_state/TINY_STATE.md) file.  
 
 
 
@@ -89,7 +95,9 @@ def listener(event, trend):
 ```
 
 
+
 -------
+
 
 
 **Synthetic Data Example**
@@ -156,7 +164,9 @@ Connector(vocab)
 ```
 
 
+
 -------
+
 
 
 **Procedural Generation**
@@ -220,7 +230,9 @@ Connector(data)
 ```
 
 
+
 -------
+
 
 
 **Structured Sequence**
