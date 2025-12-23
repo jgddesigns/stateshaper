@@ -6,7 +6,7 @@ import streamlit as st
 # Streamlit Page Setup
 # -------------------------------------------------
 st.set_page_config(
-    page_title="Tiny MSE Compression Demo",
+    page_title="Stateshaper Tiny State Compression Demo",
     page_icon="🧬",
     layout="centered",
 )
@@ -17,7 +17,7 @@ st.set_page_config(
 st.markdown(
     """
     <h1 style='font-size:42px; font-weight:700; margin-bottom:0.1em;'>
-        Morphic Semantic Engine – Tiny MSE Format
+        Stateshaper – Tiny State Format
     </h1>
     <h3 style='font-size:20px; font-style:italic; color:#666; margin-top:0;'>
         Enter a seed, prefix, or full code — generate JSON deterministically.
