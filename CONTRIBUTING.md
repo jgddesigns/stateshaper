@@ -1,20 +1,20 @@
 # Contributing to Stateshaper
 
 
-Stateshaper can do a lot on its own, but does even better with Shaper Plugins! 
+*Stateshaper* can do a lot on its own, but does even better with Shaper Plugins! 
 
 Plugins are intended to define what events are called using the engine. This can be specific to each app, but can also apply to other app's with similar logic.
 
 Plugins for random events, ratings based personaliation, pure compression and structured output are planned to be released as standard universal add-ons to the library.
 
-If a user can some up with their own specialized Shaper Plugin, sharing it would be appreciated! The open source aspect of Stateshaper is encouraged. 
+If a user can some up with their own specialized plugin, sharing it would be appreciated! The open source aspect of *Stateshaper* is encouraged. Maybe other uses can be thought of for this library as well. 
 
 
 
 Here is an example of how a plugin is used:
 
 
-Stateshaper can create continued meaningful output using very little memory. 
+*Stateshaper* can create continued meaningful output using very little memory. 
 
 The ouput created needs to be defined somehow. 
 
@@ -26,7 +26,7 @@ This can be based on preference (ex. using a rating system), at random, as a spe
 -------
 
 
-Personalization Example:
+**Personalization Example**
 
 
 Define entire dataset for terms used in app. 
@@ -45,17 +45,23 @@ terms = {
 }
 ```
 
-A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using Stateshaper. The ratings allow for only certain values to be called from the master list.
+A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using *Stateshaper*. The ratings allow for only certain values to be called from the master list.
 
 In this example, the ratings used can be modified. Here is a function that listens for events used to change the ratings. This is pseudocode, assuming there is a meal tracker and a feature where users can like meals that are shown on screen.  
 
-For personalization data, the objects the logic is based on can be compressed into Tiny State format using the TinyState class. 
+For personalization data, the objects the logic is based on can be compressed into *Tiny State* format using the *TinyState* class. 
 
-See the **TINY_STATE.md** instructions in **src/main/tools/tiny_state**
+For more ino, see the [`TINY_STATE.md`](src/main/tiny_state/TINY_STATE.md) file.  
+
+
 
 
 ```python
 
+connector = Connector(input_data)
+
+# A listener function inside the personalization app
+#
 # @param event 
 #
 # ex. like a meal featuring shrimp
@@ -72,15 +78,12 @@ def listener(event, trend):
     ## User has indicated they have an increased preference in seafood, and hasn't eaten meals with beef in them for three weeks. 
 
     # likes a seafood meal in content feed
-    trend["shrimp egg rolls"] = modify(trend[event], .05)
+    trend["shrimp egg rolls"] = connector.adjust_value(trend[event], .05)
     
     # meal tracker shows user hasn't eaten beef in two weeks
-    trend["steak and eggs"] = modify(trend[event], -.15)
+    trend["steak and eggs"] = connector.adjust_value(trend[event], -.15)
 
-
-def modify(rating, change):
-
-    rating += change
+    connector.alter_stream()
 
 
 ```
@@ -89,12 +92,13 @@ def modify(rating, change):
 -------
 
 
-Random data for fintech market QA
+**Synthetic Data Example**
 
+This example is for Fintech Quality Assurance Testing. Synthetic data is continually generated to stress the application and expose weak points.
 
 A collection of terms is created for each test case. In this case, a system that stress tests an app's ability to detect fraud. 
 
-Other uses include economy simulations, UUID creation and other QA compliance uses.
+Similar uses include economy simulations, UUID creation and other QA compliance uses.
 
 One of the main benefits here instead of using a hardcoded loop is that every test case (as many as needed) can be recreated from the ~225 byte State Seed.
 
@@ -107,7 +111,7 @@ addresses = ["none", "partial", "full"]
 conditions = [True, False]
 phones = ["mobile", "landline", "voip", "toll_free", "unknown"]
 
-#initial user. build a test case for fraud.
+# create a faux user to enter into the system
 user = {
     "profile": {
         "name_match": random_choice(conditions, step),
@@ -141,12 +145,13 @@ def random_choice(value, step):
 
 
 def random_attempts():
-    return randint(0, step*.001 * 20)
+    return randint(0, step * .001 * 20)
 
 vocab = [adresses, conditions, phones] 
 
 ## Connector passes to Stateshaper. Program generates a random test case. All test cases are memorized ansd can be extracted from the seed at any time.
 Connector(vocab)
+
 
 ```
 
@@ -154,9 +159,13 @@ Connector(vocab)
 -------
 
 
-Procedural Generation
+**Procedural Generation**
+
+
 
 Functions are called during each iteration of the engine. The parameters accept the current array value and create content based on their values. 
+
+The same benefit here as the last case, determinism. With more logic to define the map assets, an entire world can be memorized and built from a *Stateshaper* seed.
 
 
 ```python
@@ -177,12 +186,14 @@ def create_content(step):
 def get_pos(step):
     return (step/window_width * 100, step/window_height * 100)
 
+
 def get_color(step):
     colors = []
     while len(colors) < 4:
         colors.append(int(round(step%100).01))
 
     return tuple(colors)
+
 
 def get_shape(step):
     shape = []
@@ -205,18 +216,17 @@ def get_size(step):
 
 Connector(data)
 
+
 ```
 
 
 -------
 
 
-Structured Sequence
+**Structured Sequence**
 
 
 Map a list of events or variables to pre-determined output.
-
-For example 
 
 
 
@@ -233,11 +243,8 @@ events = {
 
 output = [145, 647, 45, 784, 567, 432...]
 
+
 # events are called every time their assigned number appears. one even can have several numbers mapped to it. 
-
-# A Shaper Map tool is planned to be released soon. This will show the exact structure of the array generated from Stateshaper seed.
-
-# This will allow events to be called in the order that they are needed.
 
 map = {
     0: [145, 784],
@@ -252,3 +259,23 @@ vocab = [0, 1, 2, 3]
 Connector(vocab)
 
 ```
+
+
+
+Right now this type of use is limited, but expansion for structured output is currently in ***experimental*** stages. Theorhetically, if a grid of all possible *Stateshaper* arrays can be built, nearly any type of data coded can be compressed and re-built with the *Stateshaper* engine. 
+
+This grid would be massive, and require the assistance of AI to be built. 
+
+Think of the array values as steps for a recipe. Cooking a recipe correctly requires you to follow the steps in order. Now imagine all possible recipes, some have different steps and some matching but in a different order. To cook them all, we'd need to be able to generate every possible combination of steps. 
+
+Another (and one of the most difficult) example is written language. There are many possible combinations of words to form sentences, chapters and entire books. Compressing this into a seed has limits based on Shannon's theory, but with the right set of rules using *Stateshaper* might be able to find a possible workaround. Until recently, this would have been near impossible, but with the release of moder AI tools, creating the backend logic needed to do this has become easier. 
+
+
+Current Experimental Ideas:
+
+- Create a known list of possible arrays the *Stateshaper* can produce, and a tool that allows for the required output to be compressed into a State Seed.
+- Add a length limit option to cut down the reasonable amount of possible arrays needed.
+- Write a morph function creator that is used to create arrays that arent possible with the default morph function. 
+- Use multiple morph functions if needed, using the current iteration value to call them. 
+- If a particular set of data can't be built from the known arrays, use AI to brute force compare each missing value and write rules to a matching array.
+- A *Stateshaper* grid tool is planned to be released soon. This will help find the rules needed to build certain types of data based on known existing arrays. 

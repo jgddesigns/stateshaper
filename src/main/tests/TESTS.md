@@ -1,4 +1,9 @@
-This directory contains tests that demonstrate the Stateshaper engine compared to other popular algorithms. 
+**TESTS**
+
+
+
+
+This directory contains tests that demonstrate the *Stateshaper* engine compared to other popular algorithms. 
 
 The main categories being tested are:
 
@@ -7,75 +12,58 @@ The main categories being tested are:
     Personalization
     Compression
 
-In relevant areas, Stateshaper outperforms existing algorithms such as Markov Chain, Cellular Automata, and Probalistic Methods. It is also an advanced tool for Machine Learning (ML) Training and Procedural Generation. 
+In relevant areas, *Stateshaper* outperforms existing algorithms such as *Markov Chain*, *Cellular Automata*, *Pseudo-Random Number Generation* and *Probalistic Methods*. It is also an advanced tool for *Machine Learning (ML) Training* and *Procedural Generation*. 
+
+
+---
+
+
+**CURRENT TESTS**
+
+
+***Markov Chain***
+
+Uses an NPC behavior model to demostrate how *Stateshaper* can derive predictable actions from statsitcs. The output is created from memory, reproducible and reverisible. It is also **compressed** and obfuscated for privacy. Markov can do this based on probability, but the output is random rather than determined.
+
+There may be instances where Markov chain is preferred, but the highlight is that *Stateshaper* can do all Markov can and aditionally add compression and obfuscation. 
 
 
 
-Stateshaper is strongest when used after other systems:
-
-ML → Stateshaper (freeze learned behavior)
-
-Markov → Stateshaper (lock a scenario)
-
-PRNG → Stateshaper (semanticize randomness)
-
-CA → Stateshaper (compress emergent states)
+**COMING SOON:**
 
 
-
-Markov Chain:
-
-Uses an NPC behavior model to demostrate how Stateshaper can derive predictable actions from statsitcs. The output is created from memory, reproducible and reverisible. It is also **compressed** and obfuscated for privacy. Markov can do this based on probability, but the output is random rather than determined.
-
-There may be instances where Markov chain is preferred, but the highlight is that Stateshaper can do all Markov can and aditionally add compression and obfuscation. 
+*- Cellular Automata*
 
 
+*- ML Training*
 
 
-COMING SOON:
+*- PRNG*
 
 
-
-Cellular Automata
-
-open world terrain
+*- Probalistic Methods*
 
 
+---
 
 
-ML Training
+*Stateshaper* is strongest when used after other systems:
 
-training dataset storage
+
+    ML → Stateshaper (freeze learned behavior)
+
+    Markov → Stateshaper (lock a scenario)
+
+    PRNG → Stateshaper (semanticize randomness)
+
+    CA → Stateshaper (compress emergent states)
 
 
 
+**HYBRID EXAMPLES ON THE WAY INCLUDE...**
 
-PRNG
+*Fintech QA*
 
-npc behaviors
+*MMORPG Worlds*
 
-
-
-
-Probalistic Methods
-
-stock market data
-
-
-
-
-
-
-
-HYBRID EXAMPLES
-
-fintech qa
-
-mmorpg
-
-privacy personalization
-
-
-
-
-
+*Privacy-based Personalization*
