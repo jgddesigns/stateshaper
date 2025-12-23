@@ -7,7 +7,7 @@ Plugins are intended to define what events are called using the engine. This can
 
 Plugins for random events, ratings based personaliation, pure compression and structured output are planned to be released as standard universal add-ons to the library.
 
-If a user can some up with their own specialized Shaper Plugin, sharing it would be appreciated! The open source aspect of *Stateshaper* is encouraged. 
+If a user can some up with their own specialized plugin, sharing it would be appreciated! The open source aspect of *Stateshaper* is encouraged. Maybe other uses can be thought of for this library as well. 
 
 
 
@@ -51,11 +51,17 @@ In this example, the ratings used can be modified. Here is a function that liste
 
 For personalization data, the objects the logic is based on can be compressed into *Tiny State* format using the *TinyState* class. 
 
-For more ino, see the [`src/main/tiny_state/TINY_STATE.md`](TINY_STATE.md) file.  
+For more ino, see the [`TINY_STATE.md`](src/main/tiny_state/TINY_STATE.md) file.  
+
+
 
 
 ```python
 
+connector = Connector(input_data)
+
+# A listener function inside the personalization app
+#
 # @param event 
 #
 # ex. like a meal featuring shrimp
@@ -72,15 +78,12 @@ def listener(event, trend):
     ## User has indicated they have an increased preference in seafood, and hasn't eaten meals with beef in them for three weeks. 
 
     # likes a seafood meal in content feed
-    trend["shrimp egg rolls"] = modify(trend[event], .05)
+    trend["shrimp egg rolls"] = connector.adjust_value(trend[event], .05)
     
     # meal tracker shows user hasn't eaten beef in two weeks
-    trend["steak and eggs"] = modify(trend[event], -.15)
+    trend["steak and eggs"] = connector.adjust_value(trend[event], -.15)
 
-
-def modify(rating, change):
-
-    rating += change
+    connector.alter_stream()
 
 
 ```
@@ -272,6 +275,7 @@ Current Experimental Ideas:
 
 - Create a known list of possible arrays the *Stateshaper* can produce, and a tool that allows for the required output to be compressed into a State Seed.
 - Add a length limit option to cut down the reasonable amount of possible arrays needed.
-- Write a morph function creator that is used to create arrays that arent possible with the default morph function.
+- Write a morph function creator that is used to create arrays that arent possible with the default morph function. 
+- Use multiple morph functions if needed, using the current iteration value to call them. 
 - If a particular set of data can't be built from the known arrays, use AI to brute force compare each missing value and write rules to a matching array.
 - A *Stateshaper* grid tool is planned to be released soon. This will help find the rules needed to build certain types of data based on known existing arrays. 

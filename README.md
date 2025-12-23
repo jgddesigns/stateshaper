@@ -2,8 +2,6 @@
 
 **Compress data and generate content using small seeds.**
 
-*Clean up database tables by generating data in real-time within your app.*
-
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
 
@@ -84,7 +82,7 @@ The *Stateshaper* class needs to be called as follows...
 
 
 ```python
-from main.core import *Stateshaper*
+from main.core import Stateshaper
 from main.plugin import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
@@ -100,7 +98,7 @@ vocab = [1, 2, 3, 6, 7, 9]
 # vocab = [event1, event2, event3...]
 #  
 # Class instantiation. The parameters are the only values that need to be stored other than your app's custom plugin file. In the most minimal cases, only the vocabulary is needed to be stored.
-engine = *Stateshaper*(
+engine = Stateshaper(
     seed=seed,
     vocab=vocab,
     constants={"a": 3, "b": 5, "c": 7, "d": 11},
@@ -115,6 +113,7 @@ print(" ".join(tokens))
 # Use the tokens to call events. See PluginData class below.
 events = [i for plugin.get_event(i) in tokens]
 
+
 ```
 
 
@@ -122,7 +121,7 @@ events = [i for plugin.get_event(i) in tokens]
 
 The *Connector* class can take your data and compress it into seed format, making it usable in the *Stateshaper* engine. Right now this is mostly for personalization purposes, but may be modified going forward. 
 
-For more ino, see the [`src/main/connector/CONNECTOR.md`](CONNECTOR.md) file.  
+For more ino, see the [`CONNECTOR.md`](src/main/connector/CONNECTOR.md) file.  
 
 
 
@@ -219,7 +218,7 @@ seed = "567yQ90T34"
 The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full State may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
 
-For more info, see the [`src/main/tools/tiny_state/TINY_STATE.md`](TINY_STATE.md) file.
+For more info, see the [`TINY_STATE.md`](src/main/tools/tiny_state/TINY_STATE.md) file.
 
 
 ---
