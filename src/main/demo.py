@@ -1,5 +1,5 @@
-
-from demos.markov.Markov import Markov
+from tests.ca.CellularAutomata import CellularAutomata
+from tests.markov.Markov import Markov
 from connector.Connector import Connector
 from tools.tiny_state.TinyState import TinyState
 
@@ -10,9 +10,13 @@ class Demo:
     def __init__(self, user_id=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.markov = Markov()
-        self.markov_test()
-        self.connector = None
+        self.automata = CellularAutomata()
+
+        self.automata.run(.47, 7)
+
+        # self.markov = Markov()
+        # self.markov_test()
+        # self.connector = None
 
         # self.tiny_state = TinyState()
         # self.tiny_state.get_seed(self.test_data())
