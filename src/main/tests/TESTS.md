@@ -23,8 +23,6 @@ Uses an NPC behavior model to demostrate how Stateshaper can derive predictable 
 There may be instances where Markov chain is preferred, but the highlight is that Stateshaper can do all Markov can and aditionally add compression and obfuscation. 
 
 
----
-
 
 **COMING SOON:**
 
@@ -44,15 +42,16 @@ There may be instances where Markov chain is preferred, but the highlight is tha
 ---
 
 
-Stateshaper is strongest when used after other systems:
+*Stateshaper* is strongest when used after other systems:
 
-ML → Stateshaper (freeze learned behavior)
 
-Markov → Stateshaper (lock a scenario)
+    ML → Stateshaper (freeze learned behavior)
 
-PRNG → Stateshaper (semanticize randomness)
+    Markov → Stateshaper (lock a scenario)
 
-CA → Stateshaper (compress emergent states)
+    PRNG → Stateshaper (semanticize randomness)
+
+    CA → Stateshaper (compress emergent states)
 
 
 

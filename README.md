@@ -22,6 +22,23 @@ Recommended Uses Include:
 This repository contains a reference implementation in Python, example scripts, and documentation.
 
 
+Tests have been created to demonstrate *Stateshaper* engine functionality.
+
+These can be found in the src/main/tests directory.
+
+
+Additonally, two demonstrations are live online:
+
+
+*Targeted Ads Compression Demo*
+
+https://stateshaper-ads.vercel.app
+
+
+*Tiny State Compression*
+
+https://tiny-state.streamlit.app
+
 
 ---
 

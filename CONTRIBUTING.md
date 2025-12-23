@@ -1,20 +1,20 @@
 # Contributing to Stateshaper
 
 
-Stateshaper can do a lot on its own, but does even better with Shaper Plugins! 
+*Stateshaper* can do a lot on its own, but does even better with Shaper Plugins! 
 
 Plugins are intended to define what events are called using the engine. This can be specific to each app, but can also apply to other app's with similar logic.
 
 Plugins for random events, ratings based personaliation, pure compression and structured output are planned to be released as standard universal add-ons to the library.
 
-If a user can some up with their own specialized Shaper Plugin, sharing it would be appreciated! The open source aspect of Stateshaper is encouraged. 
+If a user can some up with their own specialized Shaper Plugin, sharing it would be appreciated! The open source aspect of *Stateshaper* is encouraged. 
 
 
 
 Here is an example of how a plugin is used:
 
 
-Stateshaper can create continued meaningful output using very little memory. 
+*Stateshaper* can create continued meaningful output using very little memory. 
 
 The ouput created needs to be defined somehow. 
 
@@ -45,13 +45,13 @@ terms = {
 }
 ```
 
-A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using Stateshaper. The ratings allow for only certain values to be called from the master list.
+A normal list might hold hundreds, thousands or even more values. This is the data that needs to be hardcoded into an app. As it relates to a specific user, it can be significantly condensed in database tables when using *Stateshaper*. The ratings allow for only certain values to be called from the master list.
 
 In this example, the ratings used can be modified. Here is a function that listens for events used to change the ratings. This is pseudocode, assuming there is a meal tracker and a feature where users can like meals that are shown on screen.  
 
 For personalization data, the objects the logic is based on can be compressed into *Tiny State* format using the *TinyState* class. 
 
-See the *TINY_STATE.md* instructions in *src/main/tools/tiny_state*
+For more ino, see the [`src/main/tiny_state/TINY_STATE.md`](TINY_STATE.md) file.  
 
 
 ```python
@@ -142,7 +142,7 @@ def random_choice(value, step):
 
 
 def random_attempts():
-    return randint(0, step*.001 * 20)
+    return randint(0, step * .001 * 20)
 
 vocab = [adresses, conditions, phones] 
 
@@ -162,7 +162,7 @@ Connector(vocab)
 
 Functions are called during each iteration of the engine. The parameters accept the current array value and create content based on their values. 
 
-The same benefit here as the last case, determinism. With more logic to define the map assets, an entire world can be memorized and built from a Stateshaper seed.
+The same benefit here as the last case, determinism. With more logic to define the map assets, an entire world can be memorized and built from a *Stateshaper* seed.
 
 
 ```python
@@ -259,19 +259,19 @@ Connector(vocab)
 
 
 
-Right now this type of use is limited, but expansion for structured output is currently in ***experimental*** stages. Theorhetically, if a grid of all possible Stateshaper arrays can be built, nearly any type of data coded can be compressed and re-built with the Stateshaper engine. 
+Right now this type of use is limited, but expansion for structured output is currently in ***experimental*** stages. Theorhetically, if a grid of all possible *Stateshaper* arrays can be built, nearly any type of data coded can be compressed and re-built with the *Stateshaper* engine. 
 
 This grid would be massive, and require the assistance of AI to be built. 
 
 Think of the array values as steps for a recipe. Cooking a recipe correctly requires you to follow the steps in order. Now imagine all possible recipes, some have different steps and some matching but in a different order. To cook them all, we'd need to be able to generate every possible combination of steps. 
 
-Another (and one of the most difficult) example is written language. There are many possible combinations of words to form sentences, chapters and entire books. Compressing this into a seed has limits based on Shannon's theory, but with the right set of rules using Stateshaper might be able to find a possible workaround. Until recently, this would have been near impossible, but with the release of moder AI tools, creating the backend logic needed to do this has become easier. 
+Another (and one of the most difficult) example is written language. There are many possible combinations of words to form sentences, chapters and entire books. Compressing this into a seed has limits based on Shannon's theory, but with the right set of rules using *Stateshaper* might be able to find a possible workaround. Until recently, this would have been near impossible, but with the release of moder AI tools, creating the backend logic needed to do this has become easier. 
 
 
 Current Experimental Ideas:
 
-- Create a known list of possible arrays the Stateshaper can produce, and a tool that allows for the required output to be compressed into a State Seed.
+- Create a known list of possible arrays the *Stateshaper* can produce, and a tool that allows for the required output to be compressed into a State Seed.
 - Add a length limit option to cut down the reasonable amount of possible arrays needed.
 - Write a morph function creator that is used to create arrays that arent possible with the default morph function.
 - If a particular set of data can't be built from the known arrays, use AI to brute force compare each missing value and write rules to a matching array.
-- A Stateshaper grid tool is planned to be released soon. This will help find the rules needed to build certain types of data based on known existing arrays. 
+- A *Stateshaper* grid tool is planned to be released soon. This will help find the rules needed to build certain types of data based on known existing arrays. 
