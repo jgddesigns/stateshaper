@@ -1,7 +1,7 @@
+**HOW TO USE PLUGIN CONNECTOR**
 
 
-HOW TO USE PLUGIN CONNECTOR
-
+---
 
 
 1. Make sure you have your events and corresponding prefence ratings mapped in the proper format. Example:
@@ -85,24 +85,32 @@ HOW TO USE PLUGIN CONNECTOR
 3. To get the seed to pass into the engine, call the Connector function, start_connect. 
 
 
+---
 
-Modification:
+
+**Modification**
 
 
 These functions are part of the Connector class. When used, the ratings associated with events can be adjusted. This has a direct effect on the personalization of the output. In other words, the events with the highest ratings will occur more frequently in the stream created by the engine. If a length is set in the main data object, only the values with the highest ratings will be included in the engine vocab. 
 
 
+```python
 set_value(key, rating)
+```
 
-    Sets the value of a specific item in the data input object.
+*Sets the value of a specific item in the data input object.*
 
-
+```python
 adjust_value(key, adjust)
+```
+    
+*Adds or subtracts the rating for a specific item.*
 
-    Adds or subtracts the rating for a specific item. 
 
+```python
+alter_stream() 
+```
 
-alter_stream() REQUIRED
+**REQUIRED**
 
-    After changing a rating value or values, returns the seed used in the Stateshaper engine. If the function is not called, the stream will not be modified.
-
+*After changing a rating value or values, returns the seed used in the Stateshaper engine. If the function is not called, the stream will not be modified.*

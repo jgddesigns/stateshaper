@@ -1,4 +1,4 @@
-# Stateshaper
+# *Stateshaper*
 
 **Compress data and generate content using small seeds.**
 
@@ -7,7 +7,7 @@
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
 
-Using a custom plugin file, events can be mapped to the array by tokenizing its values. The engine allows for the events be called for as long as needed. The events can include many types of data including strings, links, images and functions. Due to the nature of the algorithm, the mapped events can be condensed and extracted as Stateshaper runs.
+Using a custom plugin file, events can be mapped to the array by tokenizing its values. The engine allows for the events be called for as long as needed. The events can include many types of data including strings, links, images and functions. Due to the nature of the algorithm, the mapped events can be condensed and extracted as *Stateshaper* runs.
 
 This idea was improved upon with some help from ChatGPT, and has become the Morphic Semantic Engine.
 
@@ -51,17 +51,10 @@ Clone this repository:
 ```bash
 git clone https://github.com/jgddesigns/stateshaper.git
 cd stateshaper
-pip install -r requirements.txt
 ```
 
 
-Basic use will input values at random. The Stateshaper class needs to be called as follows.
-
-
-
-
-
-For other uses a plugin class will be required. There are default ratings based, procedural, and structured output classes. 
+The *Stateshaper* class needs to be called as follows...
 
 
 ---
@@ -70,11 +63,11 @@ For other uses a plugin class will be required. There are default ratings based,
 
 ## Basic Example
 
-Stateshaper uses an evolving array of numbers that can be tokenized to call events or variables. 
+*Stateshaper* uses an evolving array of numbers that can be tokenized to call events or variables. 
 
 
 ```python
-from main.core import Stateshaper
+from main.core import *Stateshaper*
 from main.plugin import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
@@ -90,7 +83,7 @@ vocab = [1, 2, 3, 6, 7, 9]
 # vocab = [event1, event2, event3...]
 #  
 # Class instantiation. The parameters are the only values that need to be stored other than your app's custom plugin file. In the most minimal cases, only the vocabulary is needed to be stored.
-engine = Stateshaper(
+engine = *Stateshaper*(
     seed=seed,
     vocab=vocab,
     constants={"a": 3, "b": 5, "c": 7, "d": 11},
@@ -110,9 +103,9 @@ events = [i for plugin.get_event(i) in tokens]
 
 # Connector
 
-The Connector class can take your data and compress it into seed format, making it usable in the Stateshaper engine. Right now this is mostly for personalization purposes, but may be modified going forward. 
+The *Connector* class can take your data and compress it into seed format, making it usable in the *Stateshaper* engine. Right now this is mostly for personalization purposes, but may be modified going forward. 
 
-For more ino, see the **CONNECTOR.md** file located in **src/main/connector**.
+For more ino, see the [`src/main/connector/CONNECTOR.md`](CONNECTOR.md) file.  
 
 
 
@@ -122,13 +115,13 @@ For more ino, see the **CONNECTOR.md** file located in **src/main/connector**.
 
 # Data Formats
 
-Aside from the plugin file (which can be a template that does not include specific numbers), relevant data such as the event map and ratings can be condensed into 'Tiny State' and/or 'Raw State' format. Example:
+Aside from the plugin file (which can be a template that does not include specific numbers), relevant data such as the event map and ratings can be condensed into *Tiny State* and/or *Raw State* format. Example:
 
-Tiny State: ABC-12345
+**Tiny State: ABC-12345**
 
-Raw State: QV589JX4
+**Raw State: QV589JX4**
 
-These values can be encoded and decoded in the TinyState class within the 'tools' directory. The main data map is represented as a long string of numbers. These numbers stand for positions in the map and are encoded into Tiny State format. A subset of numbers from the vocab used in the engine is also kept and encoded into Raw State format.
+These values can be encoded and decoded in the *TinyState* class within the 'tools' directory. The main data map is represented as a long string of numbers. These numbers stand for positions in the map and are encoded into *Tiny State* format. A subset of numbers from the vocab used in the engine is also kept and encoded into *Raw State* format.
 
 
 ```python 
@@ -162,9 +155,9 @@ From that, all other content can be generated during run time, and be personaliz
 
 The ratings can be modified as needed, then re-encoded as a different seed. 
 
-For some uses, a longer seed may be required. Sometimes this can be because a custom initial state, mod or constants are  required. Also if a very large amount of data causes the Tiny State seed to need additional characters. 
+For some uses, a longer seed may be required. Sometimes this can be because a custom initial state, mod or constants are  required. Also if a very large amount of data causes the *Tiny State* seed to need additional characters. 
 
-In total, there are four types of data used in Stateshaper. They are really just strings, dicts and lists in a certain format. The specific formats are as follows:
+In total, there are four types of data used in *Stateshaper*. They are really just strings, dicts and lists in a certain format. The specific formats are as follows:
 
 
 Full State:
@@ -209,7 +202,7 @@ seed = "567yQ90T34"
 The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full State may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
 
-For more info, see the **TINY_STATE.md** file located in **src/tools/tiny_state/TINY_STATE.md**.
+For more info, see the [`src/main/tools/tiny_state/TINY_STATE.md`](TINY_STATE.md) file.
 
 
 ---
@@ -222,7 +215,7 @@ The 'seed' array, 'constants' and 'mod' value are used for calculations during e
 
 For basic use, no plugin is required. Only an array of the tokens (variables or functions) is needed. If no particular order is needed (such as generating data to stress test a system for QA, or cooking app that suggests a random recipe) this may be all that is needed.
 
-For more specialized designs, a custom plugin file can be written. This will be used along with Stateshaper 'Connector' class to define specific rules for the tokens included in 'vocab' list. This can be based on developer needs and can be based on attributes, sequence or frequency the tokens are called if needed.
+For more specialized designs, a custom plugin file can be written. This will be used along with *Stateshaper* *'Connector'* class to define specific rules for the tokens included in 'vocab' list. This can be based on developer needs and can be based on attributes, sequence or frequency the tokens are called if needed.
 
 
 
@@ -235,10 +228,10 @@ If specific deterministic output is needed, these values ca be adjusted to fit w
 3. Is a Custom Morph Rule Needed?
 The math done to change the array values can also be altered. This can allow for further customization of the deterministic array.
 
-4. Call Stateshaper Class Object and Pass the Created Parameters. 
+4. Call *Stateshaper* Class Object and Pass the Created Parameters. 
 
 5. Generate the Ouput
-Create as many tokens as needed with Stateshaper().generate_token(x) method. This can be called all at once or during a loop.
+Create as many tokens as needed with *Stateshaper*().generate_token(x) method. This can be called all at once or during a loop.
 
 6. Modify the Stream if Needed 
 The data can be changed based on input such as user behavior or duration. The main class variables can be assigned new values in real time, or a new instance of the class can be created. 
