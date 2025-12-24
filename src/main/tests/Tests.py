@@ -6,17 +6,17 @@ from debug.Print import Print
 class Tests:
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, debug=True, **kwargs):
         super().__init__(**kwargs)
 
-        self.print = Print()
-        self.print.debug = False
+        self.print = Print(debug)
+        
 
-
+    
     # creates chain of deterministic output based on seed, then steps backward to see if the same output can be recreated. if so, this indicates deterministic states that can be traversed both forward and in reverse. 
     def reversibility(self, engine, x):
-        self.print.p("\n\n\n\nREVERSIBILITY TEST\n\n", True)
-        self.print.p("\n" + engine["compare"].upper() + "\n", True)
+        self.print.p("\n\n\n\nREVERSIBILITY TEST\n\n")
+        self.print.p("\n" + engine["compare"].upper() + "\n")
         self.print.p("\n\nforward step\n", True)
        
         forward = engine["forward"](x)
@@ -26,26 +26,27 @@ class Tests:
         self.print.p(reverse, True)
         
         result = True if list(reversed(reverse)) == forward else False
-        self.print.p(result, True)
         self.print.s(2, True)
-        self.print.p(engine["compare"].upper() + " Test Result: " + str(result), True)
+        self.print.p(engine["compare"].upper() + " Test Result: " + str(result) + ", list is reversible.")
         self.print.s(2, True)
         return result
     
 
     # creates output based on seed parameters, then attempts to recreate that output using the same seed. matching outputs confirms that the seed creates a deterministic sequence. 
     def determinism(self, engine, x, existing):
-        self.print.p("\n\n\n\nDETERMINISTIC TEST\n\n", True)
-        self.print.p("\n" + engine["compare"].upper() + "\n", True)
-        self.print.p("\n\noutput\n", True)
-       
+        self.print.p("\n\n\n\nDETERMINISTIC TEST\n\n")
+        self.print.p("\n" + engine["compare"].upper() + "\n")
+        self.print.p("\n\nfirst output\n", True)
+        self.print.p(existing, True)
+
+        self.print.p("\n\nsecond output\n", True)
         current = engine["run"](x)
         self.print.p(current, True)
 
         result = True if existing == current else False
         self.print.p(result, True)
         self.print.s(2, True)
-        self.print.p(engine["compare"].upper() + " Test Result: " + str(result), True)
+        self.print.p(engine["compare"].upper() + " Test Result: " + str(result) + ", lists are matching.")
         self.print.s(2, True)
         return [result, current]
     

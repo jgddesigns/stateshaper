@@ -386,7 +386,6 @@ class TinyState:
     
 
     def rebuild_data(self, compressed_seed, compressed_subset, data=None):
-
         origin_seed = self.decode(compressed_seed)
         decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset)
         export = []

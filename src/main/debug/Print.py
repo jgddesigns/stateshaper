@@ -4,10 +4,10 @@
 
 class Print:
 
-    def __init__(self, **kwargs):
+    def __init__(self, debug=True, **kwargs):
         super().__init__(**kwargs)
 
-        self.debug = True
+        self.debug = debug
 
 
     def p(self, txt, condition=None):

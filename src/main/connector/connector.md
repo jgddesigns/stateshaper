@@ -95,8 +95,12 @@
     # bratwurst and fries
     #
     # default value is None, meaning anything in the vocab list can be compounded
-    "compound_groups": ["meat", "lunch", "side"],
+    # first values is a key in the groups value that is part of each item. second value indicates if the group is mandatory for each compound. 1 indicates mandatory, 0 indicates optional. 
+    "compound_groups": [["meat", 0], ["lunch", 1], ["side", 0]],
 
+    # the terms used in between compound words. if there are more words than compound length, they will be randomly used. otherwise they will occur in the order they are in the list for each final term that is outputted. 
+    # default value is " " if not set. 
+    "compound_terms": ["and", "with", "including", "plus", ","]
 
     # used when the random rule is set. the base value used in equations to randomize the input
     # default value is 21 (if random rule is chosen and this key is not included in the input dataset)

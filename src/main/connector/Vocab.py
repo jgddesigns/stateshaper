@@ -1,4 +1,5 @@
 from random import randint
+import sys
 
 # Used to define the vocab terms used in Stateshaper.
 
@@ -226,20 +227,16 @@ class Vocab:
     
 
     def compound_mapping(self):
-        self.vocab = "compound_mapping"
-        self.compound_vocab = self.data["input"] if self.data["length"] == len(self.data["input"]) else self.compound_map()
+        if self.data["compound_groups"]:
+            mandatory = [item[0] for item in self.data["compound_groups"] if item[1] == 1]
+            groups = [group[0] for group in self.data["compound_groups"]]
+            included = [item["data"] for item in self.data["input"] if any(x in item["groups"] for x in groups) and any(x in item["groups"] for x in mandatory)]
+        else:
+            included = [item["data"] for item in self.data["input"]]
 
-        print(f"\nStateshaper vocab parameter successfully set with 'compound' rule. Length: " + str(self.data["length"]))
+        self.vocab = included
 
-
-    def compound_map(self):
-        included = []
-
-        while len(included) < self.data["length"]:
-            data = self.data["input"][randint(0, len(self.data["input"])-1)]
-            included.append(data) if data not in included else None
-
-        return included
+        print(f"\nStateshaper vocab parameter successfully set with 'compound' rule.")
 
 
     def token_mapping(self):
@@ -255,7 +252,7 @@ class Vocab:
 
         self.vocab = included
 
-        print(f"\nStateshaper vocab parameter successfully set with 'token' rule. Length: " + str(self.data["length"]))
+        print(f"\nStateshaper vocab parameter successfully set with 'token' rule.")
 
 
     def sort_token(self):

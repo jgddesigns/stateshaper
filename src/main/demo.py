@@ -10,9 +10,9 @@ class Demo:
     def __init__(self, user_id=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.automata = CellularAutomata()
+        # self.automata = CellularAutomata()
 
-        self.automata.run(.47, 7)
+        # self.automata.run(.47, 7)
 
         # self.markov = Markov()
         # self.markov_test()
@@ -21,7 +21,8 @@ class Demo:
         # self.tiny_state = TinyState()
         # self.tiny_state.get_seed(self.test_data())
 
-        # self.connector_test()
+        # self.connector_test(self.compound_test())
+
 
 
     def markov_test(self):
@@ -35,78 +36,16 @@ class Demo:
         self.markov.compression_test(10)
 
 
-    def connector_test(self):
-        data = {
-            "input": [
-                {
-                    "data": "grilled chicken salad",
-                    "rating": 14
-                },
-                {
-                    "data": "spaghetti bolognese",
-                    "rating": 14
-                },
-                {
-                    "data": "vegetable stir fry",
-                    "rating": 14
-                },
-                {
-                    "data": "cheeseburger",
-                    "rating": 45
-                },
-                {
-                    "data": "pepperoni pizza",
-                    "rating": 88
-                },
-                {
-                    "data": "fish tacos",
-                    "rating": 35
-                },
-                {
-                    "data": "beef burrito",
-                    "rating": 75
-                },
-                {
-                    "data": "chicken alfredo",
-                    "rating": 65
-                },
-                {
-                    "data": "lentil soup",
-                    "rating": 25
-                },
-                {
-                    "data": "bbq ribs",
-                    "rating": 92
-                },
-                {
-                    "data": "avocado toast",
-                    "rating": 3
-                },
-                {
-                    "data": "shrimp fried rice",
-                    "rating": 55
-                },
-                {
-                    "data": "pancake breakfast",
-                    "rating": 77
-                }
-            ],
-
-            
-            "rules": "rating",
-            "length": 10,
-            # "compound_length": 3,
-            # "compound_rules": "dfdfdf"
-        }
-
+    def connector_test(self, data):
+        
         self.connector = Connector(data)
 
         self.connector.start_connect()
 
-        self.connector.set_value("pancake breakfast", 1000)
+        # self.connector.set_value("pancake breakfast", 1000)
 
-        self.connector.alter_stream()
-        self.connector.build_seed()
+        # self.connector.alter_stream()
+        # self.connector.build_seed()
 
 
 
@@ -386,5 +325,118 @@ class Demo:
 
         }
 
+
+    def compound_test(self):
+        return {
+            "input": [
+                {
+                    "data": "sausage",
+                    "groups": ["meat", "breakfast"]
+                },
+                {
+                    "data": "salad",
+                    "groups": ["vegetable", "lunch", "dinner"]
+                },
+                {
+                    "data": "pizza",
+                    "groups": ["italian", "lunch", "dinner"]
+                },
+                {
+                    "data": "pancakes",
+                    "groups": ["breakfast", "sweet"]
+                },
+                {
+                    "data": "bacon",
+                    "groups": ["meat", "breakfast"]
+                },
+                {
+                    "data": "eggs",
+                    "groups": ["breakfast", "protein"]
+                },
+                {
+                    "data": "burger",
+                    "groups": ["meat", "lunch", "dinner"]
+                },
+                {
+                    "data": "tacos",
+                    "groups": ["mexican", "lunch", "dinner"]
+                },
+                {
+                    "data": "sandwich",
+                    "groups": ["lunch", "fast"]
+                },
+                {
+                    "data": "soup",
+                    "groups": ["dinner", "comfort"]
+                },
+                {
+                    "data": "steak",
+                    "groups": ["meat", "dinner", "breakfast"]
+                },
+                {
+                    "data": "chicken",
+                    "groups": ["protein", "lunch", "dinner"]
+                },
+                {
+                    "data": "fish",
+                    "groups": ["seafood", "dinner"]
+                },
+                {
+                    "data": "pasta",
+                    "groups": ["italian", "dinner"]
+                },
+                {
+                    "data": "rice",
+                    "groups": ["grain", "side"]
+                },
+                {
+                    "data": "fries",
+                    "groups": ["side", "fast"]
+                },
+                {
+                    "data": "oatmeal",
+                    "groups": ["breakfast", "grain"]
+                },
+                {
+                    "data": "yogurt",
+                    "groups": ["breakfast", "dairy"]
+                },
+                {
+                    "data": "fruit bowl",
+                    "groups": ["fruit", "breakfast"]
+                },
+                {
+                    "data": "ice cream",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "cookies",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "cake",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "smoothie",
+                    "groups": ["drink", "healthy"]
+                },
+                {
+                    "data": "wrap",
+                    "groups": ["lunch", "fast"]
+                },
+                {
+                    "data": "cereal",
+                    "groups": ["breakfast", "grain"]
+                }
+            ],
+
+            "rules": "compound",
+            "length": 100,
+            # "compound_length": 3,
+            # "compound_groups": [["breakfast", 1], ["meat", 0]],
+            "compound_groups": [["breakfast", 1], ["lunch", 1]],
+            "compound_terms": ["and", "with"]
+        }
 
 Demo()

@@ -28,15 +28,16 @@ class Connector:
         self.constants = constants if constants else self.default_constants
         self.mod = mod if mod else self.default_mod
 
-        self.vocab = None
-        self.data = data 
+        self.vocab = None 
         self.token_count = token_count
 
-        if data and isinstance(data, dict) == False and isinstance(data, list) == False: 
-            print("\nData input is invalid. The input requires 'dict' or 'list' format.")
+        self.check_input(data, constants)
 
-        if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
-            print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
+        self.check_random(data)
+
+        self.check_compound(data)
+
+        self.data = data
 
 
 
@@ -54,6 +55,61 @@ class Connector:
         print("\n")
 
         return self.engine
+
+
+    def check_input(self, data, constants):
+        if data and isinstance(data, dict) == False and isinstance(data, list) == False: 
+            print("\nData input is invalid. The input requires 'dict' or 'list' format.")
+
+        if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
+            print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
+
+        try:
+            isinstance(data["length"], int)
+            self.token_count = data["length"]
+        except:
+            data["length"] = 10
+            self.token_count = 10
+
+    def check_random(self, data):
+        try:
+            isinstance(data["rules"], str) and data["rules"] == "random"
+        except:
+            data["rules"] = "random"
+            return True
+        
+        try:
+            isinstance(data["modifier"], int)
+        except:
+            data["modifier"] = 21
+            
+
+    def check_compound(self, data):
+        try:
+            isinstance(data["rules"], str) and data["rules"] == "compound"
+        except:
+            data["rules"] = "random"
+            return True
+        
+        try:
+            isinstance(data["compound_modifier"], int)
+        except:
+            data["compound_modifier"] = 7
+
+        try:
+            isinstance(data["compound_length"], int)
+        except:
+            data["compound_length"] = 3
+
+        try:
+            isinstance(data["compound_groups"], list)
+        except:
+            data["compound_groups"] = None
+
+        try:
+            isinstance(data["compound_terms"], list)
+        except:
+            data["compound_terms"] = [" "]
 
 
     def build_seed(self):

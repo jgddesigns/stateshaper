@@ -12,6 +12,7 @@ class Stateshaper:
         vocab: Sequence[str],
         constants: Dict[str, int] = None,
         mod: int = 9973,
+        compound: list = None, 
     ) -> None:
         if not seed:
             raise ValueError("seed must be non-empty")
@@ -33,6 +34,7 @@ class Stateshaper:
             "d": 11,
         } if not constants else constants
         self.mod = mod
+        self.compound = compound
        
         self.iteration = 1 
 
@@ -49,6 +51,9 @@ class Stateshaper:
             }, 
             "mod": 9973
         }
+
+        if compound:
+            self.seed_format["compound"] = compound
 
         self.token_array = []
 
@@ -70,7 +75,7 @@ class Stateshaper:
 
         index = self.get_index()
 
-        token = self.token_map.get_token(index)
+        token = self.token_map.get_token(index) if not self.compound_token else self.compound_token(index)
 
         self.seed = self.morph.morph(self.seed_format, self.iteration) if self.iteration < n or forward == False else self.seed
 
@@ -82,6 +87,37 @@ class Stateshaper:
             self.iteration -= 1
 
         return token
+    
+
+    def compound_token(self, index):
+        compounds = [self.token_map.get_token(index)]
+        while len(compounds) < self.compound[0]:
+            index = (index + self.compound[1]) % len(self.vocab)
+            if self.token_map.get_token(index) not in compounds:
+                compounds.append(self.token_map.get_token(index))
+            else:
+                index = index + self.compound[1]
+
+        return self.compound_term(index, compounds)
+    
+
+    def compound_term(self, index, compounds):
+        terms = []
+        tokens = []
+
+        while len(terms) < len(compounds)-1:
+            terms.append(self.compound[2][(index + len(terms)) % len(self.compound[2])])
+
+        length = len(terms) + len(compounds)
+
+        while len(tokens) < length:
+            tokens.append(compounds[0])
+            compounds.pop(0)
+            if len(terms) > 0:
+                tokens.append(terms[0]) 
+                terms.pop(0)
+
+        return " ".join(tokens)
     
 
     def generate_tokens(self, n):
@@ -99,3 +135,4 @@ class Stateshaper:
     def get_array(self, length=50):
         self.generate_tokens(length)
         return self.token_array 
+    
