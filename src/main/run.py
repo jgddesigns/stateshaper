@@ -14,18 +14,22 @@ class RunEngine:
 
         self.plugin = Demo()
         self.data = self.plugin.compound_test()
+        self.vocab_test = self.plugin.vocab_test()
 
         self.connector = Connector(self.data)
 
         self.tests = Tests()
         self.tests.debug = True
 
+        self.tiny_state = TinyState()
+
         self.engine = None
 
         self.seed = None
         self.compressed_seed = None
 
-        self.run_engine()
+        # self.tiny_state.get_seed(self.data, self.vocab_test)
+        self.connector.start_connect()
 
 
     def run_engine(self):
@@ -45,8 +49,6 @@ class RunEngine:
 
         self.run_tests()
 
-        
-
 
     def run_tests(self):
         self.define_engine()
@@ -58,7 +60,6 @@ class RunEngine:
         self.tests.reversibility({"compare": "stateshaper", "forward": self.engine.generate_tokens, "reverse": self.engine.reverse_tokens}, self.connector.token_count)
 
 
-
     def define_engine(self):
         self.engine = Stateshaper(
             self.seed["state"],
@@ -67,6 +68,7 @@ class RunEngine:
             self.seed["mod"],
             [self.data["compound_length"], self.data["compound_modifier"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None
         )
+
         
     def compress_seed(self):
         tiny_state = TinyState()

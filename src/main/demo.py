@@ -1,3 +1,4 @@
+import random
 from tests.ca.CellularAutomata import CellularAutomata
 from tests.markov.Markov import Markov
 from connector.Connector import Connector
@@ -435,8 +436,12 @@ class Demo:
             "length": 100,
             # "compound_length": 3,
             # "compound_groups": [["breakfast", 1], ["meat", 0]],
-            "compound_groups": [["breakfast", 1], ["lunch", 1]],
+            "compound_groups": [["breakfast", 1]],
             "compound_terms": ["and", "with"]
         }
 
+    def vocab_test(self):
+        # print([i["data"] for i in self.compound_test()["input"] if self.compound_test()["input"].index(i) % random.randint(2, 5) == 0])
+        # sys.exit()
+        return [i["data"] for i in self.compound_test()["input"] if self.compound_test()["input"].index(i) % random.randint(2, 5) == 0]
 Demo()

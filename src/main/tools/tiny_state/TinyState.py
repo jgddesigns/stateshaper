@@ -294,7 +294,7 @@ class TinyState:
         print(self.top_preferences)
 
 
-    def get_seed(self, data):
+    def get_seed(self, data, vocab=None):
 
         self.data = data
 
@@ -306,92 +306,152 @@ class TinyState:
         relevant_seed = ""
         side_seed = ""
 
-        self.set_preferences(data)
+        try:
 
-        for interest in data.items():        
-            for item in interest[1]["events"]:
-                if len(start) < self.list_count:
-                    idx1 = list(data.keys()).index(interest[0])
-                    idx2 = interest[1]["events"].index(item)
-                    seed = seed + f"{idx1:02d}{idx2:02d}"
+            self.set_preferences(data)
 
-                    if len([x for x in item["attributes"] if x in self.top_preferences and interest[0] == self.top_preferences[0]]) > 0:
-                        start.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
-                        export.append(item["item"])
-                        relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
-                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if interest[0] == y]) > 0:
-                        partial.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
-                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
-                        side.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
+            for interest in data.items():        
+                for item in interest[1]["events"]:
+                    if len(start) < self.list_count:
+                        idx1 = list(data.keys()).index(interest[0])
+                        idx2 = interest[1]["events"].index(item)
+                        seed = seed + f"{idx1:02d}{idx2:02d}"
+
+                        if len([x for x in item["attributes"] if x in self.top_preferences and interest[0] == self.top_preferences[0]]) > 0:
+                            start.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
+                            export.append(item["item"])
+                            relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
+                        elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if interest[0] == y]) > 0:
+                            partial.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
+                        elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
+                            side.append({"data": item["item"], "index": f"{idx1:02d}{idx2:02d}"})
 
 
-        self.most_relevant = len(start)
-        self.partially_relevant = len(partial)
+            self.most_relevant = len(start)
+            self.partially_relevant = len(partial)
 
-        print(f"\n\n\n{self.most_relevant} highly relevant data have been added to the list:\n")
+            print(f"\n\n\n{self.most_relevant} highly relevant data have been added to the list:\n")
 
-        print(start)
+            print(start)
 
-        print(f"\n\n{self.partially_relevant} partially relevant data have been added to the list:\n")
+            print(f"\n\n{self.partially_relevant} partially relevant data have been added to the list:\n")
 
-        print(partial)
+            print(partial)
 
-        while len(start) < self.list_count:
-            side_place = randint(0, len(side)-1)
-            side_ad = side[side_place]["data"]
-            seed2 = side[side_place]["index"]
+            while len(start) < self.list_count:
+                side_place = randint(0, len(side)-1)
+                side_ad = side[side_place]["data"]
+                seed2 = side[side_place]["index"]
 
-            if len(partial) > 0:
-                start.append(partial[0])
-                export.append(partial[0]["data"])
-                relevant_seed = relevant_seed + partial[0]["index"]
-                partial.pop(0) 
-            else:
-                start.append(side_ad)
-                export.append(side_ad)
-                relevant_seed = relevant_seed + seed2
+                if len(partial) > 0:
+                    start.append(partial[0])
+                    export.append(partial[0]["data"])
+                    relevant_seed = relevant_seed + partial[0]["index"]
+                    partial.pop(0) 
+                else:
+                    start.append(side_ad)
+                    export.append(side_ad)
+                    relevant_seed = relevant_seed + seed2
+                
+            self.seed = relevant_seed 
+
+            if len(self.seed) < self.list_count:
+                self.seed = self.seed + side_seed[:self.subset_size-len(self.seed)]
+
+            self.original_seed = seed 
+
+            self.compressed_seed = self.compress(seed)
+
+            self.compressed_subset = self.encode_subset_seed(seed, relevant_seed)
+
+            self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+
+            print("\n\n\nFull list based on ratings profile:\n")
+            print(start)
+
+            print("\n\n\nCompressed Tiny State format for entire list:\n")
+            print(self.compressed_seed)
+
+            print("\n\n\nCompressed seed for chosen data set:\n")
+            print(self.compressed_subset)
+
+            print("\n\n\n List rebuilt from extracted seed:\n")
+            print(self.rebuild_data(self.compressed_seed, self.compressed_subset, self.data))
+            print("\n\n")
             
-        self.seed = relevant_seed 
+            print("\nCompare to final list:\n")
+            self.exported_data = export
+            print(export)
+            print("\n\n")
 
-        if len(self.seed) < self.list_count:
-            self.seed = self.seed + side_seed[:self.subset_size-len(self.seed)]
+            return [self.compressed_seed, self.compressed_subset]
 
-        self.original_seed = seed 
+        except:
+            return self.regular_vocab(data, vocab)
 
-        self.compressed_seed = self.compress(seed)
 
-        self.compressed_subset = self.encode_subset_seed(seed, relevant_seed)
+    def regular_vocab(self, data, vocab):
+        seed = ""
+        subseed = ""
+        for item in data["input"]:
+            idx1 = data["input"].index(item)
+            idx2 = 00
+            seed = seed + f"{idx1:02d}{idx2:02d}"
 
-        self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+        print("\n\n\nOriginal List:\n")
+        print(vocab)
 
-        print("\n\n\nFull list based on ratings profile:\n")
-        print(start)
+        self.original_seed = seed
+        print("\n\n\nOriginal Seed:\n")
+        print(self.original_seed)
+
+        self.compressed_seed = self.compress(self.original_seed)
 
         print("\n\n\nCompressed Tiny State format for entire list:\n")
         print(self.compressed_seed)
 
+        for item in data["input"]:
+            if item["data"] in vocab:
+                idx1 = data["input"].index(item)
+                idx2 = 00 
+                subseed = subseed + f"{idx1:02d}{idx2:02d}"
+
+        print("\n\n\nOriginal Subseed:\n")
+        print(subseed)
+
+        self.compressed_subset = self.encode_subset_seed(seed, subseed)
+
         print("\n\n\nCompressed seed for chosen data set:\n")
         print(self.compressed_subset)
 
-        print("\n\n\n List rebuilt from extracted seed:\n")
-        print(self.rebuild_data(self.compressed_seed, self.compressed_subset, self.data))
+        self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+
+        print("\n\n\nList rebuilt from extracted seed:\n")
+        
+        print(self.rebuild_regular(self.compressed_seed, self.compressed_subset,  self.data))
         print("\n\n")
         
-        print("\nCompare to final list:\n")
-        self.exported_data = export
-        print(export)
-        print("\n\n")
-
         return [self.compressed_seed, self.compressed_subset]
-    
+
 
     def rebuild_data(self, compressed_seed, compressed_subset, data=None):
         origin_seed = self.decode(compressed_seed)
-        decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset)
+        decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset) 
         export = []
         while len(export)<self.list_count:
             parent = decoded[:2]
             child = decoded[2:4]
             export.append(data[list(data.keys())[int(parent)]]["events"][int(child)]["item"])
+            decoded = decoded[4:]
+        return export
+    
+
+    def rebuild_regular(self, compressed_seed, compressed_subset, data=None):
+        origin = self.decode(compressed_seed)
+        decoded = self.decoded = self.decode_subset_seed(origin, compressed_subset) 
+        export = []
+        while len(decoded) > 0:
+            index = decoded[:2]
+            export.append(data["input"][int(index)]["data"])
             decoded = decoded[4:]
         return export

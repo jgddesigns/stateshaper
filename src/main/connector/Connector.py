@@ -1,3 +1,4 @@
+from tools.tiny_state.TinyState import TinyState
 from .Vocab import Vocab
 from .Modify import Modify
 import os
@@ -14,22 +15,28 @@ class Connector:
 
         self.debug = True
         self.modify = Modify(data)
-        self.default_mod = 9973
+        self.tiny_state = TinyState()
+
+        self.default_state = [66, 67, 54, 3, 34]
         self.default_constants = {
             "a": 3,
             "b": 5,
             "c": 7,
             "d": 11
         }
+        self.default_mod = 9973
 
         self.engine = None
         self.state = None
         self.vocab = None
+        self.compressed_vocab = None
         self.constants = constants if constants else self.default_constants
         self.mod = mod if mod else self.default_mod
 
         self.vocab = None 
         self.token_count = token_count
+
+        self.compressed_seed = None
 
         self.check_input(data, constants)
 
@@ -50,11 +57,43 @@ class Connector:
             "mod": self.mod
         }
 
+        self.compressed_vocab = self.compress_vocab()
+
         print("\n\n\nStateshaper Seed has been created:\n")
         print(self.engine)
-        print("\n")
 
+        print("\n\n\nVocab is Compressed:\n")
+        print(self.compressed_vocab)
+
+        print("\n\n\nCompressed Full Seed:\n")
+        self.engine["vocab"] = self.compressed_vocab
+        print(self.engine)
+
+        self.output_seed()
+
+        print("\n\n\nMinimal Output Seed:\n")
+        print(self.compressed_seed)
+        print("\nSize: " + str(len(str(self.compressed_seed))) + " bytes\n\n\n")
+        
         return self.engine
+
+
+    def output_seed(self):
+        seed = {}
+
+        if self.engine["state"] != self.default_state:
+            seed["s"] = self.engine["state"]  
+
+        seed["v"] = self.compressed_vocab
+
+        if self.engine["constants"] != self.default_constants:
+            seed["c"] = self.engine["constants"]
+
+
+        if self.engine["mod"] != self.default_mod:
+            seed["m"] = self.engine["mod"]
+
+        self.compressed_seed = seed  
 
 
     def check_input(self, data, constants):
@@ -162,6 +201,8 @@ class Connector:
         self.modify.adjust(key, adjust)
 
 
-    def alter_stream(self):
-        self.data["input"] = self.modify.export()
-        self.start_connect()
+    def compress_vocab(self):
+        return self.tiny_state.get_seed(self.data, self.vocab)
+
+    def decode_vocab(self):
+        pass
