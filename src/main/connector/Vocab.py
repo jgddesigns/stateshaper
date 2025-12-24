@@ -202,7 +202,8 @@ class Vocab:
 
 
     def random_mapping(self):
-        self.vocab = self.data["input"]
+        vocab = [i["data"] for i in self.data["input"] if self.data["input"].index(i) % randint(2, 5) == 0]
+        self.vocab = vocab
 
 
     def rating_mapping(self):

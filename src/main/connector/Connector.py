@@ -1,3 +1,4 @@
+import random
 from tools.tiny_state.TinyState import TinyState
 from .Vocab import Vocab
 from .Modify import Modify
@@ -110,6 +111,7 @@ class Connector:
             data["length"] = 10
             self.token_count = 10
 
+
     def check_random(self, data):
         try:
             isinstance(data["rules"], str) and data["rules"] == "random"
@@ -153,7 +155,27 @@ class Connector:
 
     def build_seed(self):
         self.vocab = self.get_vocab()
-        self.state = self.get_state()
+
+        if self.data["rules"] == "random":
+            self.mod = random.randint(123, 9999)
+            self.state = [random.randint(1, self.mod) for _ in range(5)]
+            self.constants = self.get_constants()
+        else:
+            self.state = self.default_state
+            self.constants = self.default_constants
+            self.mod = self.default_mod
+
+
+    def get_constants(self):
+        values = ["a", "b", "c", "d"]
+        constants = {}
+        assigned = 1
+        for value in values:
+            constant = random.randint(assigned + 1, assigned + 10)
+            constants[value] = constant
+            assigned = constant
+
+        return constants
 
 
     def get_vocab(self):
@@ -165,12 +187,7 @@ class Connector:
         
 
     def get_state(self):
-        return [66, 67, 54, 3, 34]
-
-
-    def get_constants(self):
-        if not self.constants:
-            self.constants = self.default_constants
+        return [66, 67, 54, 3, 34] 
 
 
     def assign_constants(self, constants=None):

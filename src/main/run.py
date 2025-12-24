@@ -28,7 +28,6 @@ class RunEngine:
         self.seed = None
         self.compressed_seed = None
 
-        # self.tiny_state.get_seed(self.data, self.vocab_test)
         self.connector.start_connect()
 
 
