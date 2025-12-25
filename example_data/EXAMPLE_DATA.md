@@ -32,7 +32,7 @@ Example:
 # data - the data type from these examples
 # token_count (optional, default=10) - the total amount of output values desired  
 # constants (optional, default={"a": 3,"b": 5,"c": 7,"d": 11}) - used for morphing calculations. only needss to be modified if specific determinism is needed. 
-# mod (optional, default=9973) - used for morphing calculations. only needss to be modified if specific determinism is needed. 
+# mod (optional, default=9973) - used for morphing calculations. only needs to be modified if specific determinism is needed. 
 engine = RunEngine(data, token_count)
 
 engine.run_engine()
