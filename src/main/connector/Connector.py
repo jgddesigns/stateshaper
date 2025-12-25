@@ -11,8 +11,10 @@ import sys
 class Connector:
 
 
-    def __init__(self, data=None, token_count=10, constants=None, mod=None, **kwargs):
+    def __init__(self, data, token_count=10, constants=None, mod=None, **kwargs):
         super().__init__(**kwargs)
+        if data["rules"] == "rating":
+            data["length"] = len(data["input"]) if data["length"] > len(data["input"]) else data["length"]
 
         self.debug = True
         self.modify = Modify(data)
@@ -221,5 +223,22 @@ class Connector:
     def compress_vocab(self):
         return self.tiny_state.get_seed(self.data, self.vocab)
 
-    def decode_vocab(self):
-        pass
+
+    def get_minimal(self):
+        return self.compressed_seed
+    
+
+    def decode_seed(self, seed):
+        return self.tiny_state.decode(seed)
+
+
+    def decode_minimal(self, seed, minimal):
+        return self.tiny_state.decode_subset_seed(seed, minimal)
+
+
+    def get_personalization(self, seed, minimal, data):
+        return self.tiny_state.rebuild_data(seed, minimal, data)
+
+
+    def get_data(self, seed, minimal, data):
+        return self.tiny_state.rebuild_regular(seed, minimal, data)

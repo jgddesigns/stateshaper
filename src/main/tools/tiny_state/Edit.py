@@ -2,10 +2,12 @@ import os
 import sys
 import random
 from random import randint
+import math as Math
 
 
+## WORKING ON CREATING MULTIPLE SEEDS FOR LONGER LIST 
 
-
+## OR MODIFY DECODER??
 class TinyState:
 
     def __init__(self, list_count=10, **kwargs):
@@ -17,6 +19,10 @@ class TinyState:
         self.subset_size = list_count * 4
 
         self.data = None
+
+        self.max_seed = 50
+
+        self.total_seeds = 1
 
 
     def set_count(self, count):
@@ -295,6 +301,7 @@ class TinyState:
     def set_preferences(self, data, length=5):
         self.top_preferences = data[:length]
 
+
     def sort_ratings(self, data, length=5):
         sort = sorted(data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
         return [list(i.keys())[0] for i in sort]
@@ -302,71 +309,86 @@ class TinyState:
 
     def get_seed(self, data, vocab=None):
 
+        self.total_seeds = Math.ceil(len(data["input"]) / self.max_seed)
+        self.all_seeds = [] 
+
         self.set_count(data["length"])
 
         self.data = data
-        export = []
-        partial = []
-        side = []
-        seed = ""
-        subseed = ""
-        terms = []
 
+        seed_data = None
 
         if data["rules"] == "rating":
             input = self.sort_ratings(data)
 
             self.set_preferences(input)
 
-            for item in data["input"]:
-                key = list(item.keys())[0]
-                for term in item[list(item.keys())[0]]["data"]:
-                    idx1 = data["input"].index(item)
-                    idx2 = item[list(item.keys())[0]]["data"].index(term)
-                    if len(export) < self.data["length"]:
-                        if len([x for x in term["attributes"] if x in self.top_preferences and key == self.top_preferences[0]]) > 0:
-                            export.append(f"{idx1:02d}{idx2:02d}")
-                        elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
-                            partial.append(f"{idx1:02d}{idx2:02d}")
-                        elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0:
-                            side.append(f"{idx1:02d}{idx2:02d}")
+            start_value = 0
+            end_value = self.max_seed if len(data["input"]) > self.max_seed else len(data["input"])-1
 
-                    seed = seed + f"{idx1:02d}{idx2:02d}"
-                    
-            
-            subseed = export + partial + side
+            while len(self.all_seeds) < self.total_seeds:
+                seed_data = data["input"][start_value:end_value] 
+                # print(seed_data)
+                # sys.exit()
+                export = []
+                partial = []
+                side = []
+                seed = ""
+                subseed = ""
+                for item in seed_data:
+                    key = list(item.keys())[0]
+                    for term in item[list(item.keys())[0]]["data"]:
+                        idx1 = seed_data.index(item)
+                        idx2 = item[list(item.keys())[0]]["data"].index(term)
+                        if len(export) < self.data["length"]:
+                            if len([x for x in term["attributes"] if x in self.top_preferences and key == self.top_preferences[0]]) > 0:
+                                export.append(f"{idx1:02d}{idx2:02d}")
+                            elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
+                                partial.append(f"{idx1:02d}{idx2:02d}")
+                            elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0:
+                                side.append(f"{idx1:02d}{idx2:02d}")
 
-            subseed = "".join(subseed)
+                        seed = seed + f"{idx1:02d}{idx2:02d}"
+                        
+                
+                subseed = export + partial + side
 
-            self.seed = subseed
+                subseed = "".join(subseed)
 
-            self.original_seed = seed 
+                self.seed = subseed
 
-            self.compressed_seed = self.compress(seed)
+                self.original_seed = seed 
 
-            self.compressed_subset = self.encode_subset_seed(seed, subseed)
+                self.compressed_seed = self.compress(seed)
 
-            self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+                self.compressed_subset = self.encode_subset_seed(seed, subseed)
 
-            print("\n\n\nFull list based on ratings profile:\n")
-            print(vocab)
+                self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
 
-            print("\n\n\nCompressed Tiny State format for entire list:\n")
-            print(self.compressed_seed)
+                print("\n\n\nFull list based on ratings profile:\n")
+                print(vocab)
 
-            print("\n\n\nCompressed seed for chosen data set:\n")
-            print(self.compressed_subset)
+                print("\n\n\nCompressed Tiny State format for entire list:\n")
+                print(self.compressed_seed)
 
-            print("\n\n\n List rebuilt from extracted seed:\n")
-            print(self.rebuild_data(self.compressed_seed, self.compressed_subset, self.data))
-            print("\n\n")
-            
-            print("\nCompare to final list:\n")
-            self.exported_data = vocab
-            print(vocab)
-            print("\n\n")
+                print("\n\n\nCompressed seed for chosen data set:\n")
+                print(self.compressed_subset)
 
-            return [self.compressed_seed, self.compressed_subset]
+                print("\n\n\n List rebuilt from extracted seed:\n")
+                print(self.rebuild_data(self.compressed_seed, self.compressed_subset, self.data))
+                print("\n\n")
+                
+                print("\nCompare to final list:\n")
+                self.exported_data = vocab
+                print(vocab)
+                print("\n\n")
+
+                self.all_seeds.append([self.compressed_seed, self.compressed_subset])
+
+                start_value = end_value
+                end_value = end_value + self.max_seed if len(data["input"]) > end_value + 50 else len(data["input"]) - end_value - 1
+
+            return self.all_seeds
         
         else:
             return self.regular_vocab(data, vocab)

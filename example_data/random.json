@@ -1,0 +1,31 @@
+{
+    "input": [
+        { "data": "rain" },
+        { "data": "snow" },
+        { "data": "hail" },
+        { "data": "sleet" },
+        { "data": "fog" },
+        { "data": "mist" },
+        { "data": "thunderstorm" },
+        { "data": "lightning" },
+        { "data": "tornado" },
+        { "data": "hurricane" },
+        { "data": "cyclone" },
+        { "data": "typhoon" },
+        { "data": "drizzle" },
+        { "data": "heat wave" },
+        { "data": "cold front" },
+        { "data": "warm front" },
+        { "data": "blizzard" },
+        { "data": "dust storm" },
+        { "data": "sandstorm" },
+        { "data": "monsoon" },
+        { "data": "rainbow" },
+        { "data": "frost" },
+        { "data": "dew" },
+        { "data": "overcast" },
+        { "data": "clear skies" }
+    ],
+    "rules": "random",
+    "length": 100
+}

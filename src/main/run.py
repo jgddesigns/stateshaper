@@ -9,11 +9,14 @@ from tools.tiny_state.TinyState import TinyState
 
 class RunEngine:
 
-    def __init__(self, **kwargs):
+    def __init__(self, data=None, token_count=10, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         super().__init__(**kwargs)
 
         self.plugin = Demo()
-        self.data = self.plugin.compound_test()
+        # self.data = self.plugin.compound_test()
+        # self.data = self.plugin.random_test()
+        self.data = self.plugin.rating_test()
+        # self.data = self.plugin.vocab_test()
         self.vocab_test = self.plugin.vocab_test()
 
         self.connector = Connector(self.data)
@@ -46,16 +49,13 @@ class RunEngine:
         print("\n\nTokens successfully generated from vocab.\n")
         print(self.tokens)
 
-        self.run_tests()
+        return self.tokens
 
 
     def run_tests(self):
         self.define_engine()
-
         self.tests.determinism({"compare": "stateshaper", "run": self.engine.generate_tokens}, self.connector.token_count, self.tokens)
-
         self.define_engine()
-
         self.tests.reversibility({"compare": "stateshaper", "forward": self.engine.generate_tokens, "reverse": self.engine.reverse_tokens}, self.connector.token_count)
 
 

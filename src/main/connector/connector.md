@@ -146,18 +146,24 @@ These functions are part of the *Connector* class. When used, the ratings associ
 
 
 ```python
+# key - the specific data name
+# rating - the new rating
 def set_value(self, key, rating):
     self.modify.modify(key, rating)
 ```
 
 *Sets the value of a specific item in the data input object.*
 
+
 ```python
+# key - the specific data name
+# adjust - the value to adjust the rating by
 def adjust_value(self, key, adjust):
     self.modify.adjust(key, adjust)
 ```
     
 *Adds or subtracts the rating for a specific item.*
+
 
 ```python
 # REQUIRED
@@ -167,3 +173,64 @@ def alter_stream(self):
 ```
 
 *After calling ***set_value*** or ***adjust_value***, returns the seed used in the Stateshaper engine. If the function is not called, the stream will not be modified.*
+
+
+
+**COMPRESSION**
+
+When you need to store a State Seed for future  use, these methods will create the needed output and future input. 
+
+
+```python
+def compress_vocab(self):
+    return self.tiny_state.get_seed(self.data, self.vocab)
+```
+
+*With the current vocab list, compress it to minimal size. This will create a seed standing for the entire dataset (in Tiny State format), and another representing the chosen subset vocab values (Raw State format).* 
+
+
+```python
+def get_minimal(self):
+    return self.compressed_seed
+```
+
+*Get the minimal seed needed to recreate the output.*
+
+
+```python
+# seed - the tiny state seed from original data (ex. AAA12345)
+def decode_seed(self, seed):
+    return self.tiny_state.decode(seed)
+```
+
+*Get the decoded values from the dataset seed.*
+
+
+```python
+# seed - the tiny state seed from original data (ex. AAA12345)
+# subset the raw state seed from the original subset (ex. AQT4BG6NM) 
+def decode_minimal(self, seed, subset):
+    return self.tiny_state.decode_subset_seed(seed, subset)
+```
+
+*Get the decoded values from the data subset seed.*
+
+
+```python
+# seed - the tiny state seed from original data (ex. AAA12345)
+# subset the raw state seed from the original subset (ex. AQT4BG6NM) 
+def get_personalization(self, seed, subset):
+    return self.tiny_state.rebuild_data(seed, subset, self.data)
+```
+
+*Get the original data for a seed created from personalization input.*
+
+
+```python
+# seed - the tiny state seed from original data (ex. AAA12345)
+# subset the raw state seed from the original subset (ex. AQT4BG6NM) 
+def get_data(self, seed, subset):
+    return self.tiny_state.rebuild_regular(seed, subset, self.data)
+```
+
+*Get the original data from a standard input.*

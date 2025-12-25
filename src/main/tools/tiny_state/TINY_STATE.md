@@ -93,7 +93,7 @@ example.json
 data = {
             "team": {
                 "rating": 55,
-                "events": [
+                "data": [
                     {"item": "football.png", "attributes": ["team", "contact", "outdoor"]},
                     {"item": "basketball.png", "attributes": ["team", "indoor", "fast-paced"]},
                     {"item": "soccer.png", "attributes": ["team", "endurance", "outdoor"]}
@@ -102,7 +102,7 @@ data = {
 
             "individual": {
                 "rating": 47,
-                "events": [
+                "data": [
                     {"item": "tennis.png", "attributes": ["individual", "court", "precision"]},
                     {"item": "golf.png", "attributes": ["individual", "outdoor", "precision"]},
                     {"item": "climbing.png", "attributes": ["individual", "strength", "indoor"]}
@@ -111,7 +111,7 @@ data = {
 
             "combat": {
                 "rating": 71,
-                "events": [
+                "data": [
                     {"item": "boxing.png", "attributes": ["combat", "individual", "indoor"]},
                     {"item": "mma.png", "attributes": ["combat", "discipline", "individual"]},
                     {"item": "wrestling.png", "attributes": ["combat", "grappling", "mat"]}
@@ -120,7 +120,7 @@ data = {
 
             "water": {
                 "rating": 38,
-                "events": [
+                "data": [
                     {"item": "swimming.png", "attributes": ["water", "endurance", "individual"]},
                     {"item": "surfing.png", "attributes": ["water", "balance", "outdoor"]},
                     {"item": "waterpolo.png", "attributes": ["water", "team", "endurance"]}
@@ -129,7 +129,7 @@ data = {
 
             "cycling": {
                 "rating": 84,
-                "events": [
+                "data": [
                     {"item": "cycling.png", "attributes": ["cycling", "endurance", "outdoor"]},
                     {"item": "mountain_biking.png", "attributes": ["cycling", "terrain", "outdoor"]},
                     {"item": "bmx.png", "attributes": ["cycling", "stunts", "individual"]}
@@ -138,7 +138,7 @@ data = {
 
             "track": {
                 "rating": 59,
-                "events": [
+                "data": [
                     {"item": "sprinting.png", "attributes": ["track", "speed", "individual"]},
                     {"item": "marathon.png", "attributes": ["track", "endurance", "road"]},
                     {"item": "relay.png", "attributes": ["track", "team", "speed"]}
@@ -147,7 +147,7 @@ data = {
 
             "winter": {
                 "rating": 66,
-                "events": [
+                "data": [
                     {"item": "skiing.png", "attributes": ["winter", "outdoor", "individual"]},
                     {"item": "snowboarding.png", "attributes": ["winter", "balance", "outdoor"]},
                     {"item": "biathlon.png", "attributes": ["winter", "endurance", "precision"]}
@@ -156,7 +156,7 @@ data = {
 
             "recreation": {
                 "rating": 42,
-                "events": [
+                "data": [
                     {"item": "skateboarding.png", "attributes": ["recreation", "balance", "stunts"]},
                     {"item": "surfskate.png", "attributes": ["recreation", "outdoor", "balance"]},
                     {"item": "parkour.png", "attributes": ["recreation", "agility", "urban"]}
@@ -165,7 +165,7 @@ data = {
 
             "precision": {
                 "rating": 90,
-                "events": [
+                "data": [
                     {"item": "archery.png", "attributes": ["precision", "focus", "individual"]},
                     {"item": "shooting.png", "attributes": ["precision", "control", "individual"]},
                     {"item": "golf_putting.png", "attributes": ["precision", "technique", "individual"]}
@@ -174,7 +174,7 @@ data = {
 
             "digital": {
                 "rating": 88,
-                "events": [
+                "data": [
                     {"item": "esports.png", "attributes": ["digital", "competitive", "team"]},
                     {"item": "sim_racing.png", "attributes": ["digital", "precision", "individual"]},
                     {"item": "virtual_chess.png", "attributes": ["digital", "strategy", "mental"]}

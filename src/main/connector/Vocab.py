@@ -31,10 +31,12 @@ class Vocab:
             "random": "The vocab consists of any terms within the input. If the length value is define_vocabd, the vocab list will include that many random values from the initial input data.",
             "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocabd, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
             "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of Stateshaper engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
+
+            # IN PROGRESS
             "token": "The vocab list will consist of objects or functions that are called during Stateshaper iterations. This will be based on a number ranking. If a length value is specified, the vocab list will be limited to that number. "
         }
 
-        self.compound_rules = ["random"] ##need more compound rules. matching terms? rating based?
+        self.compound_rules = ["random"] 
 
         self.mapping_types = {
             "random": self.random_mapping,
@@ -78,6 +80,7 @@ class Vocab:
             self.data["length"] = len(self.data["input"])
 
         print("\n\n")
+
         if isinstance(self.data, dict) == False:
             print("Data passed is in incorrect format. Please make sure it is a dict/json with keys 'input' (list) and 'rules' (string).")
             
@@ -99,6 +102,7 @@ class Vocab:
         else:
             print("The data has been accepted. Processing input to enter into Stateshaper...")
             self.define_vocab() if not self.data["rules"]  and not self.debug else self.define_vocab(self.data["rules"]) if not self.debug else self.test()
+
         print("\n\n")
 
 
@@ -206,25 +210,51 @@ class Vocab:
         self.vocab = vocab
 
 
+    def set_preferences(self, data, length=5):
+        self.top_preferences = data[:length]
+
+
     def rating_mapping(self):
         print("\n\nStarting ratings based mapping.\n")
-        included = []
+        personal = []
+        export = []
+        partial = []
+        side = []
+        full_list = []
 
         input = self.sort_ratings()
 
+        self.set_preferences(input)
+
+        # print(input)
+        # print(self.data["input"])
         i = 0
-        while len(included) < self.data["length"]:
-            included.append(input[i]["data"])
-            i+=1
+        for interest in self.data["input"]:        
+            key = list(interest.keys())[0]
+            for item in interest[list(interest.keys())[0]]["data"]:
+                if len(export) < self.data["length"]:
+                    if len([x for x in item["attributes"] if x in self.top_preferences and key == self.top_preferences[0]]) > 0:
+                        export.append(item["item"])
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
+                        partial.append(item["item"])
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
+                        side.append(item["item"])
+            i += 1
 
-        self.vocab = included
+        # print(export)
+        # sys.exit()
 
-        print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.")
+        full_list = export + partial + side
+        while len(personal) < self.data["length"]:
+            personal.append(full_list[len(personal)])
+
+        print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.\n")
+        self.vocab = personal
 
 
-    def sort_ratings(self):
-        print(self.data["input"])
-        return sorted(self.data["input"], key=lambda x: x["rating"], reverse=True)
+    def sort_ratings(self, length=5):
+        sort = sorted(self.data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
+        return [list(i.keys())[0] for i in sort]
     
 
     def compound_mapping(self):
