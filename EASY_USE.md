@@ -34,3 +34,10 @@ engine.run_engine()
 #
 # ["your", "input", "values", "are", "returned", "based", "on", "chosen", "stateshaper", "rules"]
 ```
+
+
+Whatever the decided use is, this tool can achieve it using almost no stored memory. 
+
+Unlimited sequences of data can be re-created from a small seed, including fully personalized user profiles. 
+
+Privacy is achieved through obfuscation. The data can't be interpreted without using the seed as a key.
