@@ -1,9 +1,11 @@
-**EASY INSTRUCTIONS FOR USE**
+**QUICK START GUIDE**
 
 
 The Stateshaper Engine will give you a list/array of deterministic events or variables to use in your logic. 
 
-For continuous use, the engine can be called in a loop. For one time, call it once with a specific token_count parameter.
+For continuous use, the engine can be called in a loop using the run_engine. For one time, call it once with a specific token_count parameter.
+
+To create the same output again, start_engine needs to be called.
 
 
 1. Make sure your data is in one of the formats listed in the *"example_data"* directory. 
@@ -22,6 +24,8 @@ engine = RunEngine(data=your_data, token_count=needed_tokens)
 
 #CUSTOM
 engine = RunEngine(data=your_data, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
+
+engine.start_engine()
 ```
 
 

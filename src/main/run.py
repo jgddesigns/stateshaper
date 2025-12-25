@@ -1,4 +1,4 @@
-from demo import Demo
+import sys
 from connector.Connector import Connector
 from core import Stateshaper
 from tests.Tests import Tests
@@ -12,51 +12,29 @@ class RunEngine:
     def __init__(self, data=None, token_count=10, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         super().__init__(**kwargs)
 
-        self.plugin = Demo()
-        # self.data = self.plugin.compound_test()
-        # self.data = self.plugin.random_test()
-        self.data = self.plugin.rating_test()
-        # self.data = self.plugin.vocab_test()
-        self.vocab_test = self.plugin.vocab_test()
+        if isinstance(data, dict):
+            self.data = data
+        else:
+            print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
+            sys.exit()
 
         self.connector = Connector(self.data)
-
-        self.tests = Tests()
-        self.tests.debug = True
 
         self.tiny_state = TinyState()
 
         self.engine = None
 
         self.seed = None
-        self.compressed_seed = None
-
-        self.connector.start_connect()
+        self.default_seed = None
 
 
-    def run_engine(self):
-        self.seed = self.connector.start_connect()
 
-        try:
-            self.compressed_seed = self.compress_seed() if self.data["rules"] == "rating" else None
-        except:
-            pass
+
+    def start_engine(self):
+        self.seed = self.connector.start_connect() if not self.seed else self.default_seed
+        self.default_seed = self.seed if not self.default_seed else self.default_seed
 
         self.define_engine()
-
-        self.tokens = self.engine.generate_tokens(self.connector.token_count)
-        
-        print("\n\nTokens successfully generated from vocab.\n")
-        print(self.tokens)
-
-        return self.tokens
-
-
-    def run_tests(self):
-        self.define_engine()
-        self.tests.determinism({"compare": "stateshaper", "run": self.engine.generate_tokens}, self.connector.token_count, self.tokens)
-        self.define_engine()
-        self.tests.reversibility({"compare": "stateshaper", "forward": self.engine.generate_tokens, "reverse": self.engine.reverse_tokens}, self.connector.token_count)
 
 
     def define_engine(self):
@@ -68,10 +46,11 @@ class RunEngine:
             [self.data["compound_length"], self.data["compound_modifier"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None
         )
 
+
+    def run_engine(self):
+        self.tokens = self.engine.generate_tokens(self.connector.token_count)
         
-    def compress_seed(self):
-        tiny_state = TinyState()
-        tiny_state.get_seed(self.data["input"])
+        print("\n\nTokens successfully generated from vocab.\n")
+        print(self.tokens)
 
-
-RunEngine()
+        return self.tokens

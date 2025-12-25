@@ -80,6 +80,7 @@ The *Stateshaper* class needs to be called as follows...
 
 *Stateshaper* uses an evolving array of numbers that can be tokenized to call events or variables. 
 
+This section highlights the core logic of *Stateshaper*. For a quick start guide, see the [`QUICK START`](QUICK_START.md) instructions.
 
 ```python
 from main.core import Stateshaper
