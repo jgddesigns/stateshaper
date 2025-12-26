@@ -57,7 +57,7 @@ In this example, the ratings used can be modified. Here is a function that liste
 
 For personalization data, the objects the logic is based on can be compressed into *Tiny State* format using the *TinyState* class. 
 
-For more info, see the [`TINY_STATE.md`](src/main/tiny_state/TINY_STATE.md) file.  
+For more info, see the [`TINY_STATE`](src/main/tiny_state/TINY_STATE.md) documentation.  
 
 
 
@@ -280,12 +280,12 @@ This grid would be massive, and require the assistance of AI to be built.
 
 Think of the array values as steps for a recipe. Cooking a recipe correctly requires you to follow the steps in order. Now imagine all possible recipes, some have different steps and some matching but in a different order. To cook them all, we'd need to be able to generate every possible combination of steps. 
 
-Another (and one of the most difficult) example is written language. There are many possible combinations of words to form sentences, chapters and entire books. Compressing this into a seed has limits based on Shannon's theory, but with the right set of rules using *Stateshaper* might be able to find a possible workaround. Until recently, this would have been near impossible, but with the release of moder AI tools, creating the backend logic needed to do this has become easier. 
+Another (and one of the most difficult) example is written language. There are many possible combinations of words to form sentences, chapters and entire books. Compressing this into a seed has limits based on Shannon's theory, but with the right set of rules using *Stateshaper* might be able to find a possible workaround. Until recently, this would have been near impossible, but with the release of modern AI tools, creating the backend logic needed to do this has become easier. 
 
 
 Current Experimental Ideas:
 
-- Create a known list of possible arrays the *Stateshaper* can produce, and a tool that allows for the required output to be compressed into a State Seed.
+- Create a known list of possible arrays the *Stateshaper* can produce, and a tool that allows for the required output to be compressed into a *State Seed*.
 - Add a length limit option to cut down the reasonable amount of possible arrays needed.
 - Write a morph function creator that is used to create arrays that arent possible with the default morph function. 
 - Use multiple morph functions if needed, using the current iteration value to call them. 

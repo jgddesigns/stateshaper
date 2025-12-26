@@ -3,9 +3,9 @@
 
 The Stateshaper Engine will give you a list/array of deterministic events or variables to use in your logic. 
 
-For continuous use, the engine can be called in a loop using the run_engine. For one time, call it once with a specific token_count parameter.
+For continuous use, the engine can be called in a loop using the *run_engine* function. For one time, call it once with a specific *token_count* parameter.
 
-To create the same output again, start_engine needs to be called.
+To create the same output again, *start_engine* needs to be called once more.
 
 
 1. Make sure your data is in one of the formats listed in the *"example_data"* directory. 
@@ -14,6 +14,8 @@ To create the same output again, start_engine needs to be called.
 2. Initialize a *RunEngine* class 
 
 ```python
+from .run import RunEngine 
+
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
 # token_count (default=10) - The desired size of the list containing your input terms.
 # constants (optional) - Only change this for custom morphing equations.

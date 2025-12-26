@@ -5,38 +5,44 @@
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
 
-Using a custom plugin file, events can be mapped to the array by tokenizing its values. The engine allows for the events be called for as long as needed. The events can include many types of data including strings, links, images and functions. Due to the nature of the algorithm, the mapped events can be condensed and extracted as *Stateshaper* runs.
+This idea was improved upon with some help from ChatGPT, and has become *Stateshaper*.
 
-This idea was improved upon with some help from ChatGPT, and has become the Morphic Semantic Engine.
+The primary benefits of *Stateshaper* are compression, enhanced privacy, and memorization. 
+
+As far as compression is concerned, using this tool can reduce data sizes by over 90%. This saves money on both database storage and bandwidth. This is because large amounts of memorized data can be generated from the small, JSON-formatted seed the engine produces during its initial run. 
+
+Compressing this data also allows for privacy, where the data contained in a seed it can't be extracted without knowing specific seed parameters. For applications, this can be stored in environment variables the same way that access keys can.
+
 
 Recommended Uses Include:
 
-- Synthetic data generation
-- Deterministic simulations
-- Procedural text & lore
-- Privacy-safe personalization
-- Embedded / offline generative behavior
+- Content Feeds
+- Routine Planner
+- Personalized Suggestions
+- QA Stress Testing
+- Procedural World Generation
 
-This repository contains a reference implementation in Python, example scripts, and documentation.
 
+This repository contains code written in Python, with other langauges scheduled to be available soon. 
 
 Tests have been created to demonstrate *Stateshaper* engine functionality.
 
 These can be found in the src/main/tests directory.
 
-
 Additonally, two demonstrations are live online:
-
 
 *Targeted Ads Compression Demo*
 
 https://stateshaper-ads.vercel.app
+
+Demonstrates the engine's ability to generate data based on personalization. Ads shown are based on user preference ratings and can be adjust in the app. The data needed to recreate the entire profile is condensed into a ~50-250 byte JSON string. 
 
 
 *Tiny State Compression*
 
 https://tiny-state.streamlit.app
 
+An interactive tool that shows how a *Stateshaper* seee can be compressed even further in ~8 bytes. A seed can be compressed, extracted and re-compressed continually and maintain its original values. 
 
 ---
 
@@ -68,19 +74,53 @@ git clone https://github.com/jgddesigns/stateshaper.git
 cd stateshaper
 ```
 
+1. Make sure your data is in one of the formats listed in the *"example_data"* directory. 
 
-The *Stateshaper* class needs to be called as follows...
 
+2. Initialize a *RunEngine* class 
+
+```python
+# data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
+# token_count (default=10) - The desired size of the list containing your input terms.
+# constants (optional) - Only change this for custom morphing equations.
+# mod (optional) - Only change this for custom morphhing equations
+
+#BASIC
+engine = RunEngine(data=your_data, token_count=needed_tokens)
+
+#CUSTOM
+engine = RunEngine(data=your_data, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
+
+engine.start_engine()
+```
+
+
+3. Call the *run_engine* method.
+
+```python
+engine.run_engine()
+
+# OUTPUT    
+#
+# ["your", "input", "values", "are", "returned", "based", "on", "chosen", "stateshaper", "rules"]
+```
+
+
+For continuous use, the engine can be called in a loop using the *run_engine* function. For one time, call it once with a specific *token_count* parameter.
+
+To create the same output again, *start_engine* needs to be called once more.
 
 ---
 
 
 
-## Basic Example
+## Core Logic Example
+### Details of the Stateshaper Main Class
 
 *Stateshaper* uses an evolving array of numbers that can be tokenized to call events or variables. 
 
-This section highlights the core logic of *Stateshaper*. For a quick start guide, see the [`QUICK START`](QUICK_START.md) instructions.
+This section shows examples of the main classes included in the engine. **They are not meant to be ran individually**.
+
 
 ```python
 from main.core import Stateshaper
@@ -88,11 +128,11 @@ from main.plugin import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
 #
-seed = [12, 7, 4, 19, 3, 11, 5, 8, 2]
+state = [12, 7, 4, 19, 3, 11, 5, 8, 2]
 
-# Tokens that are generated during each iteration of the program. For instance, this set of numbers is chosen based on a rating system in the plugin file. When tokenized, they can call desired output from the plugin. They can be modified as the engine runs if the output needs to be changed. This allows for personalization and can be based off of variables such as user behavior. 
+# Tokens that are generated during each iteration of the program. For instance, this set of events can be used to generate sprites in a video game map. 
 #
-vocab = [1, 2, 3, 6, 7, 9] 
+vocab = ["plant", "office building", "pedestrian", "tree", "pavement"...] 
 #
 # other examples include:
 # vocab = ["string1", "string2", "string3"...]
@@ -100,7 +140,7 @@ vocab = [1, 2, 3, 6, 7, 9]
 #  
 # Class instantiation. The parameters are the only values that need to be stored other than your app's custom plugin file. In the most minimal cases, only the vocabulary is needed to be stored.
 engine = Stateshaper(
-    seed=seed,
+    state=state,
     vocab=vocab,
     constants={"a": 3, "b": 5, "c": 7, "d": 11},
     mod=9973,
@@ -109,20 +149,23 @@ engine = Stateshaper(
 # Generate 20 tokens. 
 tokens = [engine.next_token() for _ in range(20)]
 print(" ".join(tokens))
-# [3, 6, 1, 3, 2, 7, 1, 2, 9....]
+# Example Output : ["tree", "tree", "pedestrian", "tree", "office building", "pedestrian", "pavement"....]
 
-# Use the tokens to call events. See PluginData class below.
-events = [i for plugin.get_event(i) in tokens]
+# Use the tokens to call events.
+# The first parameter, i is the type of sprite to draw.
+# The second parameter is a number from the state array (1 - mod, 9973). This can be used in the drawing function to add variations like color, size and position. 
+events = [i for plugin.draw(i, state[tokens.index(i)]) in tokens]
+
 
 
 ```
 
 
-# Connector
+# Connector Class
 
-The *Connector* class can take your data and compress it into seed format, making it usable in the *Stateshaper* engine. Right now this is mostly for personalization purposes, but may be modified going forward. 
+The *Connector* class can take your data and process it to be ready for compression into seed format.  
 
-For more ino, see the [`CONNECTOR.md`](src/main/connector/CONNECTOR.md) file.  
+For more ino, see the [`CONNECTOR`](src/main/connector/CONNECTOR.md) documentation.  
 
 
 
@@ -130,7 +173,7 @@ For more ino, see the [`CONNECTOR.md`](src/main/connector/CONNECTOR.md) file.
 
 
 
-# Data Formats
+# TinyState Class
 
 Aside from the plugin file (which can be a template that does not include specific numbers), relevant data such as the event map and ratings can be condensed into *Tiny State* and/or *Raw State* format. Example:
 
@@ -216,10 +259,11 @@ seed = "567yQ90T34"
 ```
 
 
-The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, Full State may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
+The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, *Full State* may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
 
-For more info, see the [`TINY_STATE.md`](src/main/tools/tiny_state/TINY_STATE.md) file.
+For more info, see the [`TINY_STATE`](src/main/tools/tiny_state/TINY_STATE.md) documentation.
+
 
 
 ---
@@ -234,7 +278,7 @@ For basic use, no plugin is required. Only an array of the tokens (variables or 
 
 For more specialized designs, a custom plugin file can be written. This will be used along with *Stateshaper* *'Connector'* class to define specific rules for the tokens included in 'vocab' list. This can be based on developer needs and can be based on attributes, sequence or frequency the tokens are called if needed.
 
-
+**Considerations for Designing Custom Plugins**
 
 1. Define a Token List 
 Them 'vocab' parameter. This can be an array of any type of values, including functions. A custom plugin file can be written if needed.
@@ -259,18 +303,33 @@ The data can be changed based on input such as user behavior or duration. The ma
 
 
 
-## Use Cases
+## Running Tests
 
+Tests can be ran using the *Tests* class.
+
+These tests demonstrate *Stateshaper's* ability to generate data against popular existing algorithms. 
+
+Areas of focus include determinism, reversibility, personalization, direct indexing, semantic flow and compression.
+
+For more info, see the [`TESTS`](src/main/tests/TESTS.md) documentation.
+
+
+
+--- 
+
+
+
+## Use Cases (Expanded)
 
 ### Personalization Without Storing User Data
 
 Personal Ads or News
 Fitness Routine
 Smart Home Scheduling
-NPC Behavior
+Student Test Sets/Lesson Plans
 
 Assign each user a seed and derive their long-term content pattern from it, without storing
-behavioral data or personally identifiable information.
+behavioral data or personally identifiable information. The output evolves over time based on input such as user interaction.
 
 
 ### Synthetic Data 
@@ -302,40 +361,81 @@ Condense large amounts of data into smaller objects. Generate it in real-time ba
 
 ```text
 stateshaper/
+├── api
+|     ├── run_api.py
+|     ├── API.md
+├── example_data
+|     ├── compound.json
+|     ├── random.json
+|     ├── rating.json
+|     ├── EXAMPLE_DATA.md
 ├── src/
 │   └── main/
-│       ├── __init__.py
-│       ├── connector.py
+|        └── connector/
+|              ├── Connector.py
+|              ├── Modify.py
+|              ├── Vocab.py
+|              ├── CONNECTOR.md
+|        └── debug/
+|              ├── Print.py
+|        └── demos/
+|              └── ads
+|                    ├── ad_list.py
+|                    ├── Print.py
+|              └── fintech
+|                    ├── coming soon
+|              └── infinite_map
+|                    ├── coming soon
+|              └── inventory
+|                    ├── coming soon
+|              └── meal_plan
+|                    ├── coming soon
+|              └── smart_home
+|                    ├── coming soon
+|              ├── DEMOS.md
+|        └── plugins/
+|              └── compression
+|                    ├── coming soon
+|              └── personalization
+|                    ├── coming soon
+|              └── procedural
+|                    ├── coming soon
+|              └── structured
+|                    ├── coming soon
+|              └── synthetic
+|                    ├── coming soon
+|              ├── PLUGINS.md
+|        └── tests/
+|              └── ca
+|                    ├── coming soon
+|              └── markov
+|                    ├── Markov.py
+|              └── ml
+|                    ├── coming soon
+|              └── prng
+|                    ├── coming soon
+|              └── probalistic
+|                    ├── coming soon
+|              ├── TESTS.md
+|              ├── Tests.py
+|        └── tools/
+|              └── tiny_state
+|                 ├── TinyState.py
+|                 ├── TINY_STATE.md
+|              ├── Morph.py
+|              ├── TokenMap.py
+|              ├── TOOLS.md              
 │       ├── core.py
-│       ├── demo.py
 │       ├── run.py
-│       └── connector/
-│           ├── __init__.py
-│           ├── Connector.py
-│           ├── Modify.py
-│           ├── Vocab.py
-│       └── demos/
-│           ├── __init__.py
-│           ├── ads/
-│               ├── __init__.py
-│               ├── ad_list.py
-│               ├── Ads.py
-│       └── tools/
-│           ├── __init__.py
-│           ├── tiny_state/
-│               ├── __init__.py
-│               ├── TinyState.py
-│           ├── morph_rules.py
-│           ├── seeds.py
-│           ├── semantic_mapper.py
-├── LICENSE
-├── CONTRIBUTING.md
 ├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── pyproject.toml
+├── QUICK_START.md
+├── README.md
 ├── setup.py
-├── requirements.txt
-└── .gitignore
-└── demo.bat
-└── run.bat
+
+
 ```
 
 
@@ -344,13 +444,17 @@ stateshaper/
 
 Contributions, ideas, and experiments are welcome!
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
+See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in creating a custom plugin (or anything else).
+
+
 
 ---
+
+
 
 ## License
 
 This project is released under the MIT License. See [`LICENSE`](LICENSE) for details.
 
 If you use this in research, products, or experiments, a mention or citation of the
-"Morphic Semantic Engine" is appreciated.
+"Stateshaper" is appreciated.

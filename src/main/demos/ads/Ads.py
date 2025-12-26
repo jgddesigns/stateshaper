@@ -175,13 +175,13 @@ class Ads:
                     seed = seed + f"{idx1:02d}{idx2:02d}"
 
                     if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0:
-                        ads.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
-                        final_ads.append(item["link"])
+                        ads.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
+                        final_ads.append(item["data"])
                         relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
                     elif len([x for x in item["attributes"] if x in self.top_interests]) > 0 and len([y for y in self.top_interests if interest[0] == y]) > 0:
-                        partial.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+                        partial.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
                     elif len([x for x in item["attributes"] if x in self.top_interests]) > 0:
-                        side.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+                        side.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
 
 
         self.most_relevant = len(ads)
@@ -246,6 +246,6 @@ class Ads:
         while len(ads)<self.tiny_mse.list_count:
             parent = self.decoded_subset[:2]
             child = self.decoded_subset[2:4]
-            ads.append(ad_list[list(ad_list.keys())[int(parent)]][int(child)]["link"])
+            ads.append(ad_list[list(ad_list.keys())[int(parent)]][int(child)]["data"])
             self.decoded_subset = self.decoded_subset[4:]
         return ads

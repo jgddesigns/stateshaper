@@ -35,6 +35,8 @@ Example:
 # mod (optional, default=9973) - used for morphing calculations. only needs to be modified if specific determinism is needed. 
 engine = RunEngine(data, token_count)
 
+engine.start_engine()
+
 engine.run_engine()
 ```
 
