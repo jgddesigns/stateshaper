@@ -104,14 +104,11 @@ class Stateshaper:
     
 
     def generate_tokens(self, n):
-        """Generate a list of n tokens."""
         return [self.next_token(n) for _ in range(n)]
     
 
     def reverse_tokens(self, n):
-        """Generate a list of n tokens."""
         self.iteration -= 3
-
         return [self.next_token(n, False) for _ in range(n)]
     
 
@@ -120,11 +117,25 @@ class Stateshaper:
         return self.token_array 
     
     
+    # jumps to spot in array. 
+    # index is actual place in the array (0 not included). if 50 tokens were created, enter 50 to get the 50th token and 1 to get the first token. 
     def jump(self, index):
-        tokens = [self.next_token(index, False) for _ in range(index)] 
         self.reset()
-        return tokens[len(tokens)-1]
-    
+        if index > 0:
+            tokens = [self.next_token(index) for _ in range(index)] 
+        try:
+            return tokens[index-1]
+        except:
+            raise ValueError("Error in 'Stateshaper' class, 'jump' function. Can't find position in token stream. Please check the parameter value and try again.\n") 
+        
+
+    def jump_back(self, index):
+       if index >= self.iteration:
+           raise ValueError(f"Error in 'Stateshaper' class, 'jump_back' function. Jump back index '{index}' is greater than current iteration.\n") 
+       back = list(reversed(self.reverse_tokens(self.iteration - index)))
+       self.iteration += 3
+       return back[0]
+
 
     def reset(self):
         self.seed = self.original_seed
