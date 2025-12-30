@@ -25,7 +25,7 @@ In relevant areas, *Stateshaper* outperforms existing algorithms such as *Markov
 
 Uses an NPC behavior model to demostrate how *Stateshaper* can derive predictable actions from statsitcs. The output is created from memory, reproducible and reverisible. It is also **compressed** and obfuscated for privacy. Markov can do this based on probability, but the output is random rather than determined.
 
-There may be instances where Markov chain is preferred, but the highlight is that *Stateshaper* can do all Markov can and aditionally add compression and obfuscation. 
+There may be instances where Markov chain is preferred, but the highlight is that *Stateshaper* can do all Markov can and additionally add compression and obfuscation. 
 
 
 
