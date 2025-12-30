@@ -136,3 +136,15 @@ class Stateshaper:
         self.generate_tokens(length)
         return self.token_array 
     
+    
+    def jump(self, index):
+        tokens = [self.next_token(index, False) for _ in range(index)] 
+        self.reset()
+        return tokens[len(tokens)-1]
+    
+
+    def reset(self):
+        self.seed = self.original_seed
+        self.iteration = 1
+        self.prior_index = 0
+        self.token_array = []
