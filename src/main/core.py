@@ -6,14 +6,7 @@ from tools.TokenMap import TokenMap
 
 class Stateshaper:
 
-    def __init__(
-        self,
-        seed: Sequence[int],
-        vocab: Sequence[str],
-        constants: Dict[str, int] = None,
-        mod: int = 9973,
-        compound: list = None, 
-    ) -> None:
+    def __init__(self, seed, vocab, constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
         if not seed:
             raise ValueError("seed must be non-empty")
         if not vocab:
@@ -27,12 +20,7 @@ class Stateshaper:
         self.original_seed = [int(x) % mod for x in seed]
     
         self.vocab = vocab
-        self.constants = {
-            "a": 3,
-            "b": 5,
-            "c": 7,
-            "d": 11,
-        } if not constants else constants
+        self.constants = constants
         self.mod = mod
         self.compound = compound
        
@@ -43,13 +31,8 @@ class Stateshaper:
         self.seed_format = {
             "seed": self.seed,
             "vocab": self.vocab,
-            "constants": {
-                "a": 3,
-                "b": 5,
-                "c": 7,
-                "d": 11
-            }, 
-            "mod": 9973
+            "constants": self.constants,
+            "mod": self.mod
         }
 
         if compound:
@@ -75,7 +58,7 @@ class Stateshaper:
 
         index = self.get_index()
 
-        token = self.token_map.get_token(index) if not self.compound_token else self.compound_token(index)
+        token = self.token_map.get_token(index) if not self.compound else self.compound_token(index)
 
         self.seed = self.morph.morph(self.seed_format, self.iteration) if self.iteration < n or forward == False else self.seed
 
