@@ -25,6 +25,18 @@ class Vocab:
         self.debug = True
         self.data = data 
 
+        try:
+            self.random_mods = data["random_mods"]
+        except:
+            self.random_mods = [10, 7]
+
+        try:
+            self.random_constants = data["random_constants"]
+        except:
+            self.random_constants = [2, 3, 5, 8]
+
+            
+
         self.rule_types = ["random", "rating", "compound", "token"]
 
         self.rules_explained = {
@@ -206,7 +218,7 @@ class Vocab:
 
 
     def random_mapping(self):
-        vocab = [i["data"] for i in self.data["input"] if self.data["input"].index(i) % randint(2, 5) == 0]
+        vocab = [i["data"] for i in self.data["input"] if self.data["input"].index(i) % (self.random_mods[0] if self.data["input"].index(i) % 2 == 0 else self.random_mods[1]) in self.random_constants]
         self.vocab = vocab
 
 
@@ -226,8 +238,6 @@ class Vocab:
 
         self.set_preferences(input)
 
-        # print(input)
-        # print(self.data["input"])
         i = 0
         for interest in self.data["input"]:        
             key = list(interest.keys())[0]
@@ -241,8 +251,6 @@ class Vocab:
                         side.append(item["item"])
             i += 1
 
-        # print(export)
-        # sys.exit()
 
         full_list = export + partial + side
         while len(personal) < self.data["length"]:
