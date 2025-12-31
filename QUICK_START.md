@@ -13,11 +13,17 @@ To create the same output again, *start_engine* needs to be called once more.
 
 2. Initialize a *RunEngine* class 
 
+
+**IMPORTANT!**
+***To create determinism, the same initial state, constants and mod value are required each time the engine starts.***
+***Not needed if no custom values were passed originally***
+
 ```python
 from .run import RunEngine 
 
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
 # token_count (default=10) - The desired size of the list containing your input terms.
+# initial_state (default=[66, 67, 54, 3, 34]) - The original starting values to base the chain on.
 # constants (optional) - Only change this for custom morphing equations.
 # mod (optional) - Only change this for custom morphhing equations
 
@@ -25,9 +31,17 @@ from .run import RunEngine
 engine = RunEngine(data=your_data, token_count=needed_tokens)
 
 #CUSTOM
-engine = RunEngine(data=your_data, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
+engine = RunEngine(data=your_data, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
 
 engine.start_engine()
+
+
+# TO GET NEEDED VALUES TO RE-CREATE THE SAME OUTPUT
+# Not needed if no custom values were originally passed.
+engine.get_seed()
+
+# With compressed vocab
+engine.get_seed(vocab=True)
 ```
 
 
@@ -39,6 +53,17 @@ engine.run_engine()
 # OUTPUT    
 #
 # ["your", "input", "values", "are", "returned", "based", "on", "chosen", "stateshaper", "rules"]
+```
+
+
+4. OPTIONAL Call the *rebuild* method or re-instantiate the class to start from the beginning.
+
+```python
+engine.rebuild()
+
+# OR
+
+engine = RunEngine(data=your_data, token_count=needed_tokens)
 ```
 
 
