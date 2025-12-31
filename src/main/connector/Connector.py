@@ -69,7 +69,7 @@ class Connector:
         print(self.compressed_vocab)
 
         print("\n\n\nCompressed Full Seed:\n")
-        self.engine["vocab"] = self.compressed_vocab
+        self.engine["vocab"] = self.compressed_vocab 
         print(self.engine)
 
         self.output_seed()
