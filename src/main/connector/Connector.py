@@ -51,7 +51,7 @@ class Connector:
 
 
 
-    def start_connect(self):
+    def start_connect(self, format=None):
         self.build_seed()
         self.engine = {
             "state": self.state,
@@ -69,7 +69,7 @@ class Connector:
         print(self.compressed_vocab)
 
         print("\n\n\nCompressed Full Seed:\n")
-        self.engine["vocab"] = self.compressed_vocab 
+        self.engine["vocab"] = self.compressed_vocab if format else self.engine["vocab"]
         print(self.engine)
 
         self.output_seed()
@@ -155,17 +155,17 @@ class Connector:
             data["compound_terms"] = [" "]
 
 
-    def build_seed(self):
+    def build_seed(self, random=None):
         self.vocab = self.get_vocab()
 
-        if self.data["rules"] == "random":
-            self.mod = random.randint(123, 9999)
-            self.state = [random.randint(1, self.mod) for _ in range(5)]
-            self.constants = self.get_constants()
-        else:
-            self.state = self.default_state
-            self.constants = self.default_constants
-            self.mod = self.default_mod
+        # if self.data["rules"] == "random":
+        #     self.mod = random.randint(123, 9999) if random else self.mod
+        #     self.state = [random.randint(1, self.mod) for _ in range(5)] if random else self.default_state
+        #     self.constants = self.get_constants() if random else self.constants
+        # else:
+        self.state = self.default_state
+        self.constants = self.default_constants
+        self.mod = self.default_mod
 
 
     def get_constants(self):
