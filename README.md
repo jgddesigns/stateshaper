@@ -38,6 +38,13 @@ https://stateshaper-ads.vercel.app
 Demonstrates the engine's ability to generate data based on personalization. Ads shown are based on user preference ratings and can be adjust in the app. The data needed to recreate the entire profile is condensed into a ~50-250 byte JSON string. 
 
 
+*Lesson Plans Demo*
+
+https://stateshaper-lessons.vercel.app
+
+An example of a personalized learning plan based on a student's performance. Condenses the entire profile into a small seed. 
+
+
 *Tiny State Compression*
 
 https://tiny-state.streamlit.app
