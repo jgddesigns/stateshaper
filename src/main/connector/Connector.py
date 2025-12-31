@@ -106,10 +106,9 @@ class Connector:
 
         try:
             isinstance(data["length"], int)
-            self.token_count = data["length"]
         except:
             data["length"] = 10
-            self.token_count = 10
+
 
 
     def check_random(self, data):

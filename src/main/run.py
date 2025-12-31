@@ -17,7 +17,7 @@ class RunEngine:
             print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
             sys.exit()
 
-        self.connector = Connector(self.data)
+        self.connector = Connector(self.data, token_count)
 
         self.tiny_state = TinyState()
 

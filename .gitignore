@@ -9,4 +9,4 @@ build/
 .vscode/
 .DS_Store
 d.bat
-src/main/debug.py
+src/main/demo.py
