@@ -8,3 +8,5 @@ build/
 .idea/
 .vscode/
 .DS_Store
+run.bat
+src/main/debug.py

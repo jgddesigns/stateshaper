@@ -1,7 +1,6 @@
 import sys
 from connector.Connector import Connector
 from core import Stateshaper
-from tests.Tests import Tests
 from tools.tiny_state.TinyState import TinyState
 
 

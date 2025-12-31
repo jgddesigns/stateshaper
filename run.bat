@@ -1,3 +1,3 @@
 set PYTHONPATH=D:\mse\stateshape
 
-python src\main\run.py
+python src\main\debug.py

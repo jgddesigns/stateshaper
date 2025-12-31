@@ -1,4 +1,4 @@
-from lesson_list import lesson_list
+from .lesson_list import lessons_list
 
 class LessonPlan:
 
@@ -13,6 +13,6 @@ class LessonPlan:
 
     def adjust_related(self, question, answer):
         adjust = 5 if answer == True else -5
-        for item in lesson_list:
+        for item in lessons_list:
             for term in item[list(item.keys())[0]]["data"]:
                 term["rating"] = term["rating"] + adjust if len([x for x in term["attributes"] if question == x]) > 0 else term["rating"]
