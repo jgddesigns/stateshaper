@@ -376,18 +376,19 @@ stateshaper/
 |              ├── Modify.py
 |              ├── Vocab.py
 |              ├── CONNECTOR.md
-|        └── debug/
-|              ├── Print.py
 |        └── demos/
 |              └── ads
 |                    ├── ad_list.py
-|                    ├── Print.py
+|                    ├── Ads.py
 |              └── fintech
 |                    ├── coming soon
 |              └── infinite_map
 |                    ├── coming soon
 |              └── inventory
 |                    ├── coming soon
+|              └── lesson_plan
+|                    ├── lessons_list.py
+|                    ├── LessonPlan.py
 |              └── meal_plan
 |                    ├── coming soon
 |              └── smart_home

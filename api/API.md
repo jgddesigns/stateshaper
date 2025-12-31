@@ -1,4 +1,4 @@
-***API CONNECTOR**
+# *API CONNECTOR*
 
 The API Connector has been designed for use with apps using the *Stateshaper* engine to create personalized content. It works in conjunction with the *RunEngine* class. This is the main class used to build and run the engine. It includes the *Connector* class and any plugin classes if needed. Any data from these can be passed into te API. Here is an example:
 

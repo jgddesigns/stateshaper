@@ -1,6 +1,6 @@
 
 import random
-from debug.Print import Print
+
 
 
 class Tests:
@@ -9,45 +9,44 @@ class Tests:
     def __init__(self, debug=True, **kwargs):
         super().__init__(**kwargs)
 
-        self.print = Print(debug)
         
 
     
     # creates chain of deterministic output based on seed, then steps backward to see if the same output can be recreated. if so, this indicates deterministic states that can be traversed both forward and in reverse. 
     def reversibility(self, engine, x):
-        self.print.p("\n\n\n\nREVERSIBILITY TEST\n\n")
-        self.print.p("\n" + engine["compare"].upper() + "\n")
-        self.print.p("\n\nforward step\n", True)
+        print("\n\n\n\nREVERSIBILITY TEST\n\n")
+        print("\n" + engine["compare"].upper() + "\n")
+        print("\n\nforward step\n")
        
         forward = engine["forward"](x)
-        self.print.p(forward, True)
-        self.print.p("\n\n\nreverse step\n", True)
+        print(forward)
+        print("\n\n\nreverse step\n")
         reverse = engine["reverse"](x)
-        self.print.p(reverse, True)
+        print(reverse)
         
         result = True if list(reversed(reverse)) == forward else False
-        self.print.s(2, True)
-        self.print.p(engine["compare"].upper() + " Test Result: " + str(result) + ", list is reversible.")
-        self.print.s(2, True)
+        
+        print(engine["compare"].upper() + " Test Result: " + str(result) + ", list is reversible.")
+        
         return result
     
 
     # creates output based on seed parameters, then attempts to recreate that output using the same seed. matching outputs confirms that the seed creates a deterministic sequence. 
     def determinism(self, engine, x, existing):
-        self.print.p("\n\n\n\nDETERMINISTIC TEST\n\n")
-        self.print.p("\n" + engine["compare"].upper() + "\n")
-        self.print.p("\n\nfirst output\n", True)
-        self.print.p(existing, True)
+        print("\n\n\n\nDETERMINISTIC TEST\n\n")
+        print("\n" + engine["compare"].upper() + "\n")
+        print("\n\nfirst output\n")
+        print(existing)
 
-        self.print.p("\n\nsecond output\n", True)
+        print("\n\nsecond output\n")
         current = engine["run"](x)
-        self.print.p(current, True)
+        print(current)
 
         result = True if existing == current else False
-        self.print.p(result, True)
-        self.print.s(2, True)
-        self.print.p(engine["compare"].upper() + " Test Result: " + str(result) + ", lists are matching.")
-        self.print.s(2, True)
+        print(result)
+        
+        print(engine["compare"].upper() + " Test Result: " + str(result) + ", lists are matching.")
+        
         return [result, current]
     
 
@@ -76,22 +75,22 @@ class Tests:
         stateshaper = '{"s":[66,67,54,3,34],"v":["AAA01005","578ACDEXF"]}'
         other = '{"s":[0, 4, 5, 6, 2, 2, 2, 5, 6, 8], "r":' + self.get_ratings(length) + '}'
 
-        self.print.s(2)
-        self.print.p("\n\nTINY_STATE test comparison for " + str(length) + " items")
-        self.print.s(2)
-        self.print.p("Original Data Sample Format (length varies):\n")
-        self.print.p(data)
-        self.print.s(2)
-        self.print.p("STATESHAPER Stored Data Size - " + str(len(stateshaper)) + " bytes\n")
-        self.print.p(stateshaper)
-        self.print.s(2)
-        self.print.p("STANDARD Stored Data Size - " + str(len(other)) + " bytes\n")
-        self.print.p(other)
-        self.print.s(2)
+        
+        print("\n\nTINY_STATE test comparison for " + str(length) + " items")
+        
+        print("Original Data Sample Format (length varies):\n")
+        print(data)
+        
+        print("STATESHAPER Stored Data Size - " + str(len(stateshaper)) + " bytes\n")
+        print(stateshaper)
+        
+        print("STANDARD Stored Data Size - " + str(len(other)) + " bytes\n")
+        print(other)
+        
 
-        self.print.p("STATESHAPER is smaller than " + compare + " by " + self.get_percent([len(stateshaper), len(other)]) + "%" if len(stateshaper) < len(other) else compare + " is smaller than STATESHAPER by " + self.get_percent([len(other), len(stateshaper)]) + "%" if len(other) < len(stateshaper) else "Both algorithms have an equal storage size.")
+        print("STATESHAPER is smaller than " + compare + " by " + self.get_percent([len(stateshaper), len(other)]) + "%" if len(stateshaper) < len(other) else compare + " is smaller than STATESHAPER by " + self.get_percent([len(other), len(stateshaper)]) + "%" if len(other) < len(stateshaper) else "Both algorithms have an equal storage size.")
 
-        self.print.s(2)
+        
 
 
     def get_ratings(self, length):

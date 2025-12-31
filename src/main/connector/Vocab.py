@@ -1,6 +1,3 @@
-from random import randint
-import sys
-
 # Used to define the vocab terms used in Stateshaper.
 
 # Data parameter format is dict/json with the following key/value pairs:

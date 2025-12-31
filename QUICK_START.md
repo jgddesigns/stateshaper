@@ -1,4 +1,4 @@
-**QUICK START GUIDE**
+# *QUICK START GUIDE*
 
 
 The Stateshaper Engine will give you a list/array of deterministic events or variables to use in your logic. 
