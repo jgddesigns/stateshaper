@@ -155,14 +155,8 @@ class Connector:
             data["compound_terms"] = [" "]
 
 
-    def build_seed(self, random=None):
+    def build_seed(self):
         self.vocab = self.get_vocab()
-
-        # if self.data["rules"] == "random":
-        #     self.mod = random.randint(123, 9999) if random else self.mod
-        #     self.state = [random.randint(1, self.mod) for _ in range(5)] if random else self.default_state
-        #     self.constants = self.get_constants() if random else self.constants
-        # else:
         self.state = self.default_state
         self.constants = self.default_constants
         self.mod = self.default_mod
