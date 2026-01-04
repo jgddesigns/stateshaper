@@ -2,8 +2,6 @@ import random
 from tools.tiny_state.TinyState import TinyState
 from .Vocab import Vocab
 from .Modify import Modify
-import os
-import sys
 
 
 
@@ -11,7 +9,7 @@ import sys
 class Connector:
 
 
-    def __init__(self, data, token_count=10, constants=None, mod=None, **kwargs):
+    def __init__(self, data, token_count=10, initial_state=None, constants=None, mod=None, **kwargs):
         super().__init__(**kwargs)
         if data["rules"] == "rating":
             data["length"] = len(data["input"]) if data["length"] > len(data["input"]) else data["length"]
@@ -20,7 +18,7 @@ class Connector:
         self.modify = Modify(data)
         self.tiny_state = TinyState()
 
-        self.default_state = [66, 67, 54, 3, 34]
+        self.initial_state = initial_state
         self.default_constants = {
             "a": 3,
             "b": 5,
@@ -79,39 +77,34 @@ class Connector:
         print("\nSize: " + str(len(str(self.compressed_seed))) + " bytes\n\n\n")
         
         return self.engine
+    
 
 
-    def output_seed(self):
+    def output_seed(self, vocab=False):
         seed = {}
 
-        if self.engine["state"] != self.default_state:
-            seed["s"] = self.engine["state"]  
-
-        seed["v"] = self.compressed_vocab
-
-        if self.engine["constants"] != self.default_constants:
-            seed["c"] = self.engine["constants"]
-
-
-        if self.engine["mod"] != self.default_mod:
-            seed["m"] = self.engine["mod"]
+        seed["s"] = self.engine["state"]  
+        seed["v"] = self.compressed_vocab if vocab == True else ""
+        seed["c"] = self.engine["constants"]
+        seed["m"] = self.engine["mod"]
 
         self.compressed_seed = seed  
+
+        return seed
 
 
     def check_input(self, data, constants):
         if data and isinstance(data, dict) == False and isinstance(data, list) == False: 
             print("\nData input is invalid. The input requires 'dict' or 'list' format.")
 
-        if constants and (isinstance(constants, list) == False or len([i for i in constants if isinstance(i, int) == False] > 0)):
-            print("\nConstants parameter is invalid. It needs to be a list containing integer values.")
+        if constants and (isinstance(constants, dict) == False or len([constants[i] for i in list(constants.keys()) if isinstance(constants[i], int) == False]) > 0):
+            print("\nConstants parameter is invalid. It needs to be a dict with keys containing integer values.")
 
         try:
             isinstance(data["length"], int)
-            self.token_count = data["length"]
         except:
             data["length"] = 10
-            self.token_count = 10
+
 
 
     def check_random(self, data):
@@ -157,7 +150,7 @@ class Connector:
 
     def build_seed(self):
         self.vocab = self.get_vocab()
-        self.state = self.default_state
+        self.state = self.initial_state
         self.constants = self.default_constants
         self.mod = self.default_mod
 
@@ -183,7 +176,7 @@ class Connector:
         
 
     def get_state(self):
-        return [66, 67, 54, 3, 34] 
+        return self.initial_state
 
 
     def assign_constants(self, constants=None):

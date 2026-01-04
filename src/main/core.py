@@ -120,7 +120,7 @@ class Stateshaper:
     # jumps to spot in array. 
     # index is actual place in the array (0 not included). if 50 tokens were created, enter 50 to get the 50th token and 1 to get the first token. 
     def jump(self, index):
-        self.reset()
+        self.rebuild()
         if index > 0:
             tokens = [self.next_token(index) for _ in range(index)] 
         try:
@@ -137,7 +137,7 @@ class Stateshaper:
        return back[0]
 
 
-    def reset(self):
+    def rebuild(self):
         self.seed = self.original_seed
         self.iteration = 1
         self.prior_index = 0

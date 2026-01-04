@@ -1,4 +1,4 @@
-**DEMOS**
+# *DEMOS*
 
 
 This directory contains demos for various applications that can benefit from *Stateshaper*.
@@ -9,6 +9,14 @@ Ads:
 
     A targeted ad content generator demonstrating the compression ability of the *Stateshaper* engine.
 
+    *stateshaper-ads.vercel.app*
+
+
+Lesson Plan:
+
+    Individualized study questions for students based on their activity. 
+
+    *stateshaper-lessons.vercel.app*
 
 
 

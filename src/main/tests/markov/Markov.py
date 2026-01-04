@@ -1,9 +1,5 @@
 import random
 from core import Stateshaper
-
-import os
-import sys
-
 from tests.Tests import Tests
 
 
@@ -17,7 +13,7 @@ class Markov:
         super().__init__(**kwargs)
 
         self.tests = Tests()
-        self.print = self.tests.print
+
 
         self.test_count = 1
         self.step_count = 50
@@ -57,10 +53,10 @@ class Markov:
         i = 0
         states = []
         while i < self.test_count:
-            self.print.p(f"\nTest #{i+1}", True)
-            self.print.p("\n\nMarkov Chain Output:\n", True)
+            print(f"\nTest #{i+1}")
+            print("\n\nMarkov Chain Output:\n")
             for step in range(self.step_count):
-                self.print.p(str(step+1) + " " + self.state, True)
+                print(str(step+1) + " " + self.state)
                 states.append(self.state)
                 self.prev_state = self.state
                 self.state = self.next_state()
@@ -74,10 +70,10 @@ class Markov:
         i = 0
         states = []
         while i < self.test_count:
-            self.print.p(f"\nTest #{i+1}", True)
-            self.print.p("\n\nMarkov Chain Output (Reverse Test):\n", True)
+            print(f"\nTest #{i+1}")
+            print("\n\nMarkov Chain Output (Reverse Test):\n")
             for step in range(self.step_count):
-                self.print.p("#" + str(step+1) + " " + self.state, True)
+                print("#" + str(step+1) + " " + self.state)
                 states.append(self.state)
                 self.prev_state = self.state
                 self.state = self.next_state()
@@ -118,8 +114,8 @@ class Markov:
 
         sorted_items = dict(sorted(data.items(), key=lambda x: x[1], reverse=True))
  
-        self.print.p("\n\nStateshaper deterministic values\n", True)
-        self.print.p(sorted_items, True)
+        print("\n\nStateshaper deterministic values\n")
+        print(sorted_items)
 
         return list(sorted_items.keys())[:3]
 
@@ -132,12 +128,8 @@ class Markov:
 
 
     def stateshaper_standard(self):
-        # self.define_stateshaper() 
         self.tokens = self.engine.generate_tokens(self.step_count) 
-        self.self.print.p_tokens()
-
-        # Markov generates values based on rating, with no memory. 
-        # stateshaper generates values based on seed output, with memory. always the same output given the same seed. if no particular order is needed, no need to test seed prior to setting the vocab. 
+        self.print_tokens()
 
 
     def stateshaper_personal(self):
@@ -156,19 +148,19 @@ class Markov:
 
         sorted_items = dict(sorted(data.items(), key=lambda x: x[1], reverse=True))
  
-        self.print.p("\n\nStateshaper personalization values\n")
-        self.print.p(sorted_items)
+        print("\n\nStateshaper personalization values\n")
+        print(sorted_items)
 
         return list(sorted_items.keys())[:3]
 
 
     def print_tokens(self):
-        self.print.p()
+        print()
         i = 1
         for token in self.tokens:
-            self.print.p(f"{str(i)} {token}")
+            print(f"{str(i)} {token}")
             i += 1
-        self.print.p("\n\n")
+        print("\n\n")
 
 
     def markov_standard(self):
@@ -235,8 +227,8 @@ class Markov:
         self.step_count = length
         passed = 0 
         i = 0
-        self.print.s(2)
-        self.print.p("REVERSIBILITY TEST (MARKOV)\n" if markov == True else "\nREVERSIBILITY TEST (STATESHAPER)\n")
+        
+        print("REVERSIBILITY TEST (MARKOV)\n" if markov == True else "\nREVERSIBILITY TEST (STATESHAPER)\n")
         while i < length:
             self.define_stateshaper()
             result = self.tests.reversibility({"compare": "markov", "forward": self.run, "reverse": self.reverse}, "standard") if markov == True else self.tests.reversibility({"compare": "stateshaper", "forward": self.engine.generate_tokens, "reverse": self.engine.reverse_tokens}, count)
@@ -245,8 +237,8 @@ class Markov:
             i += 1
 
         self.print.s(1)
-        self.print.p(str(passed) + " Tests Passed out of " + str(length))
-        self.print.s(2)
+        print(str(passed) + " Tests Passed out of " + str(length))
+        
 
 
     def get_names(self):
@@ -259,28 +251,28 @@ class Markov:
         passed = 0 
         i = 0
         name = self.get_names()
-        self.print.s(2)
-        self.print.p("DETERMINISTIC TEST (MARKOV)\n" if markov == True else "\nDETERMINISTIC TEST (STATESHAPER)\n")
+        
+        print("DETERMINISTIC TEST (MARKOV)\n" if markov == True else "\nDETERMINISTIC TEST (STATESHAPER)\n")
         while i < length:
             self.define_stateshaper("deterministic")
             first_run = self.engine.generate_tokens(count)
             print(f"\n\n\nTest #{i+1}\n")
             print("\nInitial Test:\n")
             for action in first_run:
-                self.print.p(name + " " + action)
+                print(name + " " + action)
             print("\n")
             self.engine.iteration = 1
             result = self.tests.determinism({"compare": "markov", "run": self.run}, "personal", self.run("personal")) if markov == True else self.tests.determinism({"compare": "stateshaper", "run": self.engine.generate_tokens}, count, first_run)
             print("\nNext Test:\n")
             for j in range(len(result[1])):
-                self.print.p(name + " " + result[1][j])
+                print(name + " " + result[1][j])
             passed = passed + 1 if result[0] == True else passed
             print("\nMatch: " + str(result[0]))
             i += 1
 
         self.print.s(1)
-        self.print.p(str(passed) + " Tests Passed out of " + str(length))
-        self.print.s(2)        
+        print(str(passed) + " Tests Passed out of " + str(length))
+                
 
 
     def compression_test(self, length):

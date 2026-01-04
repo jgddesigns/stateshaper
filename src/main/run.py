@@ -8,7 +8,7 @@ from tools.tiny_state.TinyState import TinyState
 
 class RunEngine:
 
-    def __init__(self, data=None, token_count=10, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
+    def __init__(self, data=None, token_count=10, initial_state=[66, 67, 54, 3, 34], constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         super().__init__(**kwargs)
 
         if isinstance(data, dict):
@@ -17,7 +17,7 @@ class RunEngine:
             print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
             sys.exit()
 
-        self.connector = Connector(self.data)
+        self.connector = Connector(self.data, token_count, initial_state, constants, mod)
 
         self.tiny_state = TinyState()
 
@@ -55,3 +55,9 @@ class RunEngine:
         return self.tokens
     
 
+    def rebuild(self):
+        self.engine.rebuild()
+
+
+    def get_seed(self, vocab=False):
+        return self.connector.output_seed(vocab)

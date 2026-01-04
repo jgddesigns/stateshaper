@@ -1,6 +1,3 @@
-from typing import Sequence
-
-
 class TokenMap:
     """Maps integer indices to tokens from a fixed vocabulary."""
 
