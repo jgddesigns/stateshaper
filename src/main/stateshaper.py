@@ -8,7 +8,7 @@ from tools.tiny_state.TinyState import TinyState
 
 class RunEngine:
 
-    def __init__(self, data=None, token_count=10, initial_state=[66, 67, 54, 3, 34], constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
+    def __init__(self, data=None, vocab=None, token_count=10, initial_state=[66, 67, 54, 3, 34], constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         super().__init__(**kwargs)
 
         if isinstance(data, dict):
@@ -17,7 +17,7 @@ class RunEngine:
             print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
             sys.exit()
 
-        self.connector = Connector(self.data, token_count, initial_state, constants, mod)
+        self.connector = Connector(self.data, vocab, token_count, initial_state, constants, mod)
 
         self.tiny_state = TinyState()
 
@@ -33,7 +33,7 @@ class RunEngine:
         self.seed = self.connector.start_connect() if not self.seed else self.default_seed
         self.default_seed = self.seed if not self.default_seed else self.default_seed
 
-        self.define_engine(['AAA05101', '87LRS01234569ABCDEFGHIJKMNOPQTUVWXYZabcdefghijklmno'])
+        self.define_engine()
 
 
     def define_engine(self, seed=None):
@@ -41,8 +41,7 @@ class RunEngine:
         if seed: 
             if self.check_format(seed):
                 engine_vocab = self.connector.get_personalization(seed[0], seed[1], self.rating_test())
-                # print(engine_vocab)
-                # sys.exit()
+
 
         self.engine = Stateshaper(
             self.seed["state"],

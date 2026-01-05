@@ -10,6 +10,8 @@ class DeriveVocab:
 
         self.vocab = None
 
+        self.original_data = None
+
         self.master_rankings = None
 
         self.derived_rankings = None
@@ -47,13 +49,16 @@ class DeriveVocab:
 
 
     def initial_rankings(self, data=None):
-        data = data if data else self.test_data()
+        data = self.original_data = data if data else self.test_data()
         rankings = {}
         similarities = {}
 
         for item in data["input"]:
             rankings[list(item.keys())[0]] = list(item.values())[0]["rating"]
-            similarities[list(item.keys())[0]] = list(item.values())[0]["data"]["attributes"]
+            try:
+                similarities[list(item.keys())[0]] = list(item.values())[0]["data"]["attributes"]
+            except:
+                similarities[list(item.keys())[0]] = list(item.values())[0]["data"][0]["attributes"]
 
         self.master_rankings = rankings
         self.similarities = similarities
@@ -64,7 +69,7 @@ class DeriveVocab:
         
 
     def get_vocab(self, rankings, length=3):
-        self.vocab = self.sort_rankings(rankings)[:length]
+        self.vocab = self.sort_rankings(rankings)[:self.original_data["length"]]
         return self.vocab
         
 
@@ -82,6 +87,25 @@ class DeriveVocab:
         self.master_rankings = rankings
 
         return rankings
+    
+
+    def post_derived(self):
+        for item in self.original_data["input"]:
+            item[list(item.keys())[0]]["rating"] = self.master_rankings[list(item.keys())[0]]
+        self.sort_data(self.original_data)
+        for item in self.original_data["input"]:
+            item[list(item.keys())[0]].pop("rating", None)
+
+        return self.original_data
+    
+
+    def get_master(self):
+        return self.original_data
+    
+
+    def sort_data(self, data):
+        sort = sorted(data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
+        return sort
     
 
     def add_rankings(self, rankings, i, add):

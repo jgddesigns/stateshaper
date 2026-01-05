@@ -16,7 +16,6 @@ rankings = initial_rankings(input_dataset)
 ```
 
 
-
 *Altering Rankings*
 
 When activity relating to the data occurs in the app, a response string can be built that adjusts the preference ratings for that data.
@@ -24,16 +23,10 @@ When activity relating to the data occurs in the app, a response string can be b
 data = [True, ["strength_training", "sprint_speed", "strategy_game"]]
 ```
 
-This can be added to a list and used in the *DeriveVocab* class function **'adjust_rankings'**. It is passed as a parameter, along with the master dataset (minus original ratings)
+This can be added to a list and used in the *DeriveVocab* class function **'adjust_rankings'**. It is passed as a parameter, along with the master dataset (minus original ratings). The new vocab is returned.
 ```python
-rankings = adjust_rankings(input, data)
+vocab = adjust_rankings(input, data)
 ```
-
-Once the ratings have been updated, you can create a new vocab. The length of the new list can be adjusted if necessary, and defaults at 3.
-```python
-vocab = get_vocab(rankings)
-```
-
 
 
 # Initial Data Example

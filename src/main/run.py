@@ -47,13 +47,18 @@ class RunEngine:
 
 
     def run_engine(self):
+
         self.tokens = self.engine.generate_tokens(self.connector.token_count)
         
-        print("\n\nTokens successfully generated from vocab.\n")
-        print(self.tokens)
+        print("\n\nTokens successfully generated from vocab.rearrrag")
 
         return self.tokens
     
+
+    def adjust_derived(self):
+        print(self.engine.connector.engine["vocab"])
+        print(self.engine.connector.vocab_obj.derive_vocab.adjust_rankings(self.engine.connector.vocab_obj.derive_vocab.test_input(), self.get_derived()))
+
 
     def rebuild(self):
         self.engine.rebuild()

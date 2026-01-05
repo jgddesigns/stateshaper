@@ -70,7 +70,7 @@ class Stateshaper:
             self.iteration -= 1
 
         return token
-    
+
 
     def compound_token(self, index):
         compounds = [self.token_map.get_token(index)]
@@ -104,8 +104,13 @@ class Stateshaper:
     
 
     def generate_tokens(self, n):
-        return [self.next_token(n) for _ in range(n)]
-    
+        self.generated_tokens = [self.next_token(n) for _ in range(n)]
+        return self.generated_tokens
+
+
+    def retrieve_token(self, pos):
+        return self.generated_tokens[pos-1]
+
 
     def reverse_tokens(self, n):
         self.iteration -= 3

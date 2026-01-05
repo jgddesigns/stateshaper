@@ -1,3 +1,4 @@
+import sys
 from stateshaper import RunEngine
 
 
@@ -13,18 +14,21 @@ class Demo:
 
 
     def start(self):
-        self.engine = RunEngine(self.get_data(), token_count=50, initial_state=[5, 34, 564, 43, 85], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=5459)
-
-        # self.engine = RunEngine(self.get_data(), token_count=1000)
+        self.engine = RunEngine(self.get_compound(), token_count=1000, initial_state=[5, 34, 564, 43, 85], constants={"a": 3, "b": 5, "c": 6, "d": 11}, mod=5459)
+        # self.engine = RunEngine(self.get_ratings())
 
         self.engine.start_engine()
 
         self.engine.run_engine()
 
-        print("\n\n\n")
+        # for i in range(100):
+        #     print(self.engine.engine.retrieve_token(i))
+
+        # print(self.engine.connector.engine["vocab"])
+        # print(self.engine.connector.vocab_obj.derive_vocab.adjust_rankings(self.engine.connector.vocab_obj.derive_vocab.test_input(), self.get_data()))
 
 
-    def get_data(self):
+    def get_ratings(self):
 
         return {
             "input": [
@@ -83,4 +87,151 @@ class Demo:
             "length": 10
         }
     
+
+    def get_random(self):
+        return {
+            "input": [
+                { "data": "rain" },
+                { "data": "snow" },
+                { "data": "hail" },
+                { "data": "sleet" },
+                { "data": "fog" },
+                { "data": "mist" },
+                { "data": "thunderstorm" },
+                { "data": "lightning" },
+                { "data": "tornado" },
+                { "data": "hurricane" },
+                { "data": "cyclone" },
+                { "data": "typhoon" },
+                { "data": "drizzle" },
+                { "data": "heat wave" },
+                { "data": "cold front" },
+                { "data": "warm front" },
+                { "data": "blizzard" },
+                { "data": "dust storm" },
+                { "data": "sandstorm" },
+                { "data": "monsoon" },
+                { "data": "rainbow" },
+                { "data": "frost" },
+                { "data": "dew" },
+                { "data": "overcast" },
+                { "data": "clear skies" }
+            ],
+            "rules": "random",
+            "length": 10
+        }
+
+
+    def get_compound(self):
+        return {
+            "input": [
+                {
+                    "data": "sausage",
+                    "groups": ["meat", "breakfast"]
+                },
+                {
+                    "data": "salad",
+                    "groups": ["vegetable", "lunch", "dinner"]
+                },
+                {
+                    "data": "pizza",
+                    "groups": ["italian", "lunch", "dinner"]
+                },
+                {
+                    "data": "pancakes",
+                    "groups": ["breakfast", "sweet"]
+                },
+                {
+                    "data": "bacon",
+                    "groups": ["meat", "breakfast"]
+                },
+                {
+                    "data": "eggs",
+                    "groups": ["breakfast", "protein"]
+                },
+                {
+                    "data": "burger",
+                    "groups": ["meat", "lunch", "dinner"]
+                },
+                {
+                    "data": "tacos",
+                    "groups": ["mexican", "lunch", "dinner"]
+                },
+                {
+                    "data": "sandwich",
+                    "groups": ["lunch", "fast"]
+                },
+                {
+                    "data": "soup",
+                    "groups": ["dinner", "comfort"]
+                },
+                {
+                    "data": "steak",
+                    "groups": ["meat", "dinner", "breakfast"]
+                },
+                {
+                    "data": "chicken",
+                    "groups": ["protein", "lunch", "dinner"]
+                },
+                {
+                    "data": "fish",
+                    "groups": ["seafood", "dinner"]
+                },
+                {
+                    "data": "pasta",
+                    "groups": ["italian", "dinner"]
+                },
+                {
+                    "data": "rice",
+                    "groups": ["grain", "side"]
+                },
+                {
+                    "data": "fries",
+                    "groups": ["side", "fast"]
+                },
+                {
+                    "data": "oatmeal",
+                    "groups": ["breakfast", "grain"]
+                },
+                {
+                    "data": "yogurt",
+                    "groups": ["breakfast", "dairy"]
+                },
+                {
+                    "data": "fruit bowl",
+                    "groups": ["fruit", "breakfast"]
+                },
+                {
+                    "data": "ice cream",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "cookies",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "cake",
+                    "groups": ["dessert", "sweet"]
+                },
+                {
+                    "data": "smoothie",
+                    "groups": ["drink", "healthy"]
+                },
+                {
+                    "data": "wrap",
+                    "groups": ["lunch", "fast"]
+                },
+                {
+                    "data": "cereal",
+                    "groups": ["breakfast", "grain"]
+                }
+            ],
+
+            "rules": "compound",
+            "length": 100,
+            "compound_length": 3,
+            "compound_groups": [["breakfast", 1], ["meat", 0]],
+            "compound_terms": ["and", "with"]
+        }
+
 Demo()

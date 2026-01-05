@@ -1,3 +1,8 @@
+from random import randint
+import sys
+
+from tools.derive_vocab.DeriveVocab import DeriveVocab
+
 # Used to define the vocab terms used in Stateshaper.
 
 # Data parameter format is dict/json with the following key/value pairs:
@@ -21,6 +26,7 @@ class Vocab:
         self.rule_types = None
         self.debug = True
         self.data = data 
+        self.derive_vocab = DeriveVocab()
 
         try:
             self.random_mods = data["random_mods"]
@@ -216,11 +222,12 @@ class Vocab:
 
     def random_mapping(self):
         vocab = [i["data"] for i in self.data["input"] if self.data["input"].index(i) % (self.random_mods[0] if self.data["input"].index(i) % 2 == 0 else self.random_mods[1]) in self.random_constants]
-        self.vocab = vocab
+        self.vocab = vocab[:self.data["length"]]
 
 
     def set_preferences(self, data, length=5):
-        self.top_preferences = data[:length]
+        # self.top_preferences = data[:length]
+        self.top_preferences = self.derive_vocab.initial_rankings(self.data)
 
 
     def rating_mapping(self):
@@ -235,7 +242,6 @@ class Vocab:
 
         self.set_preferences(input)
 
-        i = 0
         for interest in self.data["input"]:        
             key = list(interest.keys())[0]
             for item in interest[list(interest.keys())[0]]["data"]:
@@ -244,12 +250,11 @@ class Vocab:
                         export.append(item["item"])
                     elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
                         partial.append(item["item"])
-                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
+                    else:
                         side.append(item["item"])
-            i += 1
-
 
         full_list = export + partial + side
+
         while len(personal) < self.data["length"]:
             personal.append(full_list[len(personal)])
 

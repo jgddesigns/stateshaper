@@ -1,4 +1,5 @@
 import random
+import sys
 from tools.tiny_state.TinyState import TinyState
 from .Vocab import Vocab
 from .Modify import Modify
@@ -34,7 +35,6 @@ class Connector:
         self.constants = constants if constants else self.default_constants
         self.mod = mod if mod else self.default_mod
 
-        self.vocab = None 
         self.token_count = token_count
 
         self.compressed_seed = None
@@ -51,7 +51,7 @@ class Connector:
 
     def start_connect(self, format=None):
         self.build_seed()
-        self.engine = {
+        self.engine = self.minimal_seed = {
             "state": self.state,
             "vocab": self.vocab,
             "constants": self.constants,
@@ -68,11 +68,13 @@ class Connector:
 
         print("\n\n\nCompressed Full Seed:\n")
         self.engine["vocab"] = self.compressed_vocab if format else self.engine["vocab"]
+
         print(self.engine)
 
         self.output_seed()
 
         print("\n\n\nMinimal Output Seed:\n")
+        self.compressed_seed["v"] = self.compressed_vocab
         print(self.compressed_seed)
         print("\nSize: " + str(len(str(self.compressed_seed))) + " bytes\n\n\n")
         
@@ -169,8 +171,8 @@ class Connector:
 
     def get_vocab(self):
         if isinstance(self.data, dict):
-            self.vocab = Vocab(self.data)  
-            return self.vocab.define_vocab()
+            self.vocab_obj = Vocab(self.data)  
+            return self.vocab_obj.define_vocab()
         else:   
             print("no valid data")
         

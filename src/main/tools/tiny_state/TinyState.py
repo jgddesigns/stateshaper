@@ -8,7 +8,7 @@ from random import randint
 
 class TinyState:
 
-    def __init__(self, list_count=10, **kwargs):
+    def __init__(self, list_count=3, **kwargs):
         super().__init__(**kwargs)
 
         self.subset_alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -319,13 +319,15 @@ class TinyState:
                             export.append(f"{idx1:02d}{idx2:02d}")
                         elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
                             partial.append(f"{idx1:02d}{idx2:02d}")
-                        elif len([x for x in term["attributes"] if x in self.top_preferences]) > 0:
+                        else:
                             side.append(f"{idx1:02d}{idx2:02d}")
 
                     seed = seed + f"{idx1:02d}{idx2:02d}"
                     
             
             subseed = export + partial + side
+
+            subseed = subseed[:data["length"]]
 
             subseed = "".join(subseed)
 
@@ -411,7 +413,9 @@ class TinyState:
         origin_seed = self.decode(compressed_seed)
         decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset) 
         export = []
-        while len(export)<self.list_count:
+
+        data["length"] = 10
+        while len(export)<data["length"]:
             parent = decoded[:2]
             child = decoded[2:4]
             key = list(data["input"][int(parent)].keys())[0]
