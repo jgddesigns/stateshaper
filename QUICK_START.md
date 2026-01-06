@@ -22,6 +22,7 @@ To create the same output again, *start_engine* needs to be called once more.
 from .run import RunEngine 
 
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
+# seed (optional) - After the first time the engine is ran. Use a seed value to recreate the same output. All other parameters (except token count) must be matching. Included in the seed or otherwise. 
 # token_count (default=10) - The desired size of the list containing your input terms.
 # initial_state (default=[66, 67, 54, 3, 34]) - The original starting values to base the chain on.
 # constants (optional) - Only change this for custom morphing equations.
@@ -31,7 +32,7 @@ from .run import RunEngine
 engine = RunEngine(data=your_data, token_count=needed_tokens)
 
 #CUSTOM
-engine = RunEngine(data=your_data, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
+engine = RunEngine(data=your_data, seed=seed_from_first_run, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
 
 engine.start_engine()
 
@@ -63,7 +64,7 @@ engine.rebuild()
 
 # OR
 
-engine = RunEngine(data=your_data, token_count=needed_tokens)
+engine = RunEngine(data=your_data, seed=create_seed, token_count=needed_tokens)
 ```
 
 
