@@ -25,7 +25,6 @@ class LessonPlan:
 
     def after_test(self, results):
         for question in results:
-            print(question)
             self.adjust_related(question["question"]["question"], question["question"]["answer"])
         
     

@@ -155,7 +155,6 @@ engine = Stateshaper(
 
 # Generate 20 tokens. 
 tokens = [engine.next_token() for _ in range(20)]
-print(" ".join(tokens))
 # Example Output : ["tree", "tree", "pedestrian", "tree", "office building", "pedestrian", "pavement"....]
 
 # Use the tokens to call events.

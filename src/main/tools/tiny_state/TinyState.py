@@ -286,7 +286,7 @@ class TinyState:
         return self.decode_subset_seed(full_grid, compressed_subset)
     
     def set_preferences(self, data, length=5):
-        self.top_preferences = data[:length]
+        self.top_preferences = data[:self.data["length"]]
 
     def sort_ratings(self, data, length=5):
         sort = sorted(data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
@@ -294,6 +294,7 @@ class TinyState:
     
 
     def get_seed(self, data, vocab=None):
+
 
         self.set_count(data["length"])
 
@@ -308,6 +309,11 @@ class TinyState:
             input = self.sort_ratings(data)
 
             self.set_preferences(input)
+
+            # print("\n\nsorted in tiny class")
+            # print(self.top_preferences)
+            # print("\n\n")
+            # sys.exit()
 
             for item in data["input"]:
                 key = list(item.keys())[0]
@@ -414,13 +420,13 @@ class TinyState:
         decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset) 
         export = []
 
-        data["length"] = 10
         while len(export)<data["length"]:
             parent = decoded[:2]
             child = decoded[2:4]
             key = list(data["input"][int(parent)].keys())[0]
             export.append(data["input"][int(parent)][key]["data"][int(child)]["item"])
             decoded = decoded[4:]
+
         return export
     
 
@@ -432,4 +438,6 @@ class TinyState:
             index = decoded[:2]
             export.append(data["input"][int(index)]["data"])
             decoded = decoded[4:]
+        # print(export)
+        # sys.exit()
         return export

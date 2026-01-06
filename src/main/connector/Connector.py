@@ -10,7 +10,7 @@ from .Modify import Modify
 class Connector:
 
 
-    def __init__(self, data, token_count=10, initial_state=None, constants=None, mod=None, **kwargs):
+    def __init__(self, data, token_count=10, initial_state=None, constants=None, vocab=None, mod=None, **kwargs):
         super().__init__(**kwargs)
         if data["rules"] == "rating":
             data["length"] = len(data["input"]) if data["length"] > len(data["input"]) else data["length"]
@@ -30,7 +30,7 @@ class Connector:
 
         self.engine = None
         self.state = None
-        self.vocab = None
+        self.vocab = vocab if vocab else None
         self.compressed_vocab = None
         self.constants = constants if constants else self.default_constants
         self.mod = mod if mod else self.default_mod
@@ -47,6 +47,12 @@ class Connector:
 
         self.data = data
 
+        self.vocab_rules = {
+            "rating": self.get_personalization,
+            "random": self.get_data,
+            "compound": self.get_data
+        }
+
 
 
     def start_connect(self, format=None):
@@ -58,7 +64,7 @@ class Connector:
             "mod": self.mod
         }
 
-        self.compressed_vocab = self.compress_vocab()
+        # self.compressed_vocab = self.compress_vocab() if not self.compressed_vocab else self.compressed_vocab
 
         print("\n\n\nStateshaper Seed has been created:\n")
         print(self.engine)
@@ -66,7 +72,7 @@ class Connector:
         print("\n\n\nVocab is Compressed:\n")
         print(self.compressed_vocab)
 
-        print("\n\n\nCompressed Full Seed:\n")
+        print("\n\n\nFull Seed:\n")
         self.engine["vocab"] = self.compressed_vocab if format else self.engine["vocab"]
 
         print(self.engine)
@@ -151,7 +157,12 @@ class Connector:
 
 
     def build_seed(self):
-        self.vocab = self.get_vocab()
+        if self.vocab:
+            self.compressed_vocab = self.vocab
+            self.vocab = self.vocab_rules[self.data["rules"]](self.vocab[0], self.vocab[1], self.data)
+        else:
+            self.vocab = self.get_vocab()
+            self.compressed_vocab = self.compress_vocab()
         self.state = self.initial_state
         self.constants = self.default_constants
         self.mod = self.default_mod
@@ -170,12 +181,15 @@ class Connector:
 
 
     def get_vocab(self):
+        if self.vocab:
+            return True
         if isinstance(self.data, dict):
             self.vocab_obj = Vocab(self.data)  
             return self.vocab_obj.define_vocab()
         else:   
             print("no valid data")
-        
+
+
 
     def get_state(self):
         return self.initial_state

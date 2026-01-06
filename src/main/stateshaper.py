@@ -8,7 +8,7 @@ from tools.tiny_state.TinyState import TinyState
 
 class RunEngine:
 
-    def __init__(self, data=None, token_count=10, initial_state=[66, 67, 54, 3, 34], constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
+    def __init__(self, data=None, seed=None, token_count=10, initial_state=[66, 67, 54, 3, 34], vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         super().__init__(**kwargs)
 
         if isinstance(data, dict):
@@ -17,12 +17,30 @@ class RunEngine:
             print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
             sys.exit()
 
-        self.connector = Connector(self.data, token_count, initial_state, constants, mod)
+        if isinstance(seed, dict):
+            try:
+                initial_state = seed["s"] 
+            except:
+                initial_state = initial_state 
+            try:
+                vocab = seed["v"]
+            except:
+                vocab = vocab
+            try:
+                constants = seed["c"]
+            except:
+                constants = constants
+            try: 
+                mod = seed["m"] 
+            except: 
+                mod = mod
+
+
+        self.connector = Connector(self.data, token_count=token_count, initial_state=initial_state, vocab=vocab, constants=constants, mod=mod)
 
         self.tiny_state = TinyState()
 
         self.engine = None
-
         self.seed = None
         self.default_seed = None
 
@@ -37,15 +55,10 @@ class RunEngine:
 
 
     def define_engine(self, seed=None):
-        engine_vocab = self.seed["vocab"]
-        if seed: 
-            if self.check_format(seed):
-                engine_vocab = self.connector.get_personalization(seed[0], seed[1], self.rating_test())
-
 
         self.engine = Stateshaper(
             self.seed["state"],
-            engine_vocab,
+            self.seed["vocab"],
             self.seed["constants"],
             self.seed["mod"],
             [self.data["compound_length"], self.data["compound_modifier"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None

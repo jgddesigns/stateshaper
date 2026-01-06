@@ -232,11 +232,11 @@ class Vocab:
 
     def rating_mapping(self):
         print("\n\nStarting ratings based mapping.\n")
-        personal = []
         export = []
         partial = []
         side = []
         full_list = []
+
 
         input = self.sort_ratings()
 
@@ -255,11 +255,10 @@ class Vocab:
 
         full_list = export + partial + side
 
-        while len(personal) < self.data["length"]:
-            personal.append(full_list[len(personal)])
+        full_list = full_list[:self.data["length"]]
 
         print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.\n")
-        self.vocab = personal
+        self.vocab = full_list
 
 
     def sort_ratings(self, length=5):
