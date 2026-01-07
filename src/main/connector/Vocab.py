@@ -1,4 +1,7 @@
 from random import randint
+import sys
+
+from tools.derive_vocab.DeriveVocab import DeriveVocab
 
 # Used to define the vocab terms used in Stateshaper.
 
@@ -23,6 +26,19 @@ class Vocab:
         self.rule_types = None
         self.debug = True
         self.data = data 
+        self.derive_vocab = DeriveVocab()
+
+        try:
+            self.random_mods = data["random_mods"]
+        except:
+            self.random_mods = [10, 7]
+
+        try:
+            self.random_constants = data["random_constants"]
+        except:
+            self.random_constants = [2, 3, 5, 8]
+
+            
 
         self.rule_types = ["random", "rating", "compound", "token"]
 
@@ -30,10 +46,12 @@ class Vocab:
             "random": "The vocab consists of any terms within the input. If the length value is define_vocabd, the vocab list will include that many random values from the initial input data.",
             "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocabd, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
             "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of Stateshaper engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
+
+            # IN PROGRESS
             "token": "The vocab list will consist of objects or functions that are called during Stateshaper iterations. This will be based on a number ranking. If a length value is specified, the vocab list will be limited to that number. "
         }
 
-        self.compound_rules = ["random"] ##need more compound rules. matching terms? rating based?
+        self.compound_rules = ["random"] 
 
         self.mapping_types = {
             "random": self.random_mapping,
@@ -77,6 +95,7 @@ class Vocab:
             self.data["length"] = len(self.data["input"])
 
         print("\n\n")
+
         if isinstance(self.data, dict) == False:
             print("Data passed is in incorrect format. Please make sure it is a dict/json with keys 'input' (list) and 'rules' (string).")
             
@@ -98,6 +117,7 @@ class Vocab:
         else:
             print("The data has been accepted. Processing input to enter into Stateshaper...")
             self.define_vocab() if not self.data["rules"]  and not self.debug else self.define_vocab(self.data["rules"]) if not self.debug else self.test()
+
         print("\n\n")
 
 
@@ -201,45 +221,62 @@ class Vocab:
 
 
     def random_mapping(self):
-        self.vocab = self.data["input"]
+        vocab = [i["data"] for i in self.data["input"] if self.data["input"].index(i) % (self.random_mods[0] if self.data["input"].index(i) % 2 == 0 else self.random_mods[1]) in self.random_constants]
+        self.vocab = vocab[:self.data["length"]]
+
+
+    def set_preferences(self, data, length=5):
+        # self.top_preferences = data[:length]
+        self.top_preferences = self.derive_vocab.initial_rankings(self.data)
 
 
     def rating_mapping(self):
         print("\n\nStarting ratings based mapping.\n")
-        included = []
+        export = []
+        partial = []
+        side = []
+        full_list = []
+
 
         input = self.sort_ratings()
 
-        i = 0
-        while len(included) < self.data["length"]:
-            included.append(input[i]["data"])
-            i+=1
+        self.set_preferences(input)
 
-        self.vocab = included
+        for interest in self.data["input"]:        
+            key = list(interest.keys())[0]
+            for item in interest[list(interest.keys())[0]]["data"]:
+                if len(export) < self.data["length"]:
+                    if len([x for x in item["attributes"] if x in self.top_preferences and key == self.top_preferences[0]]) > 0:
+                        export.append(item["item"])
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0 and len([y for y in self.top_preferences if key == y]) > 0:
+                        partial.append(item["item"])
+                    else:
+                        side.append(item["item"])
 
-        print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.")
+        full_list = export + partial + side
+
+        full_list = full_list[:self.data["length"]]
+
+        print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.\n")
+        self.vocab = full_list
 
 
-    def sort_ratings(self):
-        print(self.data["input"])
-        return sorted(self.data["input"], key=lambda x: x["rating"], reverse=True)
+    def sort_ratings(self, length=5):
+        sort = sorted(self.data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
+        return [list(i.keys())[0] for i in sort]
     
 
     def compound_mapping(self):
-        self.vocab = "compound_mapping"
-        self.compound_vocab = self.data["input"] if self.data["length"] == len(self.data["input"]) else self.compound_map()
+        if self.data["compound_groups"]:
+            mandatory = [item[0] for item in self.data["compound_groups"] if item[1] == 1]
+            groups = [group[0] for group in self.data["compound_groups"]]
+            included = [item["data"] for item in self.data["input"] if any(x in item["groups"] for x in groups) and any(x in item["groups"] for x in mandatory)]
+        else:
+            included = [item["data"] for item in self.data["input"]]
 
-        print(f"\nStateshaper vocab parameter successfully set with 'compound' rule. Length: " + str(self.data["length"]))
+        self.vocab = included
 
-
-    def compound_map(self):
-        included = []
-
-        while len(included) < self.data["length"]:
-            data = self.data["input"][randint(0, len(self.data["input"])-1)]
-            included.append(data) if data not in included else None
-
-        return included
+        print(f"\nStateshaper vocab parameter successfully set with 'compound' rule.")
 
 
     def token_mapping(self):
@@ -255,7 +292,7 @@ class Vocab:
 
         self.vocab = included
 
-        print(f"\nStateshaper vocab parameter successfully set with 'token' rule. Length: " + str(self.data["length"]))
+        print(f"\nStateshaper vocab parameter successfully set with 'token' rule.")
 
 
     def sort_token(self):
