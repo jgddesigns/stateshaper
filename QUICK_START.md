@@ -19,20 +19,23 @@ To create the same output again, *start_engine* needs to be called once more.
 ***Not needed if no custom values were passed originally***
 
 ```python
-from .run import RunEngine 
-
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
-# seed (optional) - After the first time the engine is ran. Use a seed value to recreate the same output. All other parameters (except token count) must be matching. Included in the seed or otherwise. 
+# seed (optional) - required to recreate a previous run of the engine. it is created after the first run of the engine. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the "v" key with state format data needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
 # token_count (default=10) - The desired size of the list containing your input terms.
 # initial_state (default=[66, 67, 54, 3, 34]) - The original starting values to base the chain on.
 # constants (optional) - Only change this for custom morphing equations.
 # mod (optional) - Only change this for custom morphhing equations
 
-#BASIC
+from stateshaper import RunEngine 
+
+#BASIC (first run)
 engine = RunEngine(data=your_data, token_count=needed_tokens)
 
+# RE-CREATE PREVIOUS OUTPUT
+engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens)
+
 #CUSTOM
-engine = RunEngine(data=your_data, seed=seed_from_first_run, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
+engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
 
 engine.start_engine()
 

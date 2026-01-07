@@ -88,15 +88,21 @@ cd stateshaper
 
 ```python
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
+# seed (optional) - required to recreate a previous run of the engine. it is created after the first run of the engine. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the "v" key with state format data needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
 # token_count (default=10) - The desired size of the list containing your input terms.
 # constants (optional) - Only change this for custom morphing equations.
 # mod (optional) - Only change this for custom morphhing equations
 
-#BASIC
+from stateshaper import RunEngine
+
+# BASIC (first run)
 engine = RunEngine(data=your_data, token_count=needed_tokens)
 
-#CUSTOM
-engine = RunEngine(data=your_data, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
+# RE-CREATE PREVIOUS OUTPUT
+engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens)
+
+# CUSTOM
+engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
 
 engine.start_engine()
 ```
@@ -131,7 +137,7 @@ This section shows examples of the main classes included in the engine. **They a
 
 ```python
 from main.core import Stateshaper
-from main.plugin import PluginData
+from main.plugins.PluginData import PluginData
 
 # Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
 #
@@ -426,6 +432,9 @@ stateshaper/
 |              ├── TESTS.md
 |              ├── Tests.py
 |        └── tools/
+|              └── derive_vocab
+|                 ├── DeriveVocab.py
+|                 ├── DERIVE_VOCAB.md
 |              └── tiny_state
 |                 ├── TinyState.py
 |                 ├── TINY_STATE.md
@@ -433,7 +442,7 @@ stateshaper/
 |              ├── TokenMap.py
 |              ├── TOOLS.md              
 │       ├── core.py
-│       ├── run.py
+│       ├── stateshaper.py
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
