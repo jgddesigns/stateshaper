@@ -90,7 +90,7 @@ cd stateshaper
 Example: [`Compound Dataset`](example_data/compound.json)
 
 
-*Rating* - Creates a sense of personalization for the output. The output is initially created based on a ratings preference. Afterward, the output is derived from the current included items and adjusted based on whatever parameters are decided upon (such as user input). The 'derived' dataset is all that needs to be save on the backend, and does not include a 'rating' key. It can be used for all profiles in an application.
+*Rating* - Creates a sense of personalization for the output. The output is initially created based on a ratings preference. Afterward, the output is derived from the current included items and adjusted based on whatever parameters are decided upon (such as user input). The *'derived'* dataset is all that needs to be saved on the backend, and does not include a *'rating'* key. It can be used for all profiles in an application.
 
 Example: [`Initial Rating Dataset`](example_data/rating_initial.json), [`Derived Rating Dataset`](example_data/rating_derived.json) 
 
@@ -232,9 +232,7 @@ class TinyState:
       # Numbers values from the seeds stand for key/value pairs from the master dataset and are kept in groups of four in data sets length 100 or less. If more length is needed the group size can be increased.
       #
       # Example: 0214 stands for key #3, value #15 
-
       return ["event1", "event2", "event3"...]
-
 ```
 
  
@@ -398,7 +396,8 @@ stateshaper/
 ├── example_data
 |     ├── compound.json
 |     ├── random.json
-|     ├── rating.json
+|     ├── rating_derived.json
+|     ├── rating_initial.json
 |     ├── EXAMPLE_DATA.md
 ├── src/
 │   └── main/
