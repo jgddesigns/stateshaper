@@ -196,3 +196,5 @@ class DeriveVocab:
             "rules": "rating",
             "length": 5
         }
+    
+DeriveVocab()
