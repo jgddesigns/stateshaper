@@ -20,7 +20,7 @@ To create the same output again, *start_engine* needs to be called once more.
 
 ```python
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
-# seed (optional) - required to recreate a previous run of the engine. it is created after the first run of the engine. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the "v" key with state format data needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
+# seed (optional) - required to recreate a previous run of the engine. it is created after the first run of the engine and can be retrieved using the 'get_seed' function from the main class. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the state format data in the "v" key needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
 # token_count (default=10) - The desired size of the list containing your input terms.
 # initial_state (default=[66, 67, 54, 3, 34]) - The original starting values to base the chain on.
 # constants (optional) - Only change this for custom morphing equations.
@@ -38,7 +38,6 @@ engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens)
 engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens, initial_state=optional_custom_logic, constants=optional_custom_logic, mod=more_optional_logic)
 
 engine.start_engine()
-
 
 # TO GET NEEDED VALUES TO RE-CREATE THE SAME OUTPUT
 # Not needed if no custom values were originally passed.

@@ -59,11 +59,17 @@ Primary Use: Synthetic Datasets (Procedural Worlds, Code/ID Generation)
 
 
 
-*rating.json*
+*rating_initial.json*
 
-For 'rating' data ruleset. Creates an output set based on ratings-derived preferences. 
+For 'rating' data ruleset. Creates an output set based on ratings-derived preferences. Only needed during the first run of the engine for each profile. The ratings values can be defineds beforehand using whatever methods deemed necessary. DOES NOT NEED TO BE STORED.
 
 Primary Use: Personalization (Content Feeds, Routine Schedules)
+
+
+
+*rating_derived.json*
+
+The same data from rating_initial, minus the ratings. What is stored on the backend and used for each profile. Base function calls on this data once a profile has been generated (and you used a seed to run the engine).
 
 
 

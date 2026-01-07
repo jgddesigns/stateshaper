@@ -16,26 +16,28 @@ class DeriveVocab:
 
         self.derived_rankings = None
 
-        # build from initial list
         self.similarities = None
 
-        # self.test()
+        self.test()
 
 
 
     def test(self):
-        print("\n\nINITIAL RANKINGS\n")
+        print("\n\n\nINITIAL DATA\n")
         self.initial_rankings(self.test_data())
-        print(self.master_rankings)
-        print()
+        print(self.sort_ratings(self.master_rankings))
+        print("\n\nINITIAL RANKINGS\n")
         print(self.vocab)
 
-        print("\n\nADJUSTED RANKINGS\n")
+        
         for _ in range(20):
             self.adjust_rankings(self.test_input(), self.test_data())
-        print("\n")
+        print("\n\n\n\nADJUSTED DATA\n")
+        print(self.sort_ratings(self.master_rankings))
         self.get_vocab(self.master_rankings)
+        print("\n\nADJUSTED RANKINGS\n")
         print(self.vocab)
+        print("\n\n")
 
     
     def test_input(self):
@@ -72,6 +74,14 @@ class DeriveVocab:
         self.vocab = self.sort_rankings(rankings)[:self.original_data["length"]]
         return self.vocab
         
+
+    def sort_ratings(self, rankings):
+        data = {}
+        sort = sorted(rankings, key=lambda x: rankings[x], reverse=True)
+        for item in sort:
+            data[item] = rankings[item]
+        return data
+    
 
     def sort_rankings(self, rankings):
         return sorted(rankings, key=lambda x: rankings[x], reverse=True)
@@ -186,9 +196,3 @@ class DeriveVocab:
             "rules": "rating",
             "length": 5
         }
-    
-
-
-
-
-DeriveVocab()

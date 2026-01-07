@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.main.connector.Connector import Connector
 
-from src.main.run import RunEngine
+from src.main.stateshaper import RunEngine
 import json
 
 run = RunEngine()

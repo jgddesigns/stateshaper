@@ -64,7 +64,6 @@ class Connector:
             "mod": self.mod
         }
 
-        # self.compressed_vocab = self.compress_vocab() if not self.compressed_vocab else self.compressed_vocab
 
         print("\n\n\nStateshaper Seed has been created:\n")
         print(self.engine)

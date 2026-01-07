@@ -1,6 +1,3 @@
-import os
-import sys
-import random
 from random import randint
 
 
@@ -310,11 +307,6 @@ class TinyState:
 
             self.set_preferences(input)
 
-            # print("\n\nsorted in tiny class")
-            # print(self.top_preferences)
-            # print("\n\n")
-            # sys.exit()
-
             for item in data["input"]:
                 key = list(item.keys())[0]
                 for term in item[list(item.keys())[0]]["data"]:
@@ -438,6 +430,5 @@ class TinyState:
             index = decoded[:2]
             export.append(data["input"][int(index)]["data"])
             decoded = decoded[4:]
-        # print(export)
-        # sys.exit()
+
         return export

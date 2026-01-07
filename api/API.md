@@ -4,7 +4,11 @@ The API Connector has been designed for use with apps using the *Stateshaper* en
 
 
 
+```python
+from stateshaper import RunEngine
+
 run = RunEngine()
+```
 
 
 ```python
