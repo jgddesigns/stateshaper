@@ -85,6 +85,12 @@ cd stateshaper
 
 **Make sure your data is in one of the formats listed in the *"example_data"* directory. The output that is generated depends on the values contained in this dataset. The data types are based on the following rules:**
 
+***If needed, use the *FormatData* class in the nested *'format_data'* directory.***
+
+Instructions: [`Formatting Data for Input`](example_data/format_data/FORMAT_DATA.md)
+
+
+
 *Compound* - A collection of items that include a specified group. Only items from the defined groups will be part of the final output.
 
 Example: [`Compound Dataset`](example_data/compound.json)
@@ -98,6 +104,9 @@ Example: [`Initial Rating Dataset`](example_data/rating_initial.json), [`Derived
 *Random* - A seemingly random array of the included items is generated. Only one item from the master dataset is included per engine step.
 
 Example: [`Random Dataset`](src/main/connector/random.json)
+
+
+
 
 
 

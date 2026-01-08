@@ -8,7 +8,9 @@ For continuous use, the engine can be called in a loop using the *run_engine* fu
 To create the same output again, *start_engine* needs to be called once more.
 
 
-1. Make sure your data is in one of the formats listed in the *"example_data"* directory. 
+1. Make sure your data is in one of the formats listed in the *"example_data"* directory. If needed, use the *FormatData* class in the nested *'format_data'* directory.
+
+Instructions: [`Formatting Data for Input`](example_data/format_data/FORMAT_DATA.md)
 
 
 2. Initialize a *RunEngine* class 
