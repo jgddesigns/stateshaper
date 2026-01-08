@@ -9,7 +9,7 @@ Takes your data and formats it for input into the *Stateshaper* engine.
 ## **Instructions:**
 
 
-### COMPOUND RULESET 
+### *COMPOUND* RULESET 
 
 Call the *'build_data'* function to generate a data template. 
 
@@ -80,7 +80,7 @@ get_data()
 
 
 
-### RANDOM RULESET 
+### *RANDOM* RULESET 
 
 Call the *'build_data'* function to generate a data template. 
 
@@ -114,7 +114,7 @@ get_data()
 
 
 
-### RATING RULESET 
+### *RATING* RULESET 
 
 Call the *'build_data'* function to generate a data template. 
 
