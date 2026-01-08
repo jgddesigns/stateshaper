@@ -37,10 +37,6 @@ class FormatData:
             "rating": self.rating_row
         }
 
-        self.rating_example()
-
-        
-
 
 
     
@@ -87,6 +83,7 @@ class FormatData:
         print(f"\nCreated row #{place} for current '{rule}' rule template.")
         self.current_template["input"].append(row)
         return True
+
 
     def remove_row(self, item, rule, key=None):
         if rule == "rating":
@@ -191,6 +188,3 @@ class FormatData:
         self.add_rating("mmorpg", 95)
         print("\n\nhere is the created template:\n")
         print(self.current_template)
-
-    
-FormatData()

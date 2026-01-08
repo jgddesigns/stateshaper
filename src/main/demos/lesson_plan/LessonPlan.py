@@ -55,9 +55,12 @@ class LessonPlan:
     def adjust_ratings(self):
         ratings = list(self.lesson_ratings.keys())
         for item in self.data["input"]:
-            if item[list(item.keys())[0]]["data"][0]["attributes"][0] in ratings:
-                item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"][0]["attributes"][0]]) / 2)
-        
+            try:
+                if item[list(item.keys())[0]]["data"][0]["attributes"][0] in ratings:
+                    item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"][0]["attributes"][0]]) / 2)
+            except:
+                if item[list(item.keys())[0]]["data"]["attributes"][0] in ratings:
+                    item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"]["attributes"][0]]) / 2)              
 
     def ratings_data(self):
         sort = sorted(self.lesson_ratings, key=lambda x: self.lesson_ratings[x], reverse=True)
@@ -85,7 +88,10 @@ class LessonPlan:
                                                                                           
         
         while len(test) < len(data):
-            answer = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == data[len(test)]][0]].values())[0]["data"][0]["answer"]   
+            try:
+                answer = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == data[len(test)]][0]].values())[0]["data"][0]["answer"]   
+            except:
+                answer = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == data[len(test)]][0]].values())[0]["data"]["answer"]   
             result = random.randint(0, 1)
             test.append({"question": data[len(test)], "answer": answer}) if data[len(test)] not in test else None
 
