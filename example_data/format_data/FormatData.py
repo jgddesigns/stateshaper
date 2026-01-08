@@ -154,6 +154,8 @@ class FormatData:
         return row
 
 
+    def get_data(self):
+        return self.current_template
 
 
     def compound_example(self):
