@@ -403,6 +403,9 @@ stateshaper/
 |     ├── run_api.py
 |     ├── API.md
 ├── example_data
+|     └── format_data/
+|        ├── FormatData.py
+|        ├── FORMAT_DATA.md
 |     ├── compound.json
 |     ├── random.json
 |     ├── rating_derived.json
