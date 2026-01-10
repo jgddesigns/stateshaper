@@ -76,7 +76,11 @@ class DeriveVocab:
         
 
     def current_vocab(self):
-        return self.vocab
+        try:
+            vocab = [list(i.values())[0]["data"][0]["item"] for i in self.original_data["input"] if [j for j in self.vocab if j == list(i.keys())[0]]]
+        except:
+            vocab = [list(i.values())[0]["data"]["item"] for i in self.original_data["input"] if [j for j in self.vocab if j == list(i.keys())[0]]]
+        return vocab
     
 
     def sort_ratings(self, rankings):
@@ -88,8 +92,8 @@ class DeriveVocab:
     
 
     def sort_rankings(self, rankings):
-        return sorted(rankings, key=lambda x: rankings[x], reverse=True)
-    
+        rankings = sorted(rankings, key=lambda x: rankings[x], reverse=True)
+        return rankings
     
     def derive_rankings(self):
         rankings = self.master_rankings

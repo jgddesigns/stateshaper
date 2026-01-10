@@ -82,6 +82,7 @@ class RunEngine:
 
 
     def run_engine(self, token_count=None):
+        print(self.seed)
         self.tokens = self.engine.generate_tokens(self.connector.token_count if not token_count else token_count)
         
         print("\n\nTokens successfully generated from vocab.")
