@@ -399,10 +399,13 @@ Condense large amounts of data into smaller objects. Generate it in real-time ba
 
 ```text
 stateshaper/
-├── api
+├── api/
 |     ├── run_api.py
 |     ├── API.md
 ├── example_data
+|     └── format_data/
+|        ├── FormatData.py
+|        ├── FORMAT_DATA.md
 |     ├── compound.json
 |     ├── random.json
 |     ├── rating_derived.json
@@ -416,53 +419,53 @@ stateshaper/
 |              ├── Vocab.py
 |              ├── CONNECTOR.md
 |        └── demos/
-|              └── ads
+|              └── ads/
 |                    ├── ad_list.py
 |                    ├── Ads.py
-|              └── fintech
+|              └── fintech/
 |                    ├── coming soon
-|              └── infinite_map
+|              └── infinite_map/
 |                    ├── coming soon
-|              └── inventory
+|              └── inventory/
 |                    ├── coming soon
-|              └── lesson_plan
+|              └── lesson_plan/
 |                    ├── lessons_list.py
 |                    ├── LessonPlan.py
-|              └── meal_plan
+|              └── meal_plan/
 |                    ├── coming soon
-|              └── smart_home
+|              └── smart_home/
 |                    ├── coming soon
 |              ├── DEMOS.md
 |        └── plugins/
-|              └── compression
+|              └── compression/
 |                    ├── coming soon
-|              └── personalization
+|              └── personalization/
 |                    ├── coming soon
-|              └── procedural
+|              └── procedural/
 |                    ├── coming soon
-|              └── structured
+|              └── structured/
 |                    ├── coming soon
-|              └── synthetic
+|              └── synthetic/
 |                    ├── coming soon
 |              ├── PLUGINS.md
 |        └── tests/
-|              └── ca
+|              └── ca/
 |                    ├── coming soon
-|              └── markov
+|              └── markov/
 |                    ├── Markov.py
-|              └── ml
+|              └── ml/
 |                    ├── coming soon
-|              └── prng
+|              └── prng/
 |                    ├── coming soon
-|              └── probalistic
+|              └── probalistic/
 |                    ├── coming soon
 |              ├── TESTS.md
 |              ├── Tests.py
 |        └── tools/
-|              └── derive_vocab
+|              └── derive_vocab/
 |                 ├── DeriveVocab.py
 |                 ├── DERIVE_VOCAB.md
-|              └── tiny_state
+|              └── tiny_state/
 |                 ├── TinyState.py
 |                 ├── TINY_STATE.md
 |              ├── Morph.py

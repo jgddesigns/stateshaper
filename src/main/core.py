@@ -1,25 +1,13 @@
-import sys
-from typing import List, Dict, Sequence
-from tools.Morph import Morph
-from tools.TokenMap import TokenMap
-
-
 class Stateshaper:
 
-    def __init__(self, seed, vocab, constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
-        if not seed:
-            raise ValueError("seed must be non-empty")
-        if not vocab:
-            raise ValueError("vocab must be non-empty")
+    def __init__(self, state=[10, 67, 876, 347, 19], vocab=[], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
 
-        self.token_map = TokenMap(vocab)
-        self.morph = Morph()
+        self.current_state = [int(x) % mod for x in state]
 
-        self.seed = [int(x) % mod for x in seed]
-
-        self.original_seed = [int(x) % mod for x in seed]
+        self.original_state = [int(x) % mod for x in state]
     
-        self.vocab = vocab
+        self.current_vocab = vocab
+        self.original_vocab = vocab
         self.constants = constants
         self.mod = mod
         self.compound = compound
@@ -29,8 +17,8 @@ class Stateshaper:
         self.prior_index = 0
 
         self.seed_format = {
-            "seed": self.seed,
-            "vocab": self.vocab,
+            "state": self.current_state,
+            "vocab": self.original_vocab,
             "constants": self.constants,
             "mod": self.mod
         }
@@ -41,109 +29,59 @@ class Stateshaper:
         self.token_array = []
 
 
-    def base_index(self):
-        total = 0
-        for i, val in enumerate(self.seed):
-            total += (i + 1) * val
-        return (total + self.iteration) % 17
+
+    def step(self): 
+        self.morph_array()
+        self.iteration += 1
+        return self.get_token()
 
 
-    def get_index(self):
-        return int(sum(self.seed)/len(self.vocab)) % len(self.vocab)
+    def reverse(self):
+        self.iteration = self.iteration - 1 if self.iteration > 1 else 1
+        value = self.current_state[len(self.current_state)-1]
+        self.current_state = self.current_state[:len(self.current_state)-1]
+        old_value = [self.reverse_morph(value)]
+        self.current_state = old_value + self.current_state
+        return self.get_token()
 
 
-    def next_token(self, n, forward=True):
-        if self.iteration < 0:
-            self.seed = self.original_seed
-
-        index = self.get_index()
-
-        token = self.token_map.get_token(index) if not self.compound else self.compound_token(index)
-
-        self.seed = self.morph.morph(self.seed_format, self.iteration) if self.iteration < n or forward == False else self.seed
-
-        self.token_array.append(self.seed[0])
-
-        if forward == True:
-            self.iteration += 1  
-        else:
-            self.iteration -= 1
-
-        return token
-
-
-    def compound_token(self, index):
-        compounds = [self.token_map.get_token(index)]
-        while len(compounds) < self.compound[0]:
-            index = (index + self.compound[1]) % len(self.vocab)
-            if self.token_map.get_token(index) not in compounds:
-                compounds.append(self.token_map.get_token(index))
-            else:
-                index = index + self.compound[1]
-
-        return self.compound_term(index, compounds)
+    def get_token(self):
+        return self.current_vocab[self.index_token()]
     
 
-    def compound_term(self, index, compounds):
-        terms = []
-        tokens = []
-
-        while len(terms) < len(compounds)-1:
-            terms.append(self.compound[2][(index + len(terms)) % len(self.compound[2])])
-
-        length = len(terms) + len(compounds)
-
-        while len(tokens) < length:
-            tokens.append(compounds[0])
-            compounds.pop(0)
-            if len(terms) > 0:
-                tokens.append(terms[0]) 
-                terms.pop(0)
-
-        return " ".join(tokens)
+    def generate_tokens(self, amount):
+        self.rebuild()
+        return [self.step() for _ in range(amount)]
     
 
-    def generate_tokens(self, n):
-        self.generated_tokens = [self.next_token(n) for _ in range(n)]
-        return self.generated_tokens
+    def index_token(self):
+        return self.current_state[0] * (self.constants["a"] * (self.constants["c"] + self.constants["b"])) % len(self.current_vocab)
 
 
-    def retrieve_token(self, pos):
-        return self.generated_tokens[pos-1]
+    def morph_array(self):
+        value = self.current_state[0]
+        self.current_state = self.current_state[1:]
+        self.current_state.append(self.new_value(value))
 
 
-    def reverse_tokens(self, n):
-        self.iteration -= 3
-        return [self.next_token(n, False) for _ in range(n)]
+    def reverse_morph(self, value):
+        return ((value - self.constants["d"]) * pow((round((self.constants["c"] * self.constants["c"]) / self.constants["a"]) * self.constants["b"] * self.iteration) % self.mod, -1, self.mod)) % self.mod
+
+
+    def new_value(self, value):
+        return self.morph_logic(value) 
+
+
+    def morph_logic(self, value):
+        return (self.constants["d"] + round((self.constants["c"] * self.constants["c"])/self.constants["a"]) * self.constants["b"] * self.iteration * value) % self.mod
     
 
-    def get_array(self, length=50):
-        self.generate_tokens(length)
-        return self.token_array 
-    
-    
-    # jumps to spot in array. 
-    # index is actual place in the array (0 not included). if 50 tokens were created, enter 50 to get the 50th token and 1 to get the first token. 
     def jump(self, index):
         self.rebuild()
-        if index > 0:
-            tokens = [self.next_token(index) for _ in range(index)] 
-        try:
-            return tokens[index-1]
-        except:
-            raise ValueError("Error in 'Stateshaper' class, 'jump' function. Can't find position in token stream. Please check the parameter value and try again.\n") 
-        
-
-    def jump_back(self, index):
-       if index >= self.iteration:
-           raise ValueError(f"Error in 'Stateshaper' class, 'jump_back' function. Jump back index '{index}' is greater than current iteration.\n") 
-       back = list(reversed(self.reverse_tokens(self.iteration - index)))
-       self.iteration += 3
-       return back[0]
+        tokens = [self.step() for _ in range(index)]
+        return tokens[len(tokens)-1]
 
 
-    def rebuild(self):
-        self.seed = self.original_seed
+    def rebuild(self): 
         self.iteration = 1
-        self.prior_index = 0
-        self.token_array = []
+        self.current_state = self.original_state

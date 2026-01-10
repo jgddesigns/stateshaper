@@ -18,7 +18,7 @@ class DeriveVocab:
 
         self.similarities = None
 
-        self.test()
+        # self.test()
 
 
 
@@ -70,10 +70,14 @@ class DeriveVocab:
         return self.vocab
         
 
-    def get_vocab(self, rankings, length=3):
+    def get_vocab(self, rankings, length=3, data=None):
         self.vocab = self.sort_rankings(rankings)[:self.original_data["length"]]
         return self.vocab
         
+
+    def current_vocab(self):
+        return self.vocab
+    
 
     def sort_ratings(self, rankings):
         data = {}
@@ -130,6 +134,7 @@ class DeriveVocab:
 
 
     def adjust_rankings(self, input, data):
+        self.original_data = data if not self.original_data else self.original_data
         rankings = self.create_dataset(data)
         for item in input:
             [self.add_rankings(rankings, i, (1 if item[0] == True else -1)) for i in item[1]]

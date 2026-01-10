@@ -57,6 +57,7 @@ class Connector:
 
     def start_connect(self, format=None):
         self.build_seed()
+        
         self.engine = self.minimal_seed = {
             "state": self.state,
             "vocab": self.vocab,
@@ -74,8 +75,6 @@ class Connector:
         print("\n\n\nFull Seed:\n")
         self.engine["vocab"] = self.compressed_vocab if format else self.engine["vocab"]
 
-        print(self.engine)
-
         self.output_seed()
 
         print("\n\n\nMinimal Output Seed:\n")
@@ -87,11 +86,11 @@ class Connector:
     
 
 
-    def output_seed(self, vocab=False):
+    def output_seed(self, vocab=False, derived=None):
         seed = {}
 
         seed["s"] = self.engine["state"]  
-        seed["v"] = self.compressed_vocab if vocab == True else ""
+        seed["v"] = self.compressed_vocab if vocab == True else derived if derived else ""
         seed["c"] = self.engine["constants"]
         seed["m"] = self.engine["mod"]
 
@@ -222,9 +221,13 @@ class Connector:
         self.modify.adjust(key, adjust)
 
 
-    def compress_vocab(self):
-        return self.tiny_state.get_seed(self.data, self.vocab)
+    def compress_vocab(self, vocab=None):
+        return self.tiny_state.get_seed(self.data, self.vocab if not vocab else vocab)
 
+
+    def compress_regular(self, vocab=None):
+        return self.tiny_state.derived_seed(self.data, self.vocab if not vocab else vocab)
+    
 
     def get_minimal(self):
         return self.compressed_seed
