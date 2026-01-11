@@ -1,3 +1,4 @@
+
 class Stateshaper:
 
     def __init__(self, state=[10, 67, 876, 347, 19], vocab=[], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
@@ -30,10 +31,11 @@ class Stateshaper:
 
 
 
+
     def step(self): 
         self.morph_array()
         self.iteration += 1
-        return self.get_token()
+        return self.get_token() if not self.compound else self.compound_token()
 
 
     def reverse(self):
@@ -85,3 +87,24 @@ class Stateshaper:
     def rebuild(self): 
         self.iteration = 1
         self.current_state = self.original_state
+
+
+    def compound_token(self):
+        tokens = []
+        count = 0
+        while len(tokens) < self.compound[0]:
+            token = self.current_vocab[(self.current_state[0] + count + self.iteration * (len(tokens)*self.constants["c"]) * (self.constants["a"] * (self.constants["c"] + self.constants["b"]))) % len(self.current_vocab)] 
+            if token in tokens:
+                count += 1
+            else:
+                tokens.append(token) 
+        i = 1
+        while i < len(tokens):
+            tokens.insert(i, self.compound[2][((len(tokens) + 1) * self.iteration * self.constants["c"]) % len(self.compound[2])])
+            i += 2
+
+        return " ".join(tokens)
+    
+
+    def compound_reverse(self):
+        pass

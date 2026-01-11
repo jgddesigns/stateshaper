@@ -77,7 +77,7 @@ class RunEngine:
             self.seed["vocab"],
             self.seed["constants"],
             self.seed["mod"],
-            [self.data["compound_length"], self.data["compound_modifier"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None
+            [self.data["compound_length"], self.data["compound_groups"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None
         )
 
 
