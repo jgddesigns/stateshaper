@@ -7,7 +7,7 @@ import sys
 class TinyState:
 
     def __init__(self, list_count=3, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.subset_alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 

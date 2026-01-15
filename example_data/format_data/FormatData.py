@@ -4,7 +4,7 @@ import sys
 class FormatData:
 
     def __init__(self, input=None, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.parent_terms = {
             "rating": ["input", "rules", "length"],

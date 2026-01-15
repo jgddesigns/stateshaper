@@ -21,7 +21,7 @@ class Vocab:
 
 
     def __init__(self, data, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.rule_types = None
         self.debug = True

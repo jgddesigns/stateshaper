@@ -11,7 +11,7 @@ from example_data.format_data.FormatData import FormatData
 class RunEngine:
 
     def __init__(self, data=None, seed=None, token_count=10, initial_state=[66, 67, 54, 3, 34], vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
-        super().__init__(**kwargs)
+        
 
         if isinstance(data, dict):
             self.data = data
@@ -113,8 +113,9 @@ class RunEngine:
         self.engine.rebuild()
 
 
-    def get_seed(self, vocab=False):
-        return self.connector.output_seed(vocab)
+    def get_seed(self, state=None, vocab=False, constants=None, mod=None):
+        return self.connector.output_seed(state=state, vocab=vocab, constants=constants, mod=mod)
+    
     
     def get_derived(self):
         return self.derived_seed

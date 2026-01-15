@@ -48,7 +48,7 @@ class Stateshaper:
 
 
     def get_token(self):
-        return self.current_vocab[self.index_token()]
+        return self.current_vocab[self.index_token()] if len(self.current_vocab) > 0 else self.current_state[0]
     
 
     def generate_tokens(self, amount):
