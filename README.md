@@ -45,6 +45,13 @@ https://stateshaper-lessons.vercel.app
 An example of a personalized learning plan based on a student's performance. Condenses the entire profile into a small seed. 
 
 
+*Fintech QA Demo*
+
+https://stateshaper-qa.vercel.app
+
+Using numbers as tokens, values are derived to stress test a fintech app's math calculations.
+
+
 *Tiny State Compression*
 
 https://tiny-state.streamlit.app
