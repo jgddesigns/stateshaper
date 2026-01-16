@@ -5,6 +5,8 @@
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
 
+![Alt text](https://github.com/jgddesigns/stateshaper/blob/main/flowchart.png)
+
 This idea was improved upon with some help from ChatGPT, and has become *Stateshaper*.
 
 The primary benefits of *Stateshaper* are compression, enhanced privacy, and memorization. 
