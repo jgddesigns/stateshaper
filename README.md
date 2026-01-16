@@ -7,7 +7,7 @@ The origin of this idea started with the 'Infinite Map Concept' I created in ear
 
 ![Alt text](https://github.com/jgddesigns/stateshaper/blob/main/flowchart.png)
 
-This idea was improved upon with some help from ChatGPT, and has become *Stateshaper*.
+This idea was improved upon, and has become *Stateshaper*.
 
 The primary benefits of *Stateshaper* are compression, enhanced privacy, and memorization. 
 
