@@ -1,8 +1,26 @@
 import random
-from main.tools.tiny_state.TinyState import TinyState
+import os
+import sys
+from src.main.tools.tiny_mse.TinyMSE import TinyMSE
+
+sys.path.append(os.path.dirname(__file__))
+
 from ad_list import ad_list
 from random import randint
+import hashlib
 import random
+import string
+
+
+
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
+
+if SRC_ROOT not in sys.path:
+    sys.path.insert(0, SRC_ROOT)
+
+
 
 
 
@@ -11,9 +29,9 @@ class Ads:
 
 
     def __init__(self, user_id=None, **kwargs):
-        
+        super().__init__(**kwargs)
 
-        self.tiny_mse = TinyState(10)
+        self.tiny_mse = TinyMSE(10)
 
         self.seed_store = {}
         self.seed = ""
@@ -152,11 +170,12 @@ class Ads:
     def set_interests(self, length=3):
         self.top_interests = sorted(self.interests, key=lambda x: self.interests[x], reverse=True)[:length]
 
-        print("\n\nSTATESHAPER TARGETED AD DEMO\n\nThis demonstration shows how app related storage data can be reduced by over 80%.\n\n")
+        print("\n\nMSE TARGETED AD DEMO\n\nThis demonstration shows how app related storage data can be reduced by over 80%.\n\n")
         print("\n\nRandom interest list has been generated. The highest rated interests are:\n")
         print(self.top_interests)
 
 
+    # build a list of the ads to be shown. contains actual url. for demo, some images will be included in this directory.
     def get_ads(self):
         ads = [] 
         partial = []
@@ -175,13 +194,13 @@ class Ads:
                     seed = seed + f"{idx1:02d}{idx2:02d}"
 
                     if len([x for x in item["attributes"] if x in self.top_interests and interest[0] == self.top_interests[0]]) > 0:
-                        ads.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
-                        final_ads.append(item["data"])
+                        ads.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
+                        final_ads.append(item["link"])
                         relevant_seed = relevant_seed + f"{idx1:02d}{idx2:02d}"
                     elif len([x for x in item["attributes"] if x in self.top_interests]) > 0 and len([y for y in self.top_interests if interest[0] == y]) > 0:
-                        partial.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
+                        partial.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
                     elif len([x for x in item["attributes"] if x in self.top_interests]) > 0:
-                        side.append({"ad": item["data"], "index": f"{idx1:02d}{idx2:02d}"})
+                        side.append({"ad": item["link"], "index": f"{idx1:02d}{idx2:02d}"})
 
 
         self.most_relevant = len(ads)
@@ -246,6 +265,6 @@ class Ads:
         while len(ads)<self.tiny_mse.list_count:
             parent = self.decoded_subset[:2]
             child = self.decoded_subset[2:4]
-            ads.append(ad_list[list(ad_list.keys())[int(parent)]][int(child)]["data"])
+            ads.append(ad_list[list(ad_list.keys())[int(parent)]][int(child)]["link"])
             self.decoded_subset = self.decoded_subset[4:]
         return ads
