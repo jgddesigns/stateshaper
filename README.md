@@ -517,7 +517,7 @@ stateshaper/
 
 ## Contributing
 
-Contributions, ideas, and experiments are welcome!
+Contributions, ideas, and experiments are welcome! A separate repo is being created that will allow for open-source contributions. Until then, feel free to fork this repo and experiment with it. 
 
 See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in creating a custom plugin (or anything else).
 
