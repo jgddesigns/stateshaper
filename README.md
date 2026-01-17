@@ -4,9 +4,9 @@
 
 
 The origin of this idea started with the 'Infinite Map Concept' I created in early 2025. The core logic starts with the idea of using a static length array of numbers which has values that change based on a mathematic function. The function uses a modulus operator to keep the array within a fixed range of values. Because of this, continuing to run the engine will produce an unbound chain of deterministic output. 
-
+<br> 
 ![Alt text](https://github.com/jgddesigns/stateshaper/blob/main/flowchart.png)
-
+<br> 
 This idea was improved upon, and has become *Stateshaper*.
 
 The primary benefits of *Stateshaper* are compression, enhanced privacy, and memorization. 
@@ -15,6 +15,7 @@ As far as compression is concerned, using this tool can reduce data sizes by ove
 
 Compressing this data also allows for privacy, where the data contained in a seed it can't be extracted without knowing specific seed parameters. For applications, this can be stored in environment variables the same way that access keys can.
 
+<br> <br> 
 
 Recommended Uses Include:
 
@@ -24,6 +25,7 @@ Recommended Uses Include:
 - QA Stress Testing
 - Procedural World Generation
 
+<br> <br> 
 
 This repository contains code written in Python, with other langauges scheduled to be available soon. 
 
@@ -33,12 +35,15 @@ These can be found in the src/main/tests directory.
 
 Additonally, two demonstrations are live online:
 
+<br> <br> 
+
 *Targeted Ads Compression Demo*
 
 https://stateshaper-ads.vercel.app
 
 Demonstrates the engine's ability to generate data based on personalization. Ads shown are based on user preference ratings and can be adjust in the app. The data needed to recreate the entire profile is condensed into a ~50-250 byte JSON string. 
 
+<br> 
 
 *Lesson Plans Demo*
 
@@ -46,6 +51,7 @@ https://stateshaper-lessons.vercel.app
 
 An example of a personalized learning plan based on a student's performance. Condenses the entire profile into a small seed. 
 
+<br> 
 
 *Fintech QA Demo*
 
@@ -53,6 +59,7 @@ https://stateshaper-qa.vercel.app
 
 Using numbers as tokens, values are derived to stress test a fintech app's math calculations.
 
+<br> 
 
 *Drawing Graphics Demo*
 
@@ -60,16 +67,19 @@ https://stateshaper-graphics.vercel.app
 
 With a plugin file that uses a numerical token to set each graphic object's attributes, an endless amount of onscreen content can be generated. A basic example of 2d shapes and colors is shown. When more precise calculations are used, this output can include even the most modern textures. 
 
+<br> 
 
 *Tiny State Compression*
 
 https://tiny-state.streamlit.app
 
+<br> 
+
 An interactive tool that shows how a *Stateshaper* seee can be compressed even further in ~8 bytes. A seed can be compressed, extracted and re-compressed continually and maintain its original values. 
 
 ---
 
-
+<br> <br> 
 
 ## Features
 
@@ -84,7 +94,7 @@ An interactive tool that shows how a *Stateshaper* seee can be compressed even f
 
 ---
 
-
+<br> <br> 
 
 ## Quick Start
 
@@ -105,27 +115,25 @@ cd stateshaper
 
 Instructions: [`Formatting Data for Input`](example_data/format_data/FORMAT_DATA.md)
 
-
+<br> <br> 
 
 *Compound* - A collection of items that include a specified group. Only items from the defined groups will be part of the final output.
 
 Example: [`Compound Dataset`](example_data/compound.json)
 
+<br> 
 
 *Rating* - Creates a sense of personalization for the output. The output is initially created based on a ratings preference. Afterward, the output is derived from the current included items and adjusted based on whatever parameters are decided upon (such as user input). The *'derived'* dataset is all that needs to be saved on the backend, and does not include a *'rating'* key. It can be used for all profiles in an application.
 
 Example: [`Initial Rating Dataset`](example_data/rating_initial.json), [`Derived Rating Dataset`](example_data/rating_derived.json) 
 
+<br> 
 
 *Random* - A seemingly random array of the included items is generated. Only one item from the master dataset is included per engine step.
 
 Example: [`Random Dataset`](src/main/connector/random.json)
 
-
-
-
-
-
+<br> <br> 
 
 **Initialize a *RunEngine* class:**
 
@@ -150,7 +158,7 @@ engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens,
 engine.start_engine()
 ```
 
-
+<br> 
 
 **Call the *run_engine* method:**
 
@@ -162,6 +170,7 @@ engine.run_engine()
 # ["your", "input", "values", "are", "returned", "based", "on", "chosen", "stateshaper", "rules"]
 ```
 
+<br> 
 
 For continuous use, the engine can be called in a loop using the *run_engine* function. For one time, call it once with a specific *token_count* parameter.
 
@@ -169,7 +178,7 @@ To create the same output again, *start_engine* needs to be called once more.
 
 ---
 
-
+<br> 
 
 ## Core Logic Example
 ### Details of the Stateshaper Main Class
@@ -178,6 +187,7 @@ To create the same output again, *start_engine* needs to be called once more.
 
 This section shows examples of the main classes included in the engine. **They are not meant to be ran individually**.
 
+<br> 
 
 ```python
 from main.core import Stateshaper
@@ -211,11 +221,9 @@ tokens = [engine.next_token() for _ in range(20)]
 # The first parameter, i is the type of sprite to draw.
 # The second parameter is a number from the state array (1 - mod, 9973). This can be used in the drawing function to add variations like color, size and position. 
 events = [i for plugin.draw(i, state[tokens.index(i)]) in tokens]
-
-
-
 ```
 
+<br> 
 
 # Connector Class
 
@@ -227,7 +235,7 @@ For more ino, see the [`CONNECTOR`](src/main/connector/CONNECTOR.md) documentati
 
 ---
 
-
+<br> 
 
 # TinyState Class
 
@@ -283,6 +291,7 @@ seed = {"user_id": "johnq1234", "signature": [3404,832,2194, 6734,105],"series_s
 
 ```
 
+<br> 
 
 Short State:
 ```python
@@ -293,6 +302,7 @@ seed = ["user_176551",[3404,832,2194,6734,105],["ABC12345", "567yQ90T34"]]
 
 ```
 
+<br> 
 
 Tiny State
 ```python
@@ -303,6 +313,8 @@ seed = "ABC12345"
 
 ```
 
+<br> 
+
 Raw State
 ```python
 
@@ -312,6 +324,7 @@ seed = "567yQ90T34"
 
 ```
 
+<br> 
 
 The format needed will vary depending on the needs for each application. For applications needing only continuous, random data Tiny or Raw format may be all that is needed. For those that require more complex, personalized data, *Full State* may be needed. A combination of any of these can be used, as long as the required 'vocab' parameter is passed into the engine.
 
@@ -322,7 +335,7 @@ For more info, see the [`TINY_STATE`](src/main/tools/tiny_state/TINY_STATE.md) d
 
 ---
 
-
+<br> 
 
 ## How It Works 
 
@@ -355,7 +368,7 @@ The data can be changed based on input such as user behavior or duration. The ma
 
 ---
 
-
+<br> 
 
 ## Running Tests
 
@@ -371,7 +384,7 @@ For more info, see the [`TESTS`](src/main/tests/TESTS.md) documentation.
 
 --- 
 
-
+<br> 
 
 ## Use Cases (Expanded)
 
@@ -409,7 +422,7 @@ Condense large amounts of data into smaller objects. Generate it in real-time ba
 
 ---
 
-
+<br> 
 
 ## Project Structure
 
@@ -500,7 +513,7 @@ stateshaper/
 
 ```
 
-
+<br> 
 
 ## Contributing
 
@@ -512,7 +525,7 @@ See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in crea
 
 ---
 
-
+<br> 
 
 ## License
 
