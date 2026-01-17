@@ -1,95 +1,138 @@
-import os
 import sys
-
 from typing import List, Dict, Sequence
-
-sys.path.append(os.path.dirname(__file__))
-
-from tools.morph_rules import morph_state_default
-from tools.semantic_mapper import SemanticMapper
+from tools.Morph import Morph
+from tools.TokenMap import TokenMap
 
 
-class MorphicSemanticEngine:
-    """Core engine: evolves a numeric state and emits semantic tokens.
-
-    This class is intentionally simple and opinionated:
-    - It keeps track of a fixed-length integer state.
-    - On each step, it morphs the state using a deterministic rule.
-    - It converts the state into an integer code.
-    - A SemanticMapper turns codes into tokens from a vocabulary.
-    """
+class Stateshaper:
 
     def __init__(
         self,
         seed: Sequence[int],
         vocab: Sequence[str],
-        constants: Dict[str, int],
+        constants: Dict[str, int] = None,
         mod: int = 9973,
+        compound: list = None, 
     ) -> None:
         if not seed:
             raise ValueError("seed must be non-empty")
         if not vocab:
             raise ValueError("vocab must be non-empty")
 
-        self.mod = mod
+        self.token_map = TokenMap(vocab)
+        self.morph = Morph()
+
         self.seed = [int(x) % mod for x in seed]
-        self.t = 0  # iteration counter
 
+        self.original_seed = [int(x) % mod for x in seed]
+        # print(vocab)
+        self.vocab = vocab
         self.constants = {
-            "a": int(constants.get("a", 3)),
-            "b": int(constants.get("b", 5)),
-            "c": int(constants.get("c", 7)),
-            "d": int(constants.get("d", 11)),
+            "a": 3,
+            "b": 5,
+            "c": 7,
+            "d": 11,
         } if not constants else constants
+        self.mod = mod
+        self.compound = compound
+       
+        self.iteration = 1 
 
-        self.mapper = SemanticMapper(vocab=vocab)
-        self._prev_token_index = 0
+        self.prior_index = 0
 
-    # ---------------------------
-    # Core stepping logic
-    # ---------------------------
-    def _base_code(self) -> int:
-        """Aggregate state into a small integer code (0..26 by default).
+        self.seed_format = {
+            "seed": self.seed,
+            "vocab": self.vocab,
+            "constants": {
+                "a": 3,
+                "b": 5,
+                "c": 7,
+                "d": 11
+            }, 
+            "mod": 9973
+        }
 
-        This mixes position and value to provide a stable but evolving summary.
-        """
+        if compound:
+            self.seed_format["compound"] = compound
+
+        self.token_array = []
+
+
+    def base_index(self):
         total = 0
         for i, val in enumerate(self.seed):
             total += (i + 1) * val
-        return (total + self.t) % 27
-
-    def _offset(self) -> int:
-        """Compute an offset based on the current state sum.
-
-        This helps keep mapping dynamic even if base_code repeats.
-        """
-        return sum(self.seed) % len(self.mapper.vocab)
+        return (total + self.iteration) % 17
 
 
-    #based on the seed, morphs the array and gets a token from the vocab.
-    def step(self) -> str:
-        """Advance the engine by one step and return the next token."""
-        base = self._base_code()
-        offs = self._offset()
-        idx = (base + offs + self._prev_token_index) % len(self.mapper.vocab)
+    def get_index(self):
+        return int(sum(self.seed)/len(self.vocab)) % len(self.vocab)
 
-        token = self.mapper.index_to_token(idx)
-        self._prev_token_index = idx
 
-        # evolve state deterministically
-        self.seed = morph_state_default(
-            seed=self.seed,
-            t=self.t,
-            mod=self.mod,
-            **self.constants,
-        )
-        self.t += 1
+    def next_token(self, n, forward=True):
+        if self.iteration < 0:
+            self.seed = self.original_seed
+
+        index = self.get_index()
+
+        token = self.token_map.get_token(index) if not self.compound else self.compound_token(index)
+
+        self.seed = self.morph.morph(self.seed_format, self.iteration) if self.iteration < n or forward == False else self.seed
+
+        self.token_array.append(self.seed[0])
+
+        if forward == True:
+            self.iteration += 1  
+        else:
+            self.iteration -= 1
+
         return token
+    
 
-    def next_token(self) -> str:
-        """Alias for step() to make intent clearer in examples."""
-        return self.step()
+    def compound_token(self, index):
+        compounds = [self.token_map.get_token(index)]
+        while len(compounds) < self.compound[0]:
+            index = (index + self.compound[1]) % len(self.vocab)
+            if self.token_map.get_token(index) not in compounds:
+                compounds.append(self.token_map.get_token(index))
+            else:
+                index = index + self.compound[1]
 
-    def generate_tokens(self, n: int) -> List[str]:
+        return self.compound_term(index, compounds)
+    
+
+    def compound_term(self, index, compounds):
+        terms = []
+        tokens = []
+
+        while len(terms) < len(compounds)-1:
+            terms.append(self.compound[2][(index + len(terms)) % len(self.compound[2])])
+
+        length = len(terms) + len(compounds)
+
+        while len(tokens) < length:
+            tokens.append(compounds[0])
+            compounds.pop(0)
+            if len(terms) > 0:
+                tokens.append(terms[0]) 
+                terms.pop(0)
+
+        return " ".join(tokens)
+    
+
+    def generate_tokens(self, n):
         """Generate a list of n tokens."""
-        return [self.step() for _ in range(n)]
+        return [self.next_token(n) for _ in range(n)]
+    
+
+    def reverse_tokens(self, n):
+        """Generate a list of n tokens."""
+        self.iteration -= 3
+
+        return [self.next_token(n, False) for _ in range(n)]
+    
+
+    def get_array(self, length=50):
+        self.generate_tokens(length)
+        return self.token_array 
+    

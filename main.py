@@ -1,11 +1,16 @@
 import json
+import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from src.main.classes.connector.Connector import Connector
+from src.main.demos.lesson_plan.lesson_list import lesson_list
+from src.main.demos.lesson_plan.LessonPlan import LessonPlan
 from src.main.run import RunEngine
 from fastapi.middleware.cors import CORSMiddleware
-run = RunEngine()
+lessons = LessonPlan()
+
+count = 10
 
 app = FastAPI(
     title="Vercel + FastAPI",
@@ -15,12 +20,15 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"],  
-    allow_origins=["https://stateshaper-ads.vercel.app"],  
+    allow_origins=["https://stateshaper-lessons.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+run = Connector(lessons.sort_ratings())
+run.start_connect()
+
 
 class Input(BaseModel):
     message: str
@@ -28,30 +36,17 @@ class Input(BaseModel):
 
 @app.post("/api/start")
 def start():
-    ads = run.plugin.get_data()
-    run.connector = Connector(ads)
-    run.run_engine()
-    return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
+    lessons.get_data(count)
+    run.engine["vocab"] = run.compressed_seed["v"]
+    return {"response": {"lesson": run.engine["vocab"], "questions": lessons.current_questions, "ratings": lessons.current_ratings, "seed": [run.compressed_seed, run.engine]}}
 
 
 @app.post("/api/process")
 def process(input: Input):
     input = json.loads(input.message)
-    clean_input(input)
-    new_data = run.plugin.change_data(input)
-    run.connector = Connector(new_data)
-    run.run_engine()
-    return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
-
-
-# @app.get("/")
-# def read_root():
-#     ads = run.plugin.get_data()
-#     run.connector = Connector(ads)
-#     run.run_engine()
-#     return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
-
-
-def clean_input(input):
-    for item in input.items():
-        input[item[0]] = int(item[1])
+    lessons.after_test(input)
+    connect = Connector(lessons.data)
+    connect.start_connect()
+    lessons.get_data(count)
+    connect.engine["vocab"] = connect.compressed_seed["v"]    
+    return {"response": {"lesson": connect.engine["vocab"], "questions": lessons.current_questions, "ratings": lessons.current_ratings, "seed": [connect.compressed_seed, connect.engine]}}

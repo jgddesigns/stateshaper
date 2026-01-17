@@ -1,11 +1,12 @@
 from random import randint
+import sys
 
-# Used to define the vocab terms used in the MSE.
+# Used to define the vocab terms used in Stateshaper.
 
 # Data parameter format is dict/json with the following key/value pairs:
 
 # {
-#       "input": [],    ## list/array (the data to be called while the engine is running.)
+#       "input": [{"data": any, "rating": integer 1-100}],    ## list/array (the data to be called while the engine is running.)
 #       "rules": "",    ## string value (rating, compound, random or token. define_vocabs how the input will be mapped to the engine's vocab parameter.)          
 #       "length": None,  ## int (if none, uses all input.)
 #       "compound_length": None ## int (for combining compound vocab)
@@ -17,23 +18,25 @@ from random import randint
 class Vocab:
 
 
-    def __init__(self, data=None, **kwargs):
+    def __init__(self, data, **kwargs):
         super().__init__(**kwargs)
 
         self.rule_types = None
         self.debug = True
-        self.data = data if data else self.test_data()
+        self.data = data 
 
         self.rule_types = ["random", "rating", "compound", "token"]
 
         self.rules_explained = {
             "random": "The vocab consists of any terms within the input. If the length value is define_vocabd, the vocab list will include that many random values from the initial input data.",
             "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocabd, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
-            "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of the MSE engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
-            "token": "The vocab list will consist of objects or functions that are called during MSE iterations. This will be based on a number ranking. If a length value is specified, the vocab list will be limited to that number. "
+            "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of Stateshaper engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
+
+            # IN PROGRESS
+            "token": "The vocab list will consist of objects or functions that are called during Stateshaper iterations. This will be based on a number ranking. If a length value is specified, the vocab list will be limited to that number. "
         }
 
-        self.compound_rules = ["random"] ##need more compound rules. matching terms? rating based?
+        self.compound_rules = ["random"] 
 
         self.mapping_types = {
             "random": self.random_mapping,
@@ -77,6 +80,7 @@ class Vocab:
             self.data["length"] = len(self.data["input"])
 
         print("\n\n")
+
         if isinstance(self.data, dict) == False:
             print("Data passed is in incorrect format. Please make sure it is a dict/json with keys 'input' (list) and 'rules' (string).")
             
@@ -93,11 +97,12 @@ class Vocab:
             print("The 'compound' rule has been chosen, but the input list is invalid. Please make sure each value in the input data set is in the following format:\n\n{'data': values here, 'group': your specified group type, int or str}.")
 
         elif self.data["rules"] == "token" and self.valid_tokens() == False:
-            print("The 'token' rule has been chosen, but not all rules are define_vocabd. Please make sure each value in the input data set is in the following format:\n\n{'data': use an object, function call etc to call base on the value in the mse array, 'rank': int in event calling order preference (1, 2, 3).")
+            print("The 'token' rule has been chosen, but not all rules are define_vocabd. Please make sure each value in the input data set is in the following format:\n\n{'data': use an object, function call etc to call base on the value in the Stateshaper array, 'rank': int in event calling order preference (1, 2, 3).")
       
         else:
-            print("The data has been accepted. Processing input to enter into the MSE...")
+            print("The data has been accepted. Processing input to enter into Stateshaper...")
             self.define_vocab() if not self.data["rules"]  and not self.debug else self.define_vocab(self.data["rules"]) if not self.debug else self.test()
+
         print("\n\n")
 
 
@@ -107,11 +112,6 @@ class Vocab:
         return rule in self.rule_types
     
 
-    def valid_map(self):
-        ##combine all validity checks into one function
-        pass
-
-    
     def valid_ratings(self):
         i = 0
         for item in self.data["input"]:
@@ -206,44 +206,67 @@ class Vocab:
 
 
     def random_mapping(self):
-        self.vocab = self.data["input"]
+        vocab = [i["data"] for i in self.data["input"]]
+        self.vocab = vocab
+
+
+    def set_preferences(self, data, length=3):
+        self.top_preferences = data[:length]
 
 
     def rating_mapping(self):
         print("\n\nStarting ratings based mapping.\n")
-        included = []
+        personal = []
+        export = []
+        partial = []
+        side = []
+        full_list = []
 
         input = self.sort_ratings()
-
+        print("\n\n\n\n\n\n\n\n")
+        print(input)
+        print("\n\n\n\n\n\n\n\n")
+        self.set_preferences(input)
+        print(self.top_preferences)
         i = 0
-        while len(included) < self.data["length"]:
-            included.append(input[i]["data"])
-            i+=1
+        for interest in self.data["input"]:        
+            key = list(interest.keys())[0]
+            for item in interest[list(interest.keys())[0]]["data"]:
+                if len(export) < self.data["length"]:
+                    if len([x for x in item["attributes"] if x in self.top_preferences and interest[key] == self.top_preferences[0]]) > 0:
+                        export.append(item["item"])
+                    elif len([x for x in item["attributes"] if x in self.top_preferences]) > 0:
+                        partial.append(item["item"])
+                    else:
+                        side.append(item["item"])
+            i += 1
 
-        self.vocab = included
+        full_list = export + partial + side
+        print(full_list)
+        while len(personal) < self.data["length"]:
+            personal.append(full_list[len(personal)])
 
-        print(f"\nMSE vocab parameter successfully set with 'rating' rule.")
+        print(f"\nStateshaper vocab parameter successfully set with 'rating' rule.\n")
+        self.vocab = personal
 
 
-    def sort_ratings(self):
-        return sorted(self.data["input"], key=lambda x: x["rating"], reverse=True)
+    def sort_ratings(self, length=5):
+        sort = sorted(self.data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
+        lists = [list(i.values())[0]["data"][0]["attributes"] for i in sort]
+        return [item for sublist in lists for item in sublist]
     
 
     def compound_mapping(self):
-        self.vocab = "compound_mapping"
-        self.compound_vocab = self.data["input"] if self.data["length"] == len(self.data["input"]) else self.compound_map()
+        if self.data["compound_groups"]:
+            mandatory = [item[0] for item in self.data["compound_groups"] if item[1] == 1]
+            groups = [group[0] for group in self.data["compound_groups"]]
+            included = [item["data"] for item in self.data["input"] if any(x in item["groups"] for x in groups) and any(x in item["groups"] for x in mandatory)]
+        else:
+            included = [item["data"] for item in self.data["input"]]
 
-        print(f"\nMSE vocab parameter successfully set with 'compound' rule. Length: " + str(self.data["length"]))
+        self.vocab = included
 
-
-    def compound_map(self):
-        included = []
-
-        while len(included) < self.data["length"]:
-            data = self.data["input"][randint(0, len(self.data["input"])-1)]
-            included.append(data) if data not in included else None
-
-        return included
+        print(f"\nStateshaper vocab parameter successfully set with 'compound' rule.")
 
 
     def token_mapping(self):
@@ -259,7 +282,7 @@ class Vocab:
 
         self.vocab = included
 
-        print(f"\nMSE vocab parameter successfully set with 'token' rule. Length: " + str(self.data["length"]))
+        print(f"\nStateshaper vocab parameter successfully set with 'token' rule.")
 
 
     def sort_token(self):
@@ -274,75 +297,3 @@ class Vocab:
 
         print(f"\n\nThe vocab will be called based on the '{str(self.current_rule)}' rule:\n")
         print(self.rules_explained[self.current_rule])
-
-
-    def test(self):
-        if not self.data["rules"]:
-            self.data = self.test_data()
-        self.define_vocab()
-
-
-    def test_data(self):
-        print("\n\nRunning test function from Vocab class.")
-        return {
-            "input": [
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rank": 14
-                }, 
-                {
-                    "data": 123,
-                    "rank": 45,
-                },
-                {
-                    "data": 456,
-                    "rank": 88,
-                },
-                {
-                    "data": 789,
-                    "rank": 35,
-                },
-                {
-                    "data": 1673,
-                    "rank": 75,
-                },
-                {
-                    "data": 1238,
-                    "rank": 65,
-                },
-                {
-                    "data": 1213,
-                    "rank": 25,
-                },
-                {
-                    "data": 4526,
-                    "rank": 92,
-                },
-                {
-                    "data": 7849,
-                    "rank": 3,
-                },
-                {
-                    "data": 1073,
-                    "rank": 55,
-                },
-                {
-                    "data": 18,
-                    "rank": 77,
-                },
-            ],
-            
-            "rules": "token",
-            "length": 10,
-            "compound_length": 3,
-            "compound_rules": "dfdfdf"
-        }
-

@@ -1,29 +1,156 @@
-import os
+import random
 import sys
+from .lesson_list import lesson_list
+from .lesson_list import lesson_ratings
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-SRC_ROOT = os.path.join(PROJECT_ROOT, "src")
+class LessonPlan:
 
-if SRC_ROOT not in sys.path:
-    sys.path.insert(0, SRC_ROOT)
 
-###takes a dictionary of items with a keys that have list values as data 
-
-class TinyMSE:
-
-    def __init__(self, list_count=10, **kwargs):
+    def __init__(self, data=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.subset_alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        self.adjusted = []
+        self.current_lessons = []
+        self.lesson_vocab = []
+        self.sorted_data = None
+        self.data = lesson_list if not data else data
+        self.compressed_vocab = None
+        self.compressed_subset = None
+        self.current_ratings = None
+        self.lesson_ratings = lesson_ratings
+        self.current_questions = None
 
-        self.list_count = list_count
-        self.subset_size = list_count * 4
+
+  
+
+    def after_test(self, results):
+        for question in results:
+            print(question)
+            self.adjust_related(question["question"]["question"], question["question"]["answer"])
+        
+    
+    def adjust_related(self, question, answer):
+        adjust = 5 if answer == True else -5
+        ratings_adjust = 1 if answer == True else -1
+        item_pos = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == question][0]].values())[0]["data"]
+        for item in self.data["input"]:
+            for term in item[list(item.keys())[0]]["data"]:
+                print("Adjusted #" + str(self.data["input"].index(item)) + " " + list(item.keys())[0]) if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else None
+                print("Current Rating: " + str(item[list(item.keys())[0]]["rating"])) if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else None
+                self.adjusted.append(item) if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else None
+                item[list(item.keys())[0]]["rating"] = item[list(item.keys())[0]]["rating"] + adjust if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else item[list(item.keys())[0]]["rating"]
+                print("New Rating: " + str(item[list(item.keys())[0]]["rating"]) + "\n") if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else None
+        
+        for key in list(self.lesson_ratings.keys()):
+            self.lesson_ratings[key] = self.lesson_ratings[key] + ratings_adjust if key in item_pos[0]["attributes"] else self.lesson_ratings[key]
 
 
+    def sort_ratings(self):
+        self.adjust_ratings()
+        sort = sorted(self.data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
+        self.sorted_data = sort
+        self.data["input"] = sort
+        return self.data
+    
 
-    def set_count(self, count):
-        self.list_count = count
-        self.subset_size = count * 4
+    def adjust_ratings(self):
+        ratings = list(self.lesson_ratings.keys())
+        for item in self.data["input"]:
+            if item[list(item.keys())[0]]["data"][0]["attributes"][0] in ratings:
+                item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"][0]["attributes"][0]]) / 2)
+        
+
+    def ratings_data(self):
+        sort = sorted(self.lesson_ratings, key=lambda x: self.lesson_ratings[x], reverse=True)
+        self.current_ratings = [{"attribute": i, "rating": self.lesson_ratings[i]} for i in sort]
+
+
+    def set_preferences(self, data, length=10):
+        self.lesson_vocab = [list(i.keys())[0] for i in self.sorted_data]
+        self.current_lessons = self.lesson_vocab[:length if not self.data["length"] else self.data["length"]]
+        return self.current_lessons
+
+
+    def get_data(self, count):
+        self.ratings_data()
+        for _ in range(count):
+            sorted_data = self.sort_ratings()
+            current_lessons = self.set_preferences(sorted_data)
+            test_data = self.test_data(current_lessons)
+
+        return test_data
+
+
+    def test_data(self, data):
+        test = []             
+                                                                                          
+        
+        while len(test) < len(data):
+            answer = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == data[len(test)]][0]].values())[0]["data"][0]["answer"]   
+            result = random.randint(0, 1)
+            test.append({"question": data[len(test)], "answer": answer}) if data[len(test)] not in test else None
+
+        print("\n\nTest Selections\n\n")
+        print(test)
+        print()
+
+        self.current_questions = test
+    
+        return test
+    
+
+    def get_lessons(self):
+        lessons = [] 
+        partial = []
+        side = []
+        seed = ""
+        subseed = ""
+
+        for item in self.data["input"]:
+            key = list(item.keys())[0]
+            for term in item[list(item.keys())[0]]["data"]:
+                idx1 = self.data["input"].index(item)
+                idx2 = item[list(item.keys())[0]]["data"].index(term)
+                if len(lessons) < len(self.current_lessons):
+                    if len([x for x in term["attributes"] if x in self.current_lessons and key == self.current_lessons[0]]) > 0:
+                        lessons.append(f"{idx1:02d}{idx2:02d}")
+                    elif len([x for x in term["attributes"] if x in self.current_lessons]) > 0 and len([y for y in self.current_lessons if key == y]) > 0:
+                        partial.append(f"{idx1:02d}{idx2:02d}")
+                    elif len([x for x in term["attributes"] if x in self.current_lessons]) > 0:
+                        side.append(f"{idx1:02d}{idx2:02d}")
+
+                seed = seed + f"{idx1:02d}{idx2:02d}"
+
+
+        subseed = lessons + partial + side
+
+        subseed = "".join(subseed)
+
+        self.seed = subseed
+
+        self.original_seed = seed 
+
+        self.compressed_seed = self.compress(seed)
+
+        self.compressed_subset = self.encode_subset_seed(seed, subseed)
+
+        self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+
+        print("\n\n\nFull list based on ratings profile:\n")
+        print(self.current_lessons)
+
+        print("\n\n\nCompressed Tiny State format for entire list:\n")
+        print(self.compressed_seed)
+
+        print("\n\n\nCompressed seed for chosen data set:\n")
+        print(self.compressed_subset)
+
+        print("\nCompare to final list:\n")
+        self.exported_data = self.current_lessons
+        print(self.current_lessons)
+        print("\n\n")
+
+        return [self.compressed_seed, self.compressed_subset]
 
 
     def _encode_letters_from_int(self, n: int) -> str:
@@ -239,7 +366,7 @@ class TinyMSE:
         return "".join(chars)
     
 
-    def decode_subset_seed(self, full_grid: str, subset_seed: str) -> str:
+    def decode_subset_seed(self, full_grid: str, compressed_subset: str) -> str:
         """
         Decode a subset seed created by encode_subset_seed back into a sparse
         DDII string, using the same full_grid.
@@ -259,7 +386,7 @@ class TinyMSE:
             )
 
         sparse_blocks = []
-        for ch in subset_seed:
+        for ch in compressed_subset:
             try:
                 pos = self.subset_alphabet.index(ch)
             except ValueError:
@@ -275,14 +402,14 @@ class TinyMSE:
         return "".join(sparse_blocks)
     
 
-    def decode_subset(self, layout_seed: str, subset_seed: str) -> str:
+    def decode_subset(self, layout_seed: str, compressed_subset: str) -> str:
         """
         High-level API:
           - layout_seed: ABC12345 (grid shape, used to build full_grid)
-          - subset_seed: positions-only string encoded with letters/digits
+          - compressed_subset: positions-only string encoded with letters/digits
 
         Returns:
           Reconstructed sparse DDII string.
         """
-        full_grid = self.decode(layout_seed)  # strict full grid
-        return self.decode_subset_seed(full_grid, subset_seed)
+        full_grid = self.decode(layout_seed)  
+        return self.decode_subset_seed(full_grid, compressed_subset)

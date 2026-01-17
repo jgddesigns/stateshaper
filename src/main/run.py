@@ -6,8 +6,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.append(os.path.dirname(__file__))
 
 from classes.connector.Connector import Connector
-from demos.ads.Ads import Ads
-from core import MorphicSemanticEngine
+from demos.lesson_plan.LessonPlan import LessonPlan
+from core import Stateshaper
 
 
 
@@ -17,8 +17,8 @@ class RunEngine:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.plugin = Ads()
-        self.connector = Connector(self.plugin.get_data())
+        self.plugin = LessonPlan()
+        self.connector = Connector(self.plugin.sort_ratings())
 
         self.engine = None
 
@@ -29,8 +29,8 @@ class RunEngine:
 
     def run_engine(self):
         self.seed = self.connector.start_connect()
-        self.compressed_seed = self.compress_seed()
-        self.engine = MorphicSemanticEngine(
+
+        self.engine = Stateshaper(
             self.seed["state"],
             self.seed["vocab"],
             self.seed["constants"],
@@ -41,77 +41,13 @@ class RunEngine:
         
         print("\n\nTokens successfully generated from vocab.\n")
 
+        print(self.tokens)
 
-    def test(self):
-        pass
-
-
-    def test_data(self):
-        print("\n\nRunning test function from run class.")
-        return {
-            "input": [
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": "asdf",
-                    "rating": 14
-                }, 
-                {
-                    "data": 123,
-                    "rating": 45,
-                },
-                {
-                    "data": 456,
-                    "rating": 88,
-                },
-                {
-                    "data": 789,
-                    "rating": 35,
-                },
-                {
-                    "data": 1673,
-                    "rating": 75,
-                },
-                {
-                    "data": 1238,
-                    "rating": 65,
-                },
-                {
-                    "data": 1213,
-                    "rating": 25,
-                },
-                {
-                    "data": 4526,
-                    "rating": 92,
-                },
-                {
-                    "data": 7849,
-                    "rating": 3,
-                },
-                {
-                    "data": 1073,
-                    "rating": 55,
-                },
-                {
-                    "data": 18,
-                    "rating": 77,
-                },
-            ],
-            
-            "rules": "rating",
-            "length": 10,
-            "compound_length": 3,
-            "compound_rules": "dfdfdf"
-        }
+        print()
     
     def compress_seed(self):
-        self.seed["vocab"] = [self.plugin.compressed_vocab, self.plugin.subset_seed]
+        self.seed["vocab"] = [self.plugin.compressed_vocab, self.plugin.compressed_subset]
+
 
 
 # RunEngine()
