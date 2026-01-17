@@ -1,4 +1,5 @@
 from random import randint
+import sys
 
 
 
@@ -6,7 +7,7 @@ from random import randint
 class TinyState:
 
     def __init__(self, list_count=3, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.subset_alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -72,8 +73,8 @@ class TinyState:
         NOTE:
           This only encodes the LAYOUT (grid shape), not any sparse subset.
         """
-        if len(seed) != 8:
-            raise ValueError("Seed must be exactly 8 characters: 'ABC12345'")
+        # if len(seed) != 8:
+        #     raise ValueError("Seed must be exactly 8 characters: 'ABC12345'")
 
         letters = seed[:3]
         digits = seed[3:]
@@ -282,15 +283,17 @@ class TinyState:
         full_grid = self.decode(layout_seed)  
         return self.decode_subset_seed(full_grid, compressed_subset)
     
+    
     def set_preferences(self, data, length=5):
         self.top_preferences = data[:self.data["length"]]
+
 
     def sort_ratings(self, data, length=5):
         sort = sorted(data["input"], key=lambda x: list(x.values())[0]["rating"], reverse=True)
         return [list(i.keys())[0] for i in sort]
     
 
-    def get_seed(self, data, vocab=None):
+    def get_seed(self, data, vocab=None, derived=None):
 
 
         self.set_count(data["length"])
@@ -407,6 +410,74 @@ class TinyState:
         return [self.compressed_seed, self.compressed_subset]
 
 
+    def derived_seed(self, data, vocab=None):
+        self.set_count(data["length"])
+        self.data = data
+        export = []
+        side = []
+        seed = ""
+        subseed = ""
+
+        if data["rules"] == "rating":
+
+            for item in data["input"]:
+
+                idx1 = data["input"].index(item)
+                idx2 = 00
+                try:
+                    term = list(item.values())[0]["data"][0]["item"]
+                except:
+                    term = list(item.values())[0]["data"]["item"]
+                if len(export) < self.data["length"]:
+                    if term in vocab:
+                        print(term)
+                        export.append(f"{idx1:02d}{idx2:02d}")
+                    else:
+                        side.append(f"{idx1:02d}{idx2:02d}")
+
+                seed = seed + f"{idx1:02d}{idx2:02d}"
+                    
+            
+            subseed = export 
+
+            subseed = subseed[:data["length"]]
+
+            subseed = "".join(subseed)
+
+            self.seed = subseed
+
+            self.original_seed = seed 
+
+            self.compressed_seed = self.compress(seed)
+
+            self.compressed_subset = self.encode_subset_seed(seed, subseed)
+
+            self.decoded_subset = self.decode_subset_seed(seed, self.compressed_subset)
+
+            print("\n\n\nFull list based on ratings profile:\n")
+            print(vocab)
+
+            print("\n\n\nDerived Tiny State format for entire list:\n")
+            print(self.compressed_seed)
+
+            print("\n\n\nDerived seed for chosen data set:\n")
+            print(self.compressed_subset)
+
+            print("\n\n\nDerived list rebuilt from extracted seed:\n")
+            print(self.rebuild_derived(self.compressed_seed, self.compressed_subset, self.data))
+            print("\n\n")
+            
+            print("\nCompare to final list:\n")
+            self.exported_data = vocab
+            print(vocab)
+            print("\n\n")
+
+            return [self.compressed_seed, self.compressed_subset]
+        
+        else:
+            return self.regular_vocab(data, vocab)
+        
+
     def rebuild_data(self, compressed_seed, compressed_subset, data=None):
         origin_seed = self.decode(compressed_seed)
         decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset) 
@@ -415,6 +486,21 @@ class TinyState:
         while len(export)<data["length"]:
             parent = decoded[:2]
             child = decoded[2:4]
+            key = list(data["input"][int(parent)].keys())[0]
+            export.append(data["input"][int(parent)][key]["data"][int(child)]["item"])
+            decoded = decoded[4:]
+
+        return export
+    
+    
+    def rebuild_derived(self, compressed_seed, compressed_subset, data=None):
+        origin_seed = self.decode(compressed_seed)
+        decoded = self.decoded = self.decode_subset_seed(origin_seed, compressed_subset) 
+        export = []
+
+        while len(export)<data["length"]:
+            parent = decoded[:2]
+            child = 00
             key = list(data["input"][int(parent)].keys())[0]
             export.append(data["input"][int(parent)][key]["data"][int(child)]["item"])
             decoded = decoded[4:]

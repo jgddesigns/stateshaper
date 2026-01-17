@@ -6,7 +6,7 @@ class DeriveVocab:
 
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.vocab = None
 
@@ -18,7 +18,7 @@ class DeriveVocab:
 
         self.similarities = None
 
-        self.test()
+        # self.test()
 
 
 
@@ -70,10 +70,18 @@ class DeriveVocab:
         return self.vocab
         
 
-    def get_vocab(self, rankings, length=3):
+    def get_vocab(self, rankings, length=3, data=None):
         self.vocab = self.sort_rankings(rankings)[:self.original_data["length"]]
         return self.vocab
         
+
+    def current_vocab(self):
+        try:
+            vocab = [list(i.values())[0]["data"][0]["item"] for i in self.original_data["input"] if [j for j in self.vocab if j == list(i.keys())[0]]]
+        except:
+            vocab = [list(i.values())[0]["data"]["item"] for i in self.original_data["input"] if [j for j in self.vocab if j == list(i.keys())[0]]]
+        return vocab
+    
 
     def sort_ratings(self, rankings):
         data = {}
@@ -84,8 +92,8 @@ class DeriveVocab:
     
 
     def sort_rankings(self, rankings):
-        return sorted(rankings, key=lambda x: rankings[x], reverse=True)
-    
+        rankings = sorted(rankings, key=lambda x: rankings[x], reverse=True)
+        return rankings
     
     def derive_rankings(self):
         rankings = self.master_rankings
@@ -130,6 +138,7 @@ class DeriveVocab:
 
 
     def adjust_rankings(self, input, data):
+        self.original_data = data if not self.original_data else self.original_data
         rankings = self.create_dataset(data)
         for item in input:
             [self.add_rankings(rankings, i, (1 if item[0] == True else -1)) for i in item[1]]

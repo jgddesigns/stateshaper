@@ -21,7 +21,7 @@ class Vocab:
 
 
     def __init__(self, data, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.rule_types = None
         self.debug = True
@@ -43,8 +43,8 @@ class Vocab:
         self.rule_types = ["random", "rating", "compound", "token"]
 
         self.rules_explained = {
-            "random": "The vocab consists of any terms within the input. If the length value is define_vocabd, the vocab list will include that many random values from the initial input data.",
-            "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocabd, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
+            "random": "The vocab consists of any terms within the input. If the length value is define_vocab, the vocab list will include that many random values from the initial input data.",
+            "rating": "Create the vocab based on 1-100 ratings. If the length value is define_vocab, the vocab list will include that many items from the input data, based on the highest ratings. If no length is specified, the vocab will be all input.",
             "compound": "Items from the vocab list will be randomly combined based on the 'group' value and called during each iteration of Stateshaper engine. If a length is specified, the vocab list will be limited to that many items. If an compound_groups list is set, only those groups will be in the list, otherwise any group in the input data can be included.",
 
             # IN PROGRESS
@@ -112,7 +112,7 @@ class Vocab:
             print("The 'compound' rule has been chosen, but the input list is invalid. Please make sure each value in the input data set is in the following format:\n\n{'data': values here, 'group': your specified group type, int or str}.")
 
         elif self.data["rules"] == "token" and self.valid_tokens() == False:
-            print("The 'token' rule has been chosen, but not all rules are define_vocabd. Please make sure each value in the input data set is in the following format:\n\n{'data': use an object, function call etc to call base on the value in the Stateshaper array, 'rank': int in event calling order preference (1, 2, 3).")
+            print("The 'token' rule has been chosen, but not all rules are define_vocab. Please make sure each value in the input data set is in the following format:\n\n{'data': use an object, function call etc to call base on the value in the Stateshaper array, 'rank': int in event calling order preference (1, 2, 3).")
       
         else:
             print("The data has been accepted. Processing input to enter into Stateshaper...")
@@ -123,7 +123,7 @@ class Vocab:
 
     def valid_rule(self, rule):
         if rule not in self.rule_types:
-            print("\nRule in data set is not in list of define_vocabd rules.")
+            print("\nRule in data set is not in list of define_vocab rules.")
         return rule in self.rule_types
     
 

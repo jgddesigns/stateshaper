@@ -2,7 +2,7 @@ class Modify:
 
 
     def __init__(self, data, **kwargs):
-        super().__init__(**kwargs)
+        
         self.edit = None
         self.result = None
         self.data = data

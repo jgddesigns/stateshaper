@@ -11,7 +11,7 @@ class Connector:
 
 
     def __init__(self, data, token_count=10, initial_state=None, constants=None, vocab=None, mod=None, **kwargs):
-        super().__init__(**kwargs)
+        
         if data["rules"] == "rating":
             data["length"] = len(data["input"]) if data["length"] > len(data["input"]) else data["length"]
 
@@ -50,20 +50,21 @@ class Connector:
         self.vocab_rules = {
             "rating": self.get_personalization,
             "random": self.get_data,
-            "compound": self.get_data
+            "compound": self.get_data,
+            "tokens": self.get_tokens
         }
 
 
 
     def start_connect(self, format=None):
         self.build_seed()
+        
         self.engine = self.minimal_seed = {
             "state": self.state,
             "vocab": self.vocab,
             "constants": self.constants,
             "mod": self.mod
         }
-
 
         print("\n\n\nStateshaper Seed has been created:\n")
         print(self.engine)
@@ -73,8 +74,6 @@ class Connector:
 
         print("\n\n\nFull Seed:\n")
         self.engine["vocab"] = self.compressed_vocab if format else self.engine["vocab"]
-
-        print(self.engine)
 
         self.output_seed()
 
@@ -87,13 +86,13 @@ class Connector:
     
 
 
-    def output_seed(self, vocab=False):
+    def output_seed(self, state=None, vocab=None, constants=None, mod=None, derived=None):
         seed = {}
 
-        seed["s"] = self.engine["state"]  
-        seed["v"] = self.compressed_vocab if vocab == True else ""
-        seed["c"] = self.engine["constants"]
-        seed["m"] = self.engine["mod"]
+        seed["s"] = self.engine["state"] if not state else state
+        seed["v"] = self.compressed_vocab if vocab == True else derived if derived else ""
+        seed["c"] = self.engine["constants"] if not constants else constants
+        seed["m"] = self.engine["mod"] if not mod else mod
 
         self.compressed_seed = seed  
 
@@ -158,13 +157,13 @@ class Connector:
     def build_seed(self):
         if self.vocab:
             self.compressed_vocab = self.vocab
-            self.vocab = self.vocab_rules[self.data["rules"]](self.vocab[0], self.vocab[1], self.data)
+            self.vocab = self.vocab_rules[self.data["rules"]](self.vocab[0], self.vocab[1], self.data) if self.data["rules"] != "tokens" else []
         else:
-            self.vocab = self.get_vocab()
-            self.compressed_vocab = self.compress_vocab()
+            self.vocab = self.get_vocab() if self.data["rules"] != "tokens" else []
+            self.compressed_vocab = self.compress_vocab() if self.data["rules"] != "tokens" else []
         self.state = self.initial_state
-        self.constants = self.default_constants
-        self.mod = self.default_mod
+        self.constants = self.constants
+        self.mod = self.mod
 
 
     def get_constants(self):
@@ -184,10 +183,9 @@ class Connector:
             return True
         if isinstance(self.data, dict):
             self.vocab_obj = Vocab(self.data)  
-            return self.vocab_obj.define_vocab()
+            return self.vocab_obj.define_vocab() 
         else:   
             print("no valid data")
-
 
 
     def get_state(self):
@@ -222,9 +220,13 @@ class Connector:
         self.modify.adjust(key, adjust)
 
 
-    def compress_vocab(self):
-        return self.tiny_state.get_seed(self.data, self.vocab)
+    def compress_vocab(self, vocab=None):
+        return self.tiny_state.get_seed(self.data, self.vocab if not vocab else vocab)
 
+
+    def compress_regular(self, vocab=None):
+        return self.tiny_state.derived_seed(self.data, self.vocab if not vocab else vocab)
+    
 
     def get_minimal(self):
         return self.compressed_seed
@@ -244,3 +246,7 @@ class Connector:
 
     def get_data(self, seed, minimal, data):
         return self.tiny_state.rebuild_regular(seed, minimal, data)
+    
+
+    def get_tokens(self, seed, minimal, data):
+        return []

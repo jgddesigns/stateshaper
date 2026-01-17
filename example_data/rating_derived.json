@@ -52,6 +52,6 @@
         {"boxing_training": {"data": [{"item": "boxing_training.png", "attributes": ["boxing_training","stamina_build","conditioning_workout"]}]}},
         {"quarterback_drill": {"data": [{"item": "quarterback_drill.png", "attributes": ["quarterback_drill","leadership_task","teamwork_drill"]}]}}
     ],
-    "rules": "derived",
+    "rules": "rating",
     "length": 5
 }

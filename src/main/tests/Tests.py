@@ -7,7 +7,7 @@ class Tests:
 
 
     def __init__(self, debug=True, **kwargs):
-        super().__init__(**kwargs)
+        
 
         
 

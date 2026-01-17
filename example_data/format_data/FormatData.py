@@ -4,7 +4,7 @@ import sys
 class FormatData:
 
     def __init__(self, input=None, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.parent_terms = {
             "rating": ["input", "rules", "length"],
@@ -162,9 +162,9 @@ class FormatData:
         self.add_row("compound", "orange", ["candy", "fruit", "juice"])
         self.add_group("candy", 1)
         self.add_group("chocolate", 0)
-        self.add_group("pie", 0)       
+        self.add_group("flowers", 0)       
         self.add_term("and")        
-        self.add_compound_length(3) 
+        self.add_compound_length(2) 
         print("\n\nhere is the created template:\n")
         print(self.current_template)
 

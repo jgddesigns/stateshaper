@@ -7,8 +7,6 @@ class LessonPlan:
 
 
     def __init__(self, data=None, **kwargs):
-        super().__init__(**kwargs)
-
         self.adjusted = []
         self.current_lessons = []
         self.lesson_vocab = []

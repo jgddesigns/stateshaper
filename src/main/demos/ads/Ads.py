@@ -11,7 +11,7 @@ class Ads:
 
 
     def __init__(self, user_id=None, **kwargs):
-        super().__init__(**kwargs)
+        
 
         self.tiny_mse = TinyState(10)
 
