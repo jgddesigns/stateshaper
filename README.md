@@ -15,7 +15,7 @@ As far as compression is concerned, using this tool can reduce data sizes by ove
 
 Compressing this data also allows for privacy, where the data contained in a seed it can't be extracted without knowing specific seed parameters. For applications, this can be stored in environment variables the same way that access keys can.
 
-<br> <br> 
+<br>  
 
 Recommended Uses Include:
 
@@ -25,7 +25,7 @@ Recommended Uses Include:
 - QA Stress Testing
 - Procedural World Generation
 
-<br> <br> 
+<br> 
 
 This repository contains code written in Python, with other langauges scheduled to be available soon. 
 
