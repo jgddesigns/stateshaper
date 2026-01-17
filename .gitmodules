@@ -1,3 +1,6 @@
 [submodule "frontend/frontend/stateshaper_lessons_demo"]
 	path = frontend/frontend/stateshaper_lessons_demo
 	url = https://github.com/jgddesigns/stateshaper
+[submodule "frontend/stateshaper_lessons_demo"]
+	path = frontend/stateshaper_lessons_demo
+	url = https://github.com/jgddesigns/stateshaper_lessons_demo.git
