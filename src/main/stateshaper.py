@@ -46,9 +46,7 @@ class RunEngine:
                 "mod": mod
             }
 
-        print(self.seed)
-        self.connector = Connector(self.data, token_count=token_count, initial_state=initial_state,  constants=constants, vocab=vocab, mod=mod)
-
+        self.connector = Connector(data=self.data, token_count=token_count, initial_state=initial_state,  constants=constants, vocab=vocab, mod=mod)
 
         self.tiny_state = TinyState()
 
@@ -71,12 +69,12 @@ class RunEngine:
         self.define_engine()
 
 
-    def define_engine(self):
+    def define_engine(self, state=None, vocab=None, constants=None, mod=None):
         self.engine = Stateshaper(
-            self.seed["state"],
-            self.seed["vocab"],
-            self.seed["constants"],
-            self.seed["mod"],
+            self.seed["state"] if not state else state,
+            self.seed["vocab"] if not vocab else vocab,
+            self.seed["constants"] if not constants else constants,
+            self.seed["mod"] if not mod else mod,
             [self.data["compound_length"], self.data["compound_groups"], self.data["compound_terms"]] if self.data["rules"] == "compound" else None
         )
 
@@ -99,7 +97,6 @@ class RunEngine:
         print("============================================")
         print(self.tokens)
 
-    
     
     def jump(self, index):
         self.tokens = self.engine.jump(index)
@@ -151,3 +148,11 @@ class RunEngine:
             input.append([answer, [random.choice(keys), random.choice(keys), random.choice(keys)]])
 
         return input
+    
+
+    def one_token(self):
+        return self.engine.step()
+    
+
+    def reverse_one(self):
+        return self.engine.reverse()

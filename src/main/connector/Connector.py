@@ -162,8 +162,8 @@ class Connector:
             self.vocab = self.get_vocab() if self.data["rules"] != "tokens" else []
             self.compressed_vocab = self.compress_vocab() if self.data["rules"] != "tokens" else []
         self.state = self.initial_state
-        self.constants = self.default_constants
-        self.mod = self.default_mod
+        self.constants = self.constants
+        self.mod = self.mod
 
 
     def get_constants(self):

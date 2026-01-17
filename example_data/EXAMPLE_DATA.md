@@ -4,6 +4,8 @@
 This directory contains example JSON data for accepted input into the *RunEngine* class. This class is called whenever a *Stateshaper Seed* needs to be created for your data. 
 
 
+<br> <br>
+
 
 *compound.json*
 
@@ -34,6 +36,7 @@ oatmeal with berries and yogurt
 Primary Use: Synthetic Datasets (Quality Assurance, Simulations) 
 
 
+<br> <br>
 
 
 *random.json*
@@ -57,6 +60,7 @@ Used in calculations to create seemingly "random" output while maintaining repro
 Primary Use: Synthetic Datasets (Procedural Worlds, Code/ID Generation)
 
 
+<br> <br>
 
 
 *rating_initial.json*
@@ -65,6 +69,8 @@ For 'rating' data ruleset. Creates an output set based on ratings-derived prefer
 
 Primary Use: Personalization (Content Feeds, Routine Schedules)
 
+
+<br> <br>
 
 
 *rating_derived.json*
@@ -85,4 +91,33 @@ engine = RunEngine(data, token_count)
 engine.start_engine()
 
 engine.run_engine()
+```
+
+
+<br> <br>
+
+
+*tokens.json*
+
+A basic, yet powerful rule. No special data is inputted. Used when you want strictly numeric output. This can be useful for creating a chain of numbers to use as parameters for function logic. 
+
+
+
+Example:
+
+```python
+# data - the data type from these examples.
+# token_count - leave blank, one is generated at a time using this rule.
+# initial_state (optional, default=[66, 67, 54, 3, 34]) - the starting number to derive the output from
+# constants (optional, default={"a": 3,"b": 5,"c": 7,"d": 11}) - used for morphing calculations. only needss to be modified if specific determinism is needed. 
+# mod (optional, default=9973) - used for morphing calculations. only needs to be modified if specific determinism is needed. 
+engine = RunEngine(data)
+
+engine.start_engine()
+
+# get first token to use for logic 
+token = engine.one_token()
+
+# get the previous token (after one has been generated).
+token = engine.reverse_one()
 ```
