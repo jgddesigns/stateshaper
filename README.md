@@ -58,7 +58,7 @@ Using numbers as tokens, values are derived to stress test a fintech app's math 
 
 https://stateshaper-graphics.vercel.app
 
-With a plugin file that uses a numerical token to set each graphic object's attributes, an endless amount of onscreen content can be generated. A basic example of 2d shapes and colors is shown. With more precise calculations, this output can include even the most modern textures. 
+With a plugin file that uses a numerical token to set each graphic object's attributes, an endless amount of onscreen content can be generated. A basic example of 2d shapes and colors is shown. When more precise calculations are used, this output can include even the most modern textures. 
 
 
 *Tiny State Compression*
