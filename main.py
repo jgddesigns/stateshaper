@@ -1,11 +1,15 @@
 import json
+import random
+import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
-from src.main.classes.connector.Connector import Connector
-from src.main.run import RunEngine
+from src.main.demos.fintech_qa.FintechQA import FintechQA
+from src.main.stateshaper import RunEngine
 from fastapi.middleware.cors import CORSMiddleware
-run = RunEngine()
+
+
+count = 10
 
 app = FastAPI(
     title="Vercel + FastAPI",
@@ -15,43 +19,41 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"],  
-    allow_origins=["https://stateshaper-ads.vercel.app"],  
+    allow_origins=["https://stateshaper-qa.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# run = RunEngine()
+fintech_qa = FintechQA()
+
+
 class Input(BaseModel):
     message: str
 
 
-@app.post("/api/start")
-def start():
-    ads = run.plugin.get_data()
-    run.connector = Connector(ads)
-    run.run_engine()
-    return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
+
+with open("example_data/tokens.json", "r") as f:
+    data = json.loads(f.read())
+    f.close()
+run = RunEngine(data, token_count=50)
+run.start_engine()
+state = [random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973)]
+run.define_engine(state=state)
+tokens = run.run_engine()
 
 
-@app.post("/api/process")
-def process(input: Input):
-    input = json.loads(input.message)
-    clean_input(input)
-    new_data = run.plugin.change_data(input)
-    run.connector = Connector(new_data)
-    run.run_engine()
-    return {"response": {"ads": new_data, "ratings": run.plugin.interests, "seed": run.seed}}
+
+@app.post("/api/forward")
+def forward():
+    token = run.one_token()
+    test = fintech_qa.get_test(token)
+    return {"response": {"test": test, "test_token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
-# @app.get("/")
-# def read_root():
-#     ads = run.plugin.get_data()
-#     run.connector = Connector(ads)
-#     run.run_engine()
-#     return {"response": {"ads": ads, "ratings": run.plugin.interests, "seed": run.seed}}
-
-
-def clean_input(input):
-    for item in input.items():
-        input[item[0]] = int(item[1])
+@app.post("/api/reverse")
+def reverse():
+    token = run.reverse_one()
+    test = fintech_qa.get_test(token)
+    return {"response": {"test": test, "test_token": token, "seed": [run.get_seed(state=state), run.engine]}}
