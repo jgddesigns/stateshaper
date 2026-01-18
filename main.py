@@ -4,7 +4,7 @@ import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
-from src.main.demos.fintech_qa.FintechQA import FintechQA
+from src.main.demos.graphics.Graphics import Graphics
 from src.main.stateshaper import RunEngine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,14 +19,15 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://stateshaper-qa.vercel.app"],  
+    # allow_origins=["http://localhost:3000"],
+    allow_origins=["https://stateshaper-graphics.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # run = RunEngine()
-fintech_qa = FintechQA()
+graphics = Graphics()
 
 
 class Input(BaseModel):
@@ -48,12 +49,12 @@ tokens = run.run_engine()
 @app.post("/api/forward")
 def forward():
     token = run.one_token()
-    test = fintech_qa.get_test(token)
-    return {"response": {"test": test, "test_token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    shapes = graphics.get_shapes(token)
+    return {"response": {"shapes": shapes, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
 @app.post("/api/reverse")
 def reverse():
     token = run.reverse_one()
-    test = fintech_qa.get_test(token)
-    return {"response": {"test": test, "test_token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    shapes = graphics.get_shapes(token)
+    return {"response": {"shapes": shapes, "token": token, "seed": [run.get_seed(state=state), run.engine]}}

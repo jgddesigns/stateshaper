@@ -10,7 +10,7 @@ from .tools.tiny_state.TinyState import TinyState
 
 class RunEngine:
 
-    def __init__(self, data=None, seed=None, token_count=10, initial_state=[66, 67, 54, 3, 34], vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
+    def __init__(self, data=None, seed=None, token_count=10, initial_state=67, vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         
 
         if isinstance(data, dict):
@@ -25,7 +25,7 @@ class RunEngine:
             try:
                 initial_state = seed["s"] 
             except:
-                initial_state = initial_state 
+                initial_state = [initial_state] 
             try:
                 vocab = seed["v"]
             except:

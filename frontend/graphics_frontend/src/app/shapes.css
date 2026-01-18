@@ -1,0 +1,56 @@
+.circle{
+    clip-path: circle(50% at center)
+}
+
+.square{
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%)
+}
+
+.triangle{
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%)
+}
+
+.heart{
+    clip-path: path('M10,30 A20,20 0 0,1 50,30 A20,20 0 0,1 90,30 Q90,60 50,90 Q10,60 10,30 Z')
+}
+
+.star{
+    clip-path: path('M50,15 L61.8,35.1 L84.4,38.2 L68.4,53.6 L72.6,76.3 L50,65.8 L27.4,76.3 L31.6,53.6 L15.6,38.2 L38.2,35.1 L50,15 Z')
+}
+
+.moon{
+    clip-path: path('M 50 0 A 50 50 0 1 0 50 100 A 20 50 0 1 1 50 0 Z')
+}
+
+.hexagon{
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)
+}
+
+.diamond{
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)
+}
+
+.trapezoid {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+}
+
+.progress_gray{
+    width: 10px;
+    height: 10px;
+    background-color: gray;
+    border-radius: 50%;
+}
+
+.progress_green{
+    width: 10px;
+    height: 10px;
+    background-color: #4ade80;
+    border-radius: 50%;
+}
+
+.progress_red{
+    width: 10px;
+    height: 10px;
+    background-color: #fb7185;
+    border-radius: 50%;
+}

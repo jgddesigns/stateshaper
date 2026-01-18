@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Stateshaper QA Demo",
-  description: "A fintech QA demo implementing Stateshaper.",
+  title: "Stateshaper Graphics Demo",
+  description: "Storing unlimited graphics with a finite amount of memory.",
 };
 
 export default function RootLayout({ children }) {
