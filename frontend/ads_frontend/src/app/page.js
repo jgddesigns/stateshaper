@@ -292,9 +292,6 @@ export default function Home() {
         <div className="text-md ">
           <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/ads_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/ads_demo</a>
         </div>
-        {/* <div className="text-md mt-2">
-          <span className="font-bold">Backend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_ads_backend" target="_blank">https://www.github.com/jgddesigns/stateshaper_ads_backend</a>
-        </div> */}
         </div>
       : null}
       {ShowExample ?
