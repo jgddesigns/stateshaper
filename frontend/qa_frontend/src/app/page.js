@@ -465,12 +465,9 @@ export default function Home() {
         EXAMPLE ONLY
       </div>
       {ShowCode ?
-        <div className="text-white p-4 bottom-18 right-192 ml-auto absolute w-128 h-36 rounded-lg bg-blue-600">
+        <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
         <div className="text-md ">
-          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_qa_frontend" target="_blank">https://www.github.com/jgddesigns/stateshaper_qa_frontend</a>
-        </div>
-        <div className="text-md mt-2">
-          <span className="font-bold">Backend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_qa_backend" target="_blank">https://www.github.com/jgddesigns/stateshaper_qa_backend</a>
+          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/qa_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/qa_demo</a>
         </div>
         </div>
       : null}
