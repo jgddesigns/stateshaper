@@ -3,19 +3,6 @@ import sys
 
 from tools.derive_vocab.DeriveVocab import DeriveVocab
 
-# Used to define the vocab terms used in Stateshaper.
-
-# Data parameter format is dict/json with the following key/value pairs:
-
-# {
-#       "input": [{"data": any, "rating": integer 1-100}],    ## list/array (the data to be called while the engine is running.)
-#       "rules": "",    ## string value (rating, compound, random or token. define_vocabs how the input will be mapped to the engine's vocab parameter.)          
-#       "length": None,  ## int (if none, uses all input.)
-#       "compound_length": None ## int (for combining compound vocab)
-#       "compound_rules": "random" string (further rules for compounding vocab. default is random. like groups can be specified for data to be generated),
-#       "compound_groups": groups included in the compound map. can be used along with compound_rules. by default only values within a group will be matched.,
-# }
-    
 
 class Vocab:
 
@@ -78,9 +65,9 @@ class Vocab:
             print("The rule chosen is not valid. Valid types are 'rating', 'compound', 'random', or 'token'. The rule will be defaulted to 'random'.")
             self.data["rules"] = "random"
 
-        if (self.data["rules"] == "compound" and self.data["compound_length"] and isinstance(self.data["compound_length"], int) == False) or not self.data["compound_length"]:
+        if (self.data["rules"] == "compound" and self.data["compound_length"] and (isinstance(self.data["compound_length"], int) == False) or len([i for i in self.data["compound_length"] if isinstance(i, int) == True]) < len(self.data["compound_length"])) or not self.data["compound_length"]:
             print("\n\nThe 'compound' rule has been chosen, but no compound length has been assigned. Using default compound length of 2.")
-            self.data["compound_length"] = 2
+            self.data["compound_length"] = 3
 
         if (self.data["rules"] == "compound" and self.data["compound_rules"] and (isinstance(self.data["compound_rules"], int) == False or self.valid_compound_rules() == False)) or not self.data["compound_rules"]:
             print("\n\nThe 'compound' rule has been chosen, but no compound rules have been assigned, or the assigned rule is invalid. Using default compound rule'random'.")
@@ -226,7 +213,6 @@ class Vocab:
 
 
     def set_preferences(self, data, length=5):
-        # self.top_preferences = data[:length]
         self.top_preferences = self.derive_vocab.initial_rankings(self.data)
 
 
@@ -268,12 +254,8 @@ class Vocab:
 
     def compound_mapping(self):
         if self.data["compound_groups"]:
-            mandatory = [item[0] for item in self.data["compound_groups"] if item[1] == 1]
-            groups = [group[0] for group in self.data["compound_groups"]]
-            included = [item["data"] for item in self.data["input"] if any(x in item["groups"] for x in groups) and any(x in item["groups"] for x in mandatory)]
-        else:
-            included = [item["data"] for item in self.data["input"]]
-
+            included = [[item["data"] for item in self.data["input"] if len([x for x in item["groups"] if x in i]) == len(i)] for i in self.data["compound_groups"]]
+             
         self.vocab = included
 
         print(f"\nStateshaper vocab parameter successfully set with 'compound' rule.")

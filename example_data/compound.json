@@ -42,7 +42,7 @@
         },
         {
             "data": "steak",
-            "groups": ["meat", "dinner", "breakfast"]
+            "groups": ["meat", "dinner", "breakfast", "protein"]
         },
         {
             "data": "chicken",
@@ -104,7 +104,8 @@
 
     "rules": "compound",
     "length": 100,
-    "compound_length": 3,
-    "compound_groups": [["breakfast", 1], ["meat", 0]],
+    "compound_length": [2, 3, 4],
+    "compound_groups": [["breakfast", "protein"], ["meat"], ["dessert"]],
     "compound_terms": ["and", "with"]
 }
+

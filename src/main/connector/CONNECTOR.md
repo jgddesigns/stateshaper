@@ -79,7 +79,7 @@
 
     # when the compound rule is chosen, defines how many terms go together for each output
     # default value is 3 (if compound rule is chosen and this key is not included in the input dataset)
-    "compound_length": 3, 
+    "compound_length": 3, # can be a list of integers if different output lengths are needed. ex : [2, 3] can create output like this - ["meatball sandwich with chips and fries", "meatball sandwich with chips", "bratwurst and meatball sandwich"] 
 
     # the base value used in equations that define how vocab values are compounded
     # default value is 7 (if compound rule is chosen and this key is not included in the input dataset)
@@ -89,7 +89,7 @@
     # the following will group only these values together in the output
     # example outputs:
     #
-    # vocab = ["meatball sandwich", "bratwurst", "sausage sandwich", "hot dog", "cornbread", "fries", "chili", "chips", "salad", "chicken # salad", "almond", "walnuts"]
+    # vocab = ["meatball sandwich", "bratwurst", "sausage sandwich", "hot dog", "cornbread", "fries", "chili", "chips", "salad", "chicken salad", "almond", "walnuts"]
     #
     # meatball sandwich with chips
     # bratwurst and fries

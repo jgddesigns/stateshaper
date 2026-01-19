@@ -1,4 +1,7 @@
 
+import sys
+
+
 class Stateshaper:
 
     def __init__(self, state=5, vocab=[], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
@@ -14,7 +17,10 @@ class Stateshaper:
         self.original_vocab = vocab
         self.constants = constants
         self.mod = mod
+        compound[0] = [compound[0]] if isinstance(compound[0], int) == True else compound[0]
         self.compound = compound
+        print(compound)
+        
        
         self.iteration = 1 
 
@@ -94,10 +100,14 @@ class Stateshaper:
 
 
     def compound_token(self):
-        tokens = []
         count = 0
-        while len(tokens) < self.compound[0]:
-            token = self.current_vocab[(self.current_state[0] + count + self.iteration * (len(tokens)*self.constants["c"]) * (self.constants["a"] * (self.constants["c"] + self.constants["b"]))) % len(self.current_vocab)] 
+        tokens = []
+
+        current = self.compound[0][self.current_state[0] * (self.constants["c"] if self.current_state[0] % 3 == 0 else self.constants["b"]) % len(self.compound[0])]
+        group = self.current_vocab[(self.current_state[0] * self.constants["b"] if self.current_state[0] * self.current_state[0] * self.constants["d"] % 3 == 0 else self.current_state[0] * self.constants["d"]) % len(self.current_vocab)]
+        
+        while (len(tokens) < current and current < len(group)) or (len(tokens) < len(group) and current >= len(group)):
+            token = group[(self.current_state[0] + count + self.iteration * (len(tokens)*self.constants["c"]) * (self.constants["a"] * (self.constants["c"] + self.constants["b"]))) % len(group)] 
             if token in tokens:
                 count += 1
             else:

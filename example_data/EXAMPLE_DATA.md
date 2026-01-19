@@ -15,9 +15,9 @@ For 'compound' data ruleset. Takes the terms in the list and creates combination
 This rule uses the following special values:
 
 
-**"compound_length": 3** 
+**"compound_length": 3 or [3, 4, 7]** 
 
-How many words combined into a string value.
+How many words combined into a string value. Using a list of multiple values will create a variation in the number of combined terms in each output.
 
 
 **"compound_groups": [["breakfast", 1], ["meat", 0]]**

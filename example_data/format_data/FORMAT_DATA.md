@@ -67,7 +67,7 @@ format_data.add_term("and")
 Call the *'format_data.add_compound_length'* function to specify how many items you want compounded together for the final output. If you want variation, pass it as a list. The default value is 2.
 
 ```python
-format_data.add_compound_length(3)
+format_data.add_compound_length(3) # can be a list of integers for varied output lengths ex. [2, 3, 5]
 
 # sample item created from dataset:
 # chocolate pie and orange candy as well as hazelnut candy

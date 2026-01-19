@@ -139,7 +139,7 @@ class Connector:
             data["compound_modifier"] = 7
 
         try:
-            isinstance(data["compound_length"], int)
+            isinstance(data["compound_length"], int) or len([i for i in data["compound_length"] if isinstance(i, int) == True]) == len(data["compound_length"])
         except:
             data["compound_length"] = 3
 
