@@ -1,11 +1,14 @@
 
 class Stateshaper:
 
-    def __init__(self, state=[10, 67, 876, 347, 19], vocab=[], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
+    def __init__(self, state=5, vocab=[], constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973, compound=None):
 
-        self.current_state = [int(x) % mod for x in state]
-
-        self.original_state = [int(x) % mod for x in state]
+        if isinstance(state, int) == False:
+            self.current_state = [int(x) % mod for x in state]
+            self.original_state = [int(x) % mod for x in state]
+        else:
+            self.current_state = state
+            self.original_state = state
     
         self.current_vocab = vocab
         self.original_vocab = vocab
@@ -39,12 +42,13 @@ class Stateshaper:
 
 
     def reverse(self):
-        self.iteration = self.iteration - 1 if self.iteration > 1 else 1
-        value = self.current_state[len(self.current_state)-1]
-        self.current_state = self.current_state[:len(self.current_state)-1]
-        old_value = [self.reverse_morph(value)]
-        self.current_state = old_value + self.current_state
-        return self.get_token()
+        if self.iteration > 1:
+            value = self.current_state[len(self.current_state)-1]
+            self.iteration = self.iteration - 1
+            self.current_state = self.current_state[:len(self.current_state)-1] 
+            old_value = [self.reverse_morph(value)]
+            self.current_state = old_value + self.current_state
+        return self.get_token() if not self.compound else self.compound_token()
 
 
     def get_token(self):
@@ -104,7 +108,3 @@ class Stateshaper:
             i += 2
 
         return " ".join(tokens)
-    
-
-    def compound_reverse(self):
-        pass

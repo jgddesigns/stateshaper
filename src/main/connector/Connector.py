@@ -10,7 +10,7 @@ from .Modify import Modify
 class Connector:
 
 
-    def __init__(self, data, token_count=10, initial_state=None, constants=None, vocab=None, mod=None, **kwargs):
+    def __init__(self, data, token_count=None, initial_state=None, constants=None, vocab=None, mod=None, **kwargs):
         
         if data["rules"] == "rating":
             data["length"] = len(data["input"]) if data["length"] > len(data["input"]) else data["length"]
@@ -19,7 +19,8 @@ class Connector:
         self.modify = Modify(data)
         self.tiny_state = TinyState()
 
-        self.initial_state = initial_state
+        self.default_token_count = 10
+        self.default_state = 5
         self.default_constants = {
             "a": 3,
             "b": 5,
@@ -29,13 +30,12 @@ class Connector:
         self.default_mod = 9973
 
         self.engine = None
-        self.state = None
+        self.token_count = self.default_token_count if not token_count else token_count
+        self.state = self.initial_state = self.default_state if not initial_state else initial_state
         self.vocab = vocab if vocab else None
         self.compressed_vocab = None
         self.constants = constants if constants else self.default_constants
         self.mod = mod if mod else self.default_mod
-
-        self.token_count = token_count
 
         self.compressed_seed = None
 
@@ -189,7 +189,7 @@ class Connector:
 
 
     def get_state(self):
-        return self.initial_state
+        return self.state
 
 
     def assign_constants(self, constants=None):

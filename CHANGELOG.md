@@ -2,9 +2,8 @@
 
 ## 0.1.0 — Initial Public Release
 
-- Core Morphic Semantic Engine in Python
+- Core Stateshaper Engine in Python
+- Main RunEngine Class
 - Connector Class for Custom Plugins
-- Personalized Ad Content Demo
+- Personalized Ad Content, Study Plan, QA and Graphic Assets Demo
 - Tiny State Compression Demo 
-- Tests for Determinism, Consistency, Reproduction
-- PYPI stateshaper and tiny-state packages

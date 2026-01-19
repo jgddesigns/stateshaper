@@ -1,3 +1,4 @@
+import json
 import random
 import sys
 from connector.Connector import Connector
@@ -10,7 +11,7 @@ from example_data.format_data.FormatData import FormatData
 
 class RunEngine:
 
-    def __init__(self, data=None, seed=None, token_count=10, initial_state=[66, 67, 54, 3, 34], vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
+    def __init__(self, data=None, original_data=None, seed=None, token_count=10, initial_state=5, vocab=None, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973, **kwargs):
         
 
         if isinstance(data, dict):
@@ -19,7 +20,18 @@ class RunEngine:
             print("Data is not formatted or formatted incorrectly. See accepted data formats in the 'example_data' directory.")
             sys.exit()
 
+        self.original_data = original_data
+        
         self.seed = None
+
+        self.first_run = True if not seed else False
+
+        self.token_count = token_count
+
+
+        if isinstance(initial_state, int):
+            initial_state = [initial_state]
+
 
         if isinstance(seed, dict):
             try:
@@ -80,9 +92,7 @@ class RunEngine:
 
 
     def run_engine(self, token_count=None):
-        print(self.seed)
-        self.tokens = self.engine.generate_tokens(self.connector.token_count if not token_count else token_count)
-        
+        self.tokens = self.engine.generate_tokens(self.token_count if not token_count else token_count)
         print("\n\nTokens successfully generated from vocab.")
         print("============================================")
         print(self.tokens)
@@ -90,9 +100,8 @@ class RunEngine:
         return self.tokens
     
 
-    def reverse(self):
-        self.tokens = self.engine.reverse()
-
+    def reverse(self, token_count=None):
+        self.tokens = [self.engine.reverse() for _ in range(self.token_count if not token_count else token_count)]
         print("\n\nToken re-created from reverse.")
         print("============================================")
         print(self.tokens)
@@ -100,10 +109,25 @@ class RunEngine:
     
     def jump(self, index):
         self.tokens = self.engine.jump(index)
-
         print(f"\n\nToken successfully accessed from index {str(index)}.")
         print("============================================")
         print(self.tokens)
+
+
+    def one_token(self):
+        self.tokens = self.engine.step()
+        print("\n\nOne token has been created.")
+        print("============================================")
+        print(self.tokens)
+        return self.tokens 
+    
+
+    def reverse_one(self):
+        self.tokens = self.engine.reverse() 
+        print("\n\nOne token re-created from reverse.")
+        print("============================================")
+        print(self.tokens)
+        return self.tokens
 
 
     def rebuild(self):
@@ -120,7 +144,7 @@ class RunEngine:
 
     def adjust_ratings(self):
         for _ in range(20):
-            self.derive_vocab.adjust_rankings(self.test_input(), self.data)
+            self.derive_vocab.adjust_rankings(self.original_data, self.data)
         new_vocab = self.derive_vocab.current_vocab()
         self.seed["vocab"]  = new_vocab
         self.derived_seed = self.new_seed(new_vocab)
@@ -138,21 +162,3 @@ class RunEngine:
         self.derived_seed = seed["v"]  
 
         return seed
-    
-
-    def test_input(self):
-        input = []
-        keys = [list(i.keys())[0] for i in self.data["input"]]
-        while len(input) < 20:     
-            answer = random.choice([True, False])
-            input.append([answer, [random.choice(keys), random.choice(keys), random.choice(keys)]])
-
-        return input
-    
-
-    def one_token(self):
-        return self.engine.step()
-    
-
-    def reverse_one(self):
-        return self.engine.reverse()

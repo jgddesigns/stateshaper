@@ -139,10 +139,11 @@ Example: [`Random Dataset`](src/main/connector/random.json)
 
 ```python
 # data (REQUIRED) - the input data. must be in a format listed in the 'example_data' directory
-# seed (optional) - required to recreate a previous run of the engine. it is created after the first run of the engine. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the "v" key with state format data needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
-# token_count (default=10) - The desired size of the list containing your input terms.
-# constants (optional) - Only change this for custom morphing equations.
-# mod (optional) - Only change this for custom morphhing equations
+# seed (optional) - only required to recreate a previous run of the engine. it is created after the first run of the engine. when used, no other parameters other than token count need to be specified. if no custom parameters are set, only the "v" key with state format data needs to be included. (ex. seed={"v": ["ABC12345", "BVCH457SZ"]})
+# token_count (optional, default=10) - The desired size of the list containing your input terms.
+# initial_state (optional, default=5) - The starting number to derive your output from. It can also be an array of integers for custom logic. 
+# constants (optional, default={"a": 3, "b": 5, "c": 7, "d": 11}) - Only change this for custom morphing equations.
+# mod (optional, default=9973) - Only change this for custom morphing equations. Its size indicates how much unique data can be generated from a seed. This can scale from 1 to infinity (or whatever the largest number the computer can handle is).
 
 from stateshaper import RunEngine
 
@@ -155,6 +156,10 @@ engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens)
 # CUSTOM
 engine = RunEngine(data=your_data, seed=created_seed, token_count=needed_tokens, constants=optional_custom_logic, mod=more_optional_logic)
 
+#FULLY DEFINED 
+engine = RunEngine(data=your_data, token_count=needed_tokens, initial_state=optional_int_or_int_list, constants=optional_custom_logic, mod=more_optional_logic)
+
+
 engine.start_engine()
 ```
 
@@ -163,11 +168,35 @@ engine.start_engine()
 **Call the *run_engine* method:**
 
 ```python
-engine.run_engine()
+engine.run_engine() # can pass an integer as a token count if a certain amount of output is needed. ex: engine.run_engine(25)
 
 # OUTPUT    
 #
 # ["your", "input", "values", "are", "returned", "based", "on", "chosen", "stateshaper", "rules"]
+
+
+# FOR ONE TOKEN
+engine.one_token()
+
+# OUTPUT
+#
+# ["one_item"]
+
+
+# PREVIOUS TOKENS (based on passed token count)
+engine.reverse()
+
+# OUTPUT    
+#
+# ["rules", "stateshaper", "chosen", "on", "based", "returned", "are", "values", "input", "your"]
+
+
+# REVERSE ONE
+engine.one_reverse()
+
+# OUTPUT
+#
+# ["one_item"]
 ```
 
 <br> 
@@ -193,9 +222,9 @@ This section shows examples of the main classes included in the engine. **They a
 from main.core import Stateshaper
 from main.plugins.PluginData import PluginData
 
-# Small numeric seed (arbitrary integers unless otherwise needed). These values are the starting array to base the math on. Their state is what the vocab data is called from from. The array length stays consistant as the numbers change. 
+# Small numeric seed. This can usually be one number, but can also be an array if needed for custom logic. During each step of the engine, output is derived from this value. It is then morphed into a new number to be used for the next iteration. 
 #
-state = [12, 7, 4, 19, 3, 11, 5, 8, 2]
+state = 5
 
 # Tokens that are generated during each iteration of the program. For instance, this set of events can be used to generate sprites in a video game map. 
 #
@@ -285,9 +314,9 @@ In total, there are four types of data used in *Stateshaper*. They are really ju
 Full State:
 ```python
 
-seed = {"user_id": "johnq1234", "signature": [3404,832,2194, 6734,105],"series_seed": 3404,"mod": 9973,"constants": {"a": 3,"b": 5,"c": 7,"d": 11}}
+seed = {"user_id": "johnq1234", "s": 5, "v": ["ABC12345", "567yQ90T34"], "c": {"a": 3,"b": 5,"c": 7,"d": 11}, "m": 9973}
 
-# ~225 bytes
+# ~115 bytes
 
 ```
 
@@ -296,9 +325,9 @@ seed = {"user_id": "johnq1234", "signature": [3404,832,2194, 6734,105],"series_s
 Short State:
 ```python
 
-seed = ["user_176551",[3404,832,2194,6734,105],["ABC12345", "567yQ90T34"]]
+seed = ["user_176551",5,["ABC12345", "567yQ90T34"]]
 
-# ~65 bytes
+# ~45 bytes
 
 ```
 
@@ -439,6 +468,7 @@ stateshaper/
 |     ├── random.json
 |     ├── rating_derived.json
 |     ├── rating_initial.json
+|     ├── tokens.json
 |     ├── EXAMPLE_DATA.md
 ├── src/
 │   └── main/
@@ -451,16 +481,21 @@ stateshaper/
 |              └── ads/
 |                    ├── ad_list.py
 |                    ├── Ads.py
-|              └── fintech/
-|                    ├── coming soon
-|              └── infinite_map/
-|                    ├── coming soon
+|              └── fintech_qa/
+|                    ├── FintechQA.py
+|                    ├── qa_data.py
+|                    ├── FINTECH_QA.md
+|              └── graphics/
+|                    ├── Graphics.py
+|                    ├── GRAPHICS.md
 |              └── inventory/
 |                    ├── coming soon
 |              └── lesson_plan/
 |                    ├── lessons_list.py
 |                    ├── LessonPlan.py
 |              └── meal_plan/
+|                    ├── coming soon
+|              └── ml_training/
 |                    ├── coming soon
 |              └── smart_home/
 |                    ├── coming soon
@@ -478,12 +513,10 @@ stateshaper/
 |                    ├── coming soon
 |              ├── PLUGINS.md
 |        └── tests/
-|              └── ca/
+|              └── cellular_automata/
 |                    ├── coming soon
-|              └── markov/
+|              └── markov_chain/
 |                    ├── Markov.py
-|              └── ml/
-|                    ├── coming soon
 |              └── prng/
 |                    ├── coming soon
 |              └── probalistic/
@@ -497,8 +530,6 @@ stateshaper/
 |              └── tiny_state/
 |                 ├── TinyState.py
 |                 ├── TINY_STATE.md
-|              ├── Morph.py
-|              ├── TokenMap.py
 |              ├── TOOLS.md              
 │       ├── core.py
 │       ├── stateshaper.py
@@ -519,7 +550,7 @@ stateshaper/
 
 Contributions, ideas, and experiments are welcome!
 
-See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in creating a custom plugin (or anything else).
+See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in creating a custom plugin (or anything else). Right now you can fork this repo to experiment. An open source version of the code will be available soon. 
 
 
 
@@ -532,4 +563,4 @@ See [`CONTRIBUTING`](CONTRIBUTING.md) instructions if you are interested in crea
 This project is released under the MIT License. See [`LICENSE`](LICENSE) for details.
 
 If you use this in research, products, or experiments, a mention or citation of the
-"Stateshaper" is appreciated.
+"Stateshaper", "Jason Dunn", and/or "jgddesigns" is appreciated.

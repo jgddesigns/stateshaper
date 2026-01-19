@@ -1,5 +1,6 @@
 # Contributing to Stateshaper
 
+***Currently, you can fork this repo to experiment with. An open source version of the code will be released soon.***
 
 *Stateshaper* can do a lot on its own, but does even better with Shaper Plugins! 
 
