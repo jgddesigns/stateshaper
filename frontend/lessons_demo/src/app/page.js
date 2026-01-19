@@ -17,6 +17,7 @@ export default function Home() {
   const [ShowInterests, setShowInterests] = useState(true)
   const [ShowAbout, setShowAbout] = useState(false)
   const [ShowExample, setShowExample] = useState(false)
+  const [ShowCode, setShowCode] = useState(false)
   const [ShowRatings, setShowRatings] = useState(false)
   const [Score, setScore] = useState(null)
   const [SeedText, setSeedText] = useState("")
