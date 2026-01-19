@@ -291,13 +291,16 @@ export default function Home() {
       <div className="text-white text-2xl hover:font-bold bottom-6 right-12 ml-auto absolute hover:text-gray-300 cursor-pointer" onMouseEnter={e=>setShowExample(true)} onMouseLeave={e=>setShowExample(false)}>
         EXAMPLE ONLY
       </div>
+      <div className={!ShowCode ? "text-white text-2xl hover:font-bold bottom-6 right-192 ml-auto absolute hover:text-gray-300 cursor-pointer" : "text-2xl font-bold bottom-6 right-192 ml-auto absolute text-gray-300 cursor-pointer"} onMouseEnter={e=>setShowCode(true)} onClick={e=>setShowCode(false)}>
+        CODE
+      </div>
+      <div className="text-white text-2xl hover:font-bold bottom-6 right-12 ml-auto absolute hover:text-gray-300 cursor-pointer" onMouseEnter={e=>setShowExample(true)} onMouseLeave={e=>setShowExample(false)}>
+        EXAMPLE ONLY
+      </div>
       {ShowCode ?
-        <div className="text-white p-4 bottom-18 right-192 ml-auto absolute w-128 h-36 rounded-lg bg-blue-600">
+        <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
         <div className="text-md ">
-          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_graphics_frontend" target="_blank">https://www.github.com/jgddesigns/stateshaper_graphics_frontend</a>
-        </div>
-        <div className="text-md mt-2">
-          <span className="font-bold">Backend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_graphics_backend" target="_blank">https://www.github.com/jgddesigns/stateshaper_graphics_backend</a>
+          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/graphics_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/graphics_demo</a>
         </div>
         </div>
       : null}
