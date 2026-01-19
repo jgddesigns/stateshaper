@@ -288,13 +288,13 @@ export default function Home() {
         EXAMPLE ONLY
       </div>
       {ShowCode ?
-        <div className="text-white p-4 bottom-18 right-192 ml-auto absolute w-128 h-36 rounded-lg bg-blue-600">
+        <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
         <div className="text-md ">
-          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_ads_frontend" target="_blank">https://www.github.com/jgddesigns/stateshaper_ads_frontend</a>
+          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/ads_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/ads_demo</a>
         </div>
-        <div className="text-md mt-2">
+        {/* <div className="text-md mt-2">
           <span className="font-bold">Backend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper_ads_backend" target="_blank">https://www.github.com/jgddesigns/stateshaper_ads_backend</a>
-        </div>
+        </div> */}
         </div>
       : null}
       {ShowExample ?
