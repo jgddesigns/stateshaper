@@ -171,7 +171,7 @@ class FormatData:
         self.add_term("and") 
         self.add_term("with") 
         self.add_term("plus")        
-        self.add_compound_length([w, 3]) 
+        self.add_compound_length([2, 3]) 
         print("\n\nhere is the created template:\n")
         print(self.current_template)
 
