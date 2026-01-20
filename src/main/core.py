@@ -17,7 +17,10 @@ class Stateshaper:
         self.original_vocab = vocab
         self.constants = constants
         self.mod = mod
-        compound[0] = [compound[0]] if isinstance(compound[0], int) == True else compound[0]
+        try:
+            compound[0] = [compound[0]] if isinstance(compound[0], int) == True else compound[0] if compound else None
+        except:
+            pass
         self.compound = compound
         print(compound)
         
