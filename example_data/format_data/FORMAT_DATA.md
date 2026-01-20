@@ -39,16 +39,26 @@ format_data.add_row("compound", "orange", ["candy", "fruit", "juice"])
 Call the *'format_data.add_group'* function to specify which groups you want the dataset to output.
 
 ```python
-# use the group name as a parameter and a 1 for if it is required or 0 if included, but not required.
+# add lists of groups that will be grouped together. terms featuring these groups will be outputted in various combinations. there can be multiple groups, but each specific output will only include items from one particular group.
 
-# every item outputted will be a type of candy.
-format_data.add_group("candy", 1)
+# this will create combinations of items from candy and chocolate groups.
+format_data.add_group(["candy", "chocolate"])
 
-# some of the candy items will be chocolate. all of the chocolate items will be candy.
-format_data.add_group("chocolate", 0)
+# example output
+# caramels, chocolate covered almonds and fudge
 
-# chocolate items will be candy or pie, but not cake.
-format_data.add_group("pie", 1)
+# another collection of groups
+format_data.add_group(["candy", "flowers", "card"])
+
+# example output
+# buttscotch discs and lifesavers with roses, carnations and a thank you note
+
+# an item from the compound dataset is formatted as follows:
+#
+# {
+#    "data": "cake",
+#    "groups": ["dessert", "sweet"]
+# }
 ```
 
 

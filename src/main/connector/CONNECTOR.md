@@ -94,9 +94,9 @@
     # meatball sandwich with chips
     # bratwurst and fries
     #
-    # default value is None, meaning anything in the vocab list can be compounded
-    # first values is a key in the groups value that is part of each item. second value indicates if the group is mandatory for each compound. 1 indicates mandatory, 0 indicates optional. 
-    "compound_groups": [["meat", 0], ["lunch", 1], ["side", 0]],
+    # default value is None, meaning anything in the vocab list can be compounded.
+    # if groups are set, items from each group will be outputted in various combinations.
+    "compound_groups": [["meat", "lunch", "side"], ["salad", "bread", "soup"]],
 
     # the terms used in between compound words. if there are more words than compound length, they will be randomly used. otherwise they will occur in the order they are in the list for each final term that is outputted. 
     # default value is " " if not set. 

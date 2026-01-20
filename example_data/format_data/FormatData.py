@@ -37,6 +37,7 @@ class FormatData:
             "rating": self.rating_row
         }
 
+        # self.compound_example()
 
 
     
@@ -97,12 +98,12 @@ class FormatData:
             self.current_template["input"].pop(self.current_template["input"].index(row))
 
 
-    def add_group(self, group, include):
-        self.current_template["compound_groups"].append([group, include]) 
+    def add_group(self, groups):
+        self.current_template["compound_groups"].append(groups) 
 
 
-    def remove_group(self, group):
-        groups = [i for i in group if i[0] == group]
+    def remove_group(self, target):
+        groups = [i for i in target if i == target]
 
         for item in groups:
             self.current_template["compound_groups"].pop(self.current_template["compound_groups"].index(item))
@@ -158,13 +159,19 @@ class FormatData:
     def compound_example(self):
         self.build_template("compound", 5)
         self.add_row("compound", "chocolate", ["candy", "cake", "pie", "chocolate"])
+        self.add_row("compound", "vanilla", ["candy", "cake", "pie", "chocolate"])
+        self.add_row("compound", "oreo", ["cake", "pie", "chocolate", "vanilla"])
         self.add_row("compound", "lemon", ["candy", "pie", "fruit", "juice"])
         self.add_row("compound", "orange", ["candy", "fruit", "juice"])
-        self.add_group("candy", 1)
-        self.add_group("chocolate", 0)
-        self.add_group("flowers", 0)       
-        self.add_term("and")        
-        self.add_compound_length(2) 
+        self.add_row("compound", "strawberry", ["cake", "pie", "fruit", "juice"])
+        self.add_group(["candy", "chocolate"])
+        self.add_group(["candy", "fruit"])
+        self.add_group(["cake", "pie"])
+        self.add_group(["candy"])      
+        self.add_term("and") 
+        self.add_term("with") 
+        self.add_term("plus")        
+        self.add_compound_length([w, 3]) 
         print("\n\nhere is the created template:\n")
         print(self.current_template)
 

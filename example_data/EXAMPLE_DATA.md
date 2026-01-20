@@ -20,9 +20,11 @@ This rule uses the following special values:
 How many words combined into a string value. Using a list of multiple values will create a variation in the number of combined terms in each output.
 
 
-**"compound_groups": [["breakfast", 1], ["meat", 0]]**
+**"compound_groups": ["breakfast", "meat", drink]**
 
-Groups to include in the compound. A 1 in the [1] place of each item indicates every outputted value must include data from this group. A zero indicates an additional group, but one that is not mandatory. In this example, each item in the output list will always be a breakfast group, but not always part of the meat group. Any meat included must be part of the breakfast group.
+Groups to include in the compound. Each generated token will include items only from these included sets. A different token can have different items if there are multiple groups.
+
+***example output: pancakes with sausage and orange juice***
 
 
 **"compound_terms": ["and", "with"]**
