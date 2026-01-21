@@ -30,8 +30,7 @@ class LessonPlan:
         
     
     def adjust_related(self, question, answer):
-        adjust = 5 if answer == True else -5
-        ratings_adjust = 1 if answer == True else -1
+        adjust = -5 if answer == True else 5
         item_pos = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == question][0]].values())[0]["data"]
         for item in self.data["input"]:
             for term in item[list(item.keys())[0]]["data"]:
@@ -42,7 +41,7 @@ class LessonPlan:
                 print("New Rating: " + str(item[list(item.keys())[0]]["rating"]) + "\n") if len([x for x in term["attributes"] if x in item_pos[0]["attributes"]]) > 0 else None
         
         for key in list(self.lesson_ratings.keys()):
-            self.lesson_ratings[key] = self.lesson_ratings[key] + ratings_adjust if key in item_pos[0]["attributes"] else self.lesson_ratings[key]
+            self.lesson_ratings[key] = self.lesson_ratings[key] + adjust if key in item_pos[0]["attributes"] else self.lesson_ratings[key]
 
 
     def sort_ratings(self):
@@ -57,7 +56,12 @@ class LessonPlan:
         ratings = list(self.lesson_ratings.keys())
         for item in self.data["input"]:
             if item[list(item.keys())[0]]["data"][0]["attributes"][0] in ratings:
-                item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"][0]["attributes"][0]]) / 2)
+                # item[list(item.keys())[0]]["rating"] = round((item[list(item.keys())[0]]["rating"] + self.lesson_ratings[item[list(item.keys())[0]]["data"][0]["attributes"][0]]) / 2)
+
+                item[list(item.keys())[0]]["rating"] = round(sum([self.lesson_ratings[i] for i in list(self.lesson_ratings.keys()) if i in item[list(item.keys())[0]]["data"][0]["attributes"]]) / len(item[list(item.keys())[0]]["data"][0]["attributes"]))
+
+                # print("averages")
+                # print(average)
         
 
     def ratings_data(self):
@@ -77,14 +81,14 @@ class LessonPlan:
             sorted_data = self.sort_ratings()
             current_lessons = self.set_preferences(sorted_data)
             test_data = self.test_data(current_lessons)
-
+        print("\n\ntest data")
+        print(self.data["input"])
         return test_data
 
 
     def test_data(self, data):
         test = []             
                                                                                           
-        
         while len(test) < len(data):
             answer = list(self.data["input"][[self.data["input"].index(i) for i in self.data["input"] if list(i.keys())[0] == data[len(test)]][0]].values())[0]["data"][0]["answer"]   
             result = random.randint(0, 1)
@@ -93,6 +97,8 @@ class LessonPlan:
         print("\n\nTest Selections\n\n")
         print(test)
         print()
+        print("\n\nRatings\n\n")
+        print(self.lesson_ratings)
 
         self.current_questions = test
     

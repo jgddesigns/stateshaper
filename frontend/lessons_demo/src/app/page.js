@@ -19,6 +19,7 @@ export default function Home() {
   const [ShowExample, setShowExample] = useState(false)
   const [ShowCode, setShowCode] = useState(false)
   const [ShowRatings, setShowRatings] = useState(false)
+  const [SubmitError, setSubmitError] = useState(false)
   const [Score, setScore] = useState(null)
   const [SeedText, setSeedText] = useState("")
   const classes = ["font-bold", ""]
@@ -118,16 +119,16 @@ export default function Home() {
 
 
   function set_seeds(){
-    setSeeds({"0" : [full_seed(), `~225 bytes`],
-    "1" : [short_seed(), `~65 bytes`],
+    setSeeds({"0" : [full_seed(), `~` + full_seed().length + ` bytes`],
+    "1" : [short_seed(), `~` + short_seed().length + ` bytes`],
     "2" : [tiny_seed(),  `~` + tiny_seed().length + ` bytes`],
     "3" : [raw_seed(), `~` + raw_seed().length + ` bytes`]})
   }
 
 
   async function send_api(path) {
-    const res = await fetch(`https://stateshaper-lessons-backend.vercel.app/api/` + path, {
-    // const res = await fetch("http://localhost:8000/api/" + path, {
+    // const res = await fetch(`https://stateshaper-lessons-backend.vercel.app/api/` + path, {
+    const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: JSON.stringify(Answers) })
@@ -164,9 +165,11 @@ export default function Home() {
 
   function process_finish(){
     if(Answers.length < total_questions){
+      setSubmitError(true)
       console.log("please answer all the questions")
     }else{
       setInBetween(true)
+      setSubmitError(false)
       const count = Answers.reduce((c, item) => c + (item["answer"] === true), 0);
       setScore(count + " out of " + Answers.length)
       console.log(count)
@@ -228,7 +231,14 @@ export default function Home() {
                 </div>
               }
               {!InBetween ? 
-                <div className="w-22 h-8 bg-blue-400 rounded text-white text-xl flex justify-center cursor-pointer static bottom-2 ml-auto" onClick={e=> process_finish()}>Finish</div>
+                <div className="grid grid-rows-2 grid-cols-1 gap-6">
+                  <div className="w-22 h-8 bg-blue-400 rounded text-white text-xl flex justify-center cursor-pointer static bottom-2 ml-auto" onClick={e=> process_finish()}>Finish</div>
+                  {SubmitError? 
+                    <div className="text-red-400 italic">
+                      Not all questions have been answered.
+                    </div>
+                  : null}
+                </div>
               : 
                 <div className="w-22 h-8 bg-blue-400 rounded text-white text-xl flex justify-center cursor-pointer static ml-6" onClick={e=> after_finish()}>Proceed</div>       
               }
@@ -250,7 +260,7 @@ export default function Home() {
           :
           <div className="grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-3/5 gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
             <div>
-              This <i>Stateshaper</i> demo shows how an entire user profile can be condensed into a 50-225 byte seed. Here we'll use an example of a student's personalized lesson plan from a biology class. The example uses sets of 10 study questions from a bank of 100 possible choices. 
+              This <i>Stateshaper</i> demo shows how an entire user profile can be condensed into a 50-125 byte seed. Here we'll use an example of a student's personalized lesson plan from a biology class. The example uses sets of 10 study questions from a bank of 100 possible choices. 
             </div>
             <div>  
               When a student shows aptitude in a certain areas, those type of questions are phased out of the question set over time. If a student struggles in a particular area, more of those questions will be added over time based on preferences derived from ratings. Additionally, the student's all-time performance can also be compressed into a similar size and reviewed at any time. 
@@ -259,7 +269,7 @@ export default function Home() {
               This consumes very little computational resources and the installed package size is less than 1MB. All that is needed besides the main package is an app-specific plugin that can be tailored to the desired output. Stateshaper plugins are intended to take data (such as the ratings and ad images seen here), and compress it according to developer needs. Along the way, attributes can be adjusted based on variables such as user input or time of the year.
             </div>
             <div>
-              Actual data storage size is cut all the way down to the Stateshaper seed formats shown on to the right. This can often account for over 90% reduction in space used, and also allows for privacy through obfuscation.
+              Actual data storage size is cut all the way down to the Stateshaper seed formats shown on to the right. This can often account for over 90% reduction in space used, and also allows for privacy through obfuscation. 
             </div>
             <div>
               Other uses can include, but are not limited to smart home scheduling, gaming npc behavior, fintech market data QA, ML training, and store inventories. 
@@ -317,7 +327,7 @@ export default function Home() {
       {ShowCode ?
         <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
         <div className="text-md ">
-          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/lessons_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/lessons_demo</a>
+          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/lessons_demo" target="_blank">https://www.github.com/jgddesigns/stateshaper/tree/lessons_demo</a>
         </div>
         </div>
       : null}
