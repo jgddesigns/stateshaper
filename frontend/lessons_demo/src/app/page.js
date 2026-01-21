@@ -51,14 +51,6 @@ export default function Home() {
   }, [Seeds])
 
 
-  useEffect(()=>{
-    if(!NewAds){
-      show_ads()
-      setNewAds(true)
-    }
-  }, [NewAds])
-
-
   function seed_text(type){
     type == "0" ? setLinkText(classes[0]) : setLinkText(classes[1]) 
     setSeedText(Seeds[type])
@@ -73,19 +65,6 @@ export default function Home() {
     let temp_arr = Attributes
     temp_arr[e.target.id] = value
     setAttributes(temp_arr)
-  }
-
-
-  function show_ads(){
-    // let temp_arr = Ads
-    // let new_arr = []
-    // let place = 0
-    // while(new_arr.length < ad_count){
-    //   place = Math.floor(Math.random() * temp_arr.length)
-    //   new_arr.push(temp_arr[place])
-    //   temp_arr.splice(place, 1)
-    // }
-    // setAds(new_arr)
   }
 
 
@@ -127,12 +106,12 @@ export default function Home() {
 
 
   async function send_api(path) {
-    // const res = await fetch(`https://stateshaper-lessons-backend.vercel.app/api/` + path, {
-    const res = await fetch("http://localhost:8000/api/" + path, {
+    const res = await fetch(`https://stateshaper-lessons-backend.vercel.app/api/` + path, {
+    // const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: JSON.stringify(Answers) })
-    });
+    })
 
     const data = await res.json();
     console.log(data)
