@@ -4,10 +4,27 @@
 
 Takes your data and formats it for input into the *Stateshaper* engine. 
 
-
+<br>
 
 ## **Instructions:**
 
+<br>
+
+Install package from the terminal.
+```bash
+pip install shaper-format
+```
+
+<br>
+
+Initialize by importing the package. Define the class in a variable.
+```python
+from shaper_format import ShaperFormat
+
+format_data = ShaperFormat()
+```
+
+<br>
 
 ### *COMPOUND* RULESET 
 
@@ -92,7 +109,7 @@ format_data.get_data()
 ```
 
 
-
+<br> <br>
 
 ### *RANDOM* RULESET 
 
@@ -129,7 +146,7 @@ format_data.get_data()
 ```
 
 
-
+<br> <br>
 
 ### *RATING* RULESET 
 
@@ -175,6 +192,30 @@ Obtain the final dataset.
 ```python
 # retrieves data in the format needed for input into the stateshaper engine.
 # this data is only for the initial dataset. after you run the engine once with this data, get the new master dataset from the RunEngine class and use it going forward. for more instructions, see the QUICK_START or README documentation. 
+
+format_data.get_data()
+```
+
+
+<br> <br>
+
+### *TOKENS* RULESET 
+
+The *'tokens'* ruleset outputs raw numerical values for tokenization. Nothing special needs to be included in the dataset. Just define the ruleset and retrieve it.
+
+```python
+# pass the data ruleset as the only parameter. 
+
+format_data.build_data("tokens")
+
+# sample vocab input derived from dataset:
+# 5647, 6584, 57, 4029, 347, 431, 783, 9, 57, 8376
+```
+
+
+Obtain the final dataset.
+```python
+# retrieves data in the format needed for input into the stateshaper engine.
 
 format_data.get_data()
 ```
