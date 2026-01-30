@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Stateshaper Graphics Demo",
+  title: "Stateshaper ML Training Demo",
   description: "Storing unlimited graphics with a finite amount of memory.",
 };
 

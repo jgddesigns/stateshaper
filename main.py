@@ -4,7 +4,9 @@ import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
-from src.main.demos.graphics.Graphics import Graphics
+
+from src.main.demos.ml_training.TripTimeline import TripTimeline
+from src.main.demos.ml_training.MachineLearning import MachineLearning
 from src.main.stateshaper import RunEngine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,15 +21,15 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"],
-    allow_origins=["https://stateshaper-graphics.vercel.app"],  
+    allow_origins=["http://localhost:3000"],
+    #allow_origins=["https://stateshaper-graphics.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # run = RunEngine()
-graphics = Graphics()
+ml = MachineLearning()
 
 
 class Input(BaseModel):
@@ -45,16 +47,23 @@ run.define_engine(state=state)
 tokens = run.run_engine()
 
 
-
 @app.post("/api/forward")
 def forward():
     token = run.one_token()
-    shapes = graphics.get_shapes(token)
-    return {"response": {"shapes": shapes, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    test = ml.current_test(token)
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
 @app.post("/api/reverse")
 def reverse():
     token = run.reverse_one()
-    shapes = graphics.get_shapes(token)
-    return {"response": {"shapes": shapes, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    test = ml.current_test(token)
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+
+
+@app.post("/api/run_test")
+def run_test(input: Input):
+    input = json.loads(input.message)
+    trip = TripTimeline(input["token"], input["environment"])
+    test = trip.start_trip()
+    return {"response": {"trip": trip, "test": test, "token": input["token"], "seed": [run.get_seed(state=state), run.engine]}}

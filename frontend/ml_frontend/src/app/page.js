@@ -5,10 +5,14 @@ import "./shapes.css"
 export default function Home() {
   const [CurrentToken, setCurrentToken] = useState(0)
   const [OriginalToken, setOriginalToken] = useState(0)
+  const [CurrentMap, setCurrentMap] = useState(0)
+  const [MapData, setMapData] = useState(0)
+  const [MapText, setMapText] = useState("")
   const [Data, setData] = useState("")
   const [Seeds, setSeeds] = useState("")
   const [ShowForm, setShowForm] = useState(true)
   const [ShowAbout, setShowAbout] = useState(false)
+  const [ShowData, setShowData] = useState(false)
   const [ShowExample, setShowExample] = useState(false)
   const [ShowCode, setShowCode] = useState(false)
   const [SeedText, setSeedText] = useState("")
@@ -16,6 +20,7 @@ export default function Home() {
   const [LinkText, setLinkText] = useState(classes[0])
   const [ShapesData, setShapesData] = useState(null)
   const [Shapes, setShapes] = useState(null)
+  const [Line, setLine] = useState(<svg></svg>)
 
 
   const grid_size = 25
@@ -25,6 +30,7 @@ export default function Home() {
 
   const content = {
     "form" : setShowForm,
+    "data" : setShowData,
     "about":  setShowAbout
   }
 
@@ -36,8 +42,10 @@ export default function Home() {
 
   useEffect(()=>{
     if(Data){
+      console.log(Data) 
       set_seeds()
-      set_shapes()
+      change_map(0)
+      setLine(draw_line())
       !OriginalToken ? setOriginalToken(Data["token"]) : null
       setCurrentToken(Data["token"])
 
@@ -48,6 +56,11 @@ export default function Home() {
   useEffect(()=>{
     Seeds ? setSeedText(Seeds["0"]) : null
   }, [Seeds])
+
+
+  useEffect(()=>{
+    CurrentMap ? setChangeMap(true) : null
+  }, [CurrentMap])
 
 
   useEffect(()=>{
@@ -72,12 +85,12 @@ export default function Home() {
 
 
   function set_shapes(){
-    let shapes = new_shapes()
+    // let shapes = new_shapes()
     
-    for(let item of Object.keys(Data["shapes"])){
-      shapes[get_pos(Data["shapes"][item]["pos"]["x"], Data["shapes"][item]["pos"]["y"])] = Data["shapes"][item]
-    }
-    setShapesData(shapes)
+    // for(let item of Object.keys(Data["shapes"])){
+    //   shapes[get_pos(Data["shapes"][item]["pos"]["x"], Data["shapes"][item]["pos"]["y"])] = Data["shapes"][item]
+    // }
+    // setShapesData(shapes)
   }
 
 
@@ -96,7 +109,7 @@ export default function Home() {
 
 
   function show_content(show){
-    let terms = ["form", "about", "tests"]
+    let terms = ["form", "data", "about"]
     for(let i=0; i<terms.length; i++){
       content[terms[i]](show == terms[i] ? true : false)
     }
@@ -138,7 +151,8 @@ export default function Home() {
 
 
   async function send_api(path) {
-    const res = await fetch(`https://stateshaper-graphics-backend.vercel.app/api/` + path, {
+    // const res = await fetch(`https://stateshaper-ml-backend.vercel.app/api/` + path, {
+    const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: "" })
@@ -147,10 +161,73 @@ export default function Home() {
     setData(data["response"])
   }
 
+  function get_name(name){
+    name = name.split("_")
+    let string = ""
+    for(let word of name){
+      string = string + capitalize(word) + " "
+    }
+    string = string.slice(0, string.length-1)
+    return string
+  }
 
+  function capitalize(word){
+    return word[0].toUpperCase() + word.slice(1)
+  }
+
+  function get_range(range){
+    return range[0].toString().length > 1 ? range[0] + " - " + range[1] : range[0] + "  - " + range[1]
+  }
+
+
+  function change_map(current){
+    try{
+      setMapText(Data.test.environment.map((item, i) => (
+        <div className="grid grid-cols-2 gap-8" key={i}>
+          <div className="flex items-center cursor-pointer z-99" onClick={e => change_map(i)}>
+          <div className={map_text(Data.test.environment[current].environment, item.environment)}>{item.environment}</div>
+          </div>
+          <div className="font-mono whitespace-pre flex items-center">
+            mi. {get_range(item.range)}
+          </div>
+        </div>
+        )))
+      setMapData(Object.keys(Data.test.environment[current].data).map((item, i) => (
+        <div className="grid w-full grid-rows-1 grid-cols-2 gap-8 text-lg" key={i}>
+          <div>
+            {get_name(item)}
+          </div>
+          <div className={!Data.test.environment[current].data[item].toString().includes(".") ? "whitespace-pre italic" : "whitespace-pre"}>
+            {Data.test.environment[current].data[item]}
+          </div>
+        </div>
+      )))
+    }catch{setMapData("")}
+  }
+
+
+  function map_text(map, data){
+    return map == data ? "text-green-200 hover:text-green-300" : "hover:text-violet-200"
+  }
+ 
+
+  function draw_line(){
+    return <svg width="400" height="400">
+            <path
+              d="M 20 100 Q 200 180 200 100"
+              stroke="red"
+              strokeWidth="2"
+              fill="none"
+            />
+          </svg>
+  }
+
+  function run_session(){
+
+  }
 
   return (
-    <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c]">
+    <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c] font-mono">
       <style>
         {`
           .dot-scrollbar::-webkit-scrollbar {
@@ -171,75 +248,111 @@ export default function Home() {
       </style>
       <div className="grid grid-rows-1 place-items-center text-3xl mt-8 text-gray-200 font-bold">
         <div>
-          Stateshaper Graphics Demo
+          Stateshaper ML Training Demo
         </div>   
       </div>
       <div className="grid grid-cols-2 grid-rows-2 place-items-center h-4/5 mt-32 text-gray-200 min-w-full tatic">
         <div className="grid gap-8 h-full static place-items-center">
-          <div className="grid grid-rows-1 grid-cols-2 w-128 text-gray-200 text-xl cursor-pointer place-items-center">
-            <a className={ShowForm ? "font-bold text-2xl" : ""} onClick={()=>show_content("form")}>Draw</a>
+          <div className="grid grid-rows-1 grid-cols-3 w-128 text-gray-200 text-xl cursor-pointer place-items-center">
+            <a className={ShowForm ? "font-bold text-2xl" : ""} onClick={()=>show_content("form")}>Trip</a>
+            <a className={ShowData ? "font-bold text-2xl" : ""} onClick={()=>show_content("data")}>Run</a>
             <a className={ShowAbout ? "font-bold text-2xl" : ""} onClick={()=>show_content("about")}>About</a>
           </div>
           {ShowForm ?
-          <div className="grid max-w-[800px] h-140 place-items-center  overflow-y-auto mt-20 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
-            <div className="ml-auto px-12 grid grid-cols-3 grid-rows-1 max-w-[750px] gap-34 place-items-center mr-10">
-              <div className={OriginalToken == CurrentToken ? "w-28 h-12 bg-gray-600 text-black rounded px-5 py-3 cursor-none mr-auto disabled select-none" : "w-28 h-12 bg-blue-600 text-white rounded px-5 py-3 cursor-pointer hover:text-gray-300 mr-auto select-none"} onClick={OriginalToken != CurrentToken ? ()=>send_api("reverse") : null}>
-                Prior Map
-              </div>
-              <div className="grid grid-cols-1 grid-rows-2 place-items-center">
-                <div className="">
-                  Derived From
-                </div>
-                <div className="mt-1">
-                    {CurrentToken}
-                </div>
-              </div>
-              <div className="w-28 h-12 bg-blue-600 text-white rounded px-5 py-2 cursor-pointer grid-rows-1 grid-cols-2 hover:text-gray-300 ml-auto select-none" onClick={e=>send_api("forward")}>
+          <div className="grid grid-rows-3 max-w-[800px] h-140 place-items-center overflow-y-auto mt-20 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+            <div className="grid grid-rows-1 grid-cols-2 w-full text-xl mt-12 static">
+              <div className="grid w-full grid-rows-2 grid-cols-1">
                 <div>
-                  Next Map 
+                  <b>Car:</b>
+                </div>   
+                <div className="text-2xl text-blue-400 mt-4">
+                  <i>{Data ? get_name(Data.test.vehicle.name) : null}</i>
                 </div>
-                <div className="text-2xl justify-self-center mt-[-12px]">
-                  {'\u{221E}'}
+              </div>
+              <div className="grid w-full grid-rows-2 grid-cols-1">
+                <div className="grid grid-rows-1 grid-cols-2">
+                  <div>
+                    <b>Maps:</b> 
+                  </div>
+                </div>
+                <div>
+                  {Data ? MapText :null}
                 </div>
               </div>
             </div>
-            {Shapes ?
-              <div className="grid grid-rows-5 grid-cols-1 mt-24 max-w-[700px] p-4 self-start gap-32">
-                {Array.from({ length: 5 }).map((_, index) => {
-                  const start = index * 5
-                  const row_shapes = Shapes.slice(start, start + 5)
-                  return (
-                    <div
-                      key={index}
-                      className="grid grid-rows-1 grid-cols-5 gap-4 min-w-[600px] h-32 place-items-center"
-                    >
-                      {row_shapes.map((shape, cols) => (
-                        <div key={cols} className={shape}>
-                          {shape}
+            <div className="grid grid-rows-2 grid-cols-1 gap-24 w-full text-lg mt-150">
+                <div className="grid w-full grid-rows-1 grid-cols-1 justify-self-start mt-auto top-0 static">
+                  <b className="text-xl">Data:</b> <i></i>
+                </div>
+                <div className="grid grid-rows-1 grid-cols-2">
+                  <div>
+                    {Data ? Object.keys(Data.test.vehicle).map((item, i) => (
+                      <div key={i}>
+                        {i > 0 ?
+                        <div className="grid w-full grid-rows-1 grid-cols-2 gap-8">
+                          <div>
+                            {capitalize(item)}
+                          </div>
+                          <div className="whitespace-pre">
+                            {Data.test.vehicle[item]}
+                          </div>
                         </div>
-                      ))}
+                        : null}
+                      </div>
+                    )):null}
+                  </div>
+                  <div>
+                    {Data ? MapData : null}
+                  </div>
+                </div>
+              <div className="grid grid-rows-1 grid-cols-3 gap-4 w-full text-xl mr-auto mt-24">
+                <div>
+                  Derived From: 
+                </div>
+                <div>
+                  {Data.token}
+                </div>
+                <div className="grid grid-rows-1 grid-cols-2 self-end right-0 ml-auto gap-8 px-8">
+                    <div className={Data ? Data["token"] != OriginalToken ? "w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer text-4xl hover:bg-gray-300 hover:text-blue-700" : "w-20 h-12 px-4 py-1 bg-gray-600 rounded-2xl cursor-none text-4xl" : null}>
+                      &larr;
                     </div>
-                  )
-                })}
+                    <div className="w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer px-2 text-4xl hover:bg-gray-300 hover:text-blue-700">
+                      &rarr;
+                    </div>
+                </div>
               </div>
-            : null}
+            </div>
+          </div>
+          : 
+          ShowData ?
+          <div className="grid grid-rows-1 max-w-[800px] h-140 place-items-center overflow-y-auto mt-12 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+              <div className="mt-4 px-4 py-2 ml-auto w-24 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800" onClick={e => run_sesion()}>
+                Begin
+              </div>
+              <div className="mt-12 w-180 h-100 bg-gray-200">
+                  {Line}
+              </div>
           </div>
           : 
           <div className="grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-[740px] gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
             <div>
-              Implementing <i>Stateshaper</i> here allows for graphics to be drawn on the screen by using the token output to derive each graphic's attributes. This is a basic example that can be expanded upon up to the most detailed textures needed (such as modern video games or CGI). The key here is that this can be done from just a few bytes of memory. The limits are only what the GPU can handle and how detailed the code is. The output is not literally infinite (based on mathematical rules) but can come close depending on how large of a mod value is set.
+              An unlimited amount of training data for machine learning can be created and stored using <i>Stateshaper</i>. The ability for the engine to derive synthetic data by tokenizing its numeric output allows for a wide range of test values to be used. Each test can be stored and re-created at any time from the small seed formats seen to the right of the screen. 
             </div>
             <div>  
-              Potentially, an entire map can be built using these methods without storing any of the sprites in static memory. The graphics can be seemingly random, or mapped exactly as needed depending on the token output from <i>Stateshaper</i>. For more detailed applications, the token output can be modified within the package's source code by altering its morph function or passing custom class parameters. This can also be achieved within the methods written in the plugin file connecting to a specific app.
+              If the test variations created aren't good enough, output can be adjusted in the plugin file by using the current token as a base to derive test values from. This particular example shows how <i>Stateshaper</i> can be used to run road simulations to help train the AI in self-driving cars. Theoretically, all possible test scenarios can be brute-force tested based on the deterministic nature of the program. If needed, the parameter values for the main class and corresponding plugin file can be modified for a particular use.
             </div>
             <div>
-              Once a plugin file is written that defines rules for the graphics, the values can be passed into your application and used to generate on-screen content. The plugin file can be easily connected to the Stateshaper engine and used to generate your data at any time. Examples for creating a plugin like this can be found in the <i>Stateshaper</i> GitHub repository:
+              Once run, these tests can be stored using almost no space. Any simulation can be revisited at any time. Consider that one prototype for a self-driving car may have several versions. Each version created can have millions of possible AI training sessions conducted before the car begins testing on the road. The data needed for this can take up many terabytes of space. Storing this data can be important for many reasons such as further research, version comparison, and regulatory reasons to name a few. Using <i>Stateshaper</i> in this case can reduce database related costs in this instance by over 99%. This includes storage, bandwidth and electricity consumption. 
             </div>
-            <div className="mt-4 underline">
-              <a className="hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper" target="_blank">https://www.github.com/jgddesigns/stateshaper</a>
+            <div>
+              ML Training is only one of the many uses for this program. It is currently available as a Python package and Github repository. 
+            </div>
+            <div className="mt-8 grid grid-cols-1 gap-4 grid-rows-2 place-items-center">
+              <code>pip install stateshaper</code>
+              <a className="underline hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper" target="_blank">https://www.github.com/jgddesigns/stateshaper</a>
             </div>
             <div className="mt-4">
-              Other uses can include, but are not limited to, smart home scheduling, gaming NPC behavior, content generation, ML training, and store inventories. 
+              Other uses can include, but are not limited to, smart home scheduling, gaming NPC behavior, content generation, graphic assets and store inventories. 
             </div>
           </div>
         }
@@ -300,7 +413,7 @@ export default function Home() {
       {ShowCode ?
         <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
         <div className="text-md ">
-          <span className="font-bold">Frontend:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/graphics_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/graphics_demo</a>
+          <span className="font-bold">Github:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/graphics_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/ml_demo</a>
         </div>
         </div>
       : null}
