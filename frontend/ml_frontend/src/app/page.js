@@ -4,6 +4,7 @@ import "./shapes.css"
 import Draw from "./classes/Draw"
 
 export default function Home() {
+  const defaults = {}
   const [DrawValue, setDrawValue] = useState(0)
   const [DrawColor, setDrawColor] = useState("red")
   const [DrawData, setDrawData] = useState("red")
@@ -28,19 +29,8 @@ export default function Home() {
   const [LinkText, setLinkText] = useState(classes[0])
   const [ReceiveTrip, setReceiveTrip] = useState(false)
   const [LoadedTrip, setLoadedTrip] = useState(true)
-
-  const colors = [
-    "#6B8EAD", // muted steel blue
-    "#7FA6A0", // soft teal pastel
-    "#9A7AA0", // dusty lavender
-    "#8FAF7A", // desaturated moss green
-    "#C97BBE", // soft magenta pastel 
-    "#7C9EB2", // calm slate blue
-    "#9C6B6B", // muted rose
-    "#6F8F7D", // subdued sea green
-    "#8B7AAE", // soft periwinkle
-    "#5F8A8B"  // deep pastel teal
-  ]
+  const [Pause, setPause] = useState(false)
+  const [StartTest, setStartTest] = useState(false)
 
 
   const content = {
@@ -59,6 +49,7 @@ export default function Home() {
     if(TestTrigger == true){
       setRunTest(true)
       setTestTrigger(false)
+      StartTest == false ? setStartTest(true) : null
     } 
   }, [TestTrigger])
 
@@ -83,6 +74,19 @@ export default function Home() {
   useEffect(()=>{
     Seeds ? setSeedText(Seeds["0"]) : null
   }, [Seeds])
+
+
+  useEffect(()=>{
+    while(StartTest == true && Counter < 100){
+      const timeoutId = setTimeout(() => {
+          if(Pause != true){ 
+            run_session()
+          }
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [StartTest, Counter])
 
 
   function draw_value(value){
@@ -255,6 +259,7 @@ export default function Home() {
     setCounter(-1)
     setDrawValue(null)
     setTestTrigger(false)
+    setStartTest(false)
     send_api("reset")
   }
   

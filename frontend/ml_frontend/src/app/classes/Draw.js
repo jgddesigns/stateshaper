@@ -2,20 +2,33 @@
 import {useEffect, useState} from "react"
 
 
-// props: Value, PreviousValue, Counter, Y_Interval, RunTestState
+// props: Value, PreviousValue, Counter, X_Interval, RunTestState
 export default function Draw(props) {
+    const defaults = {"interval": 7.19, "max_x": 725, "max_y": 400}
+    const colors = {
+        "steel_blue": "#6B8EAD",
+        "soft_teal": "#7FA6A0",
+        "lavender": "#9A7AA0",
+        "moss_green": "#8FAF7A",
+        "magenta": "#C97BBE",
+        "slate_blue": "#7C9EB2",
+        "rose": "#9C6B6B",
+        "sea_green": "#6F8F7D",
+        "periwinkle": "#8B7AAE",
+        "teal": "#5F8A8B"
+    }
+
     const [Line, setLine] = useState(null)
     const [Calculations, setCalculations] = useState(null)
-    const [X_Interval, setX_Interval] = useState(7.19)
-    const [PreviousValue, setPreviousValue] = useState(400)
+
+    const [X_Interval, setX_Interval] = useState(defaults.interval)
+    const [PreviousValue, setPreviousValue] = useState(defaults.max_y)
     const [CurrentValue, setCurrentValue] = useState(0)
-    const [Color, setColor] = useState("red")
+    const [Color, setColor] = useState(colors.rose)
 
 
 
     useEffect(()=>{
-        props.X_Interval ? setX_Interval(props.X_Interval) : null
-        props.Color ? setColor(props.Color) : null
         props.Counter < 1 ? setLine(null) : null
         console.log(Line)
     }, [])
@@ -96,7 +109,7 @@ export default function Draw(props) {
 
   return (
     <div>
-        <svg width="725" height="400">
+        <svg width={defaults.max_x} height={defaults.max_y}>
             {Line ? 
                 Line.map(item =>
                     item  
