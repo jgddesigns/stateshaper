@@ -27,6 +27,7 @@ export default function Home() {
   const classes = ["font-bold", ""]
   const [LinkText, setLinkText] = useState(classes[0])
   const [ReceiveTrip, setReceiveTrip] = useState(false)
+  const [LoadedTrip, setLoadedTrip] = useState(true)
 
   const colors = [
     "#6B8EAD", // muted steel blue
@@ -97,6 +98,7 @@ export default function Home() {
     for(let i=0; i<terms.length; i++){
       content[terms[i]](show == terms[i] ? true : false)
     }
+    // show == "data" ? redraw() : null
   }
 
 
@@ -151,6 +153,10 @@ export default function Home() {
     if(path == "trip"){
       setDrawData(data.response.test.data)
       setReceiveTrip(true)
+    }   
+
+    if(path == "reset"){
+      setLoadedTrip(true)
     }   
 
     console.log("data in " + path)
@@ -216,6 +222,7 @@ export default function Home() {
  
 
   function run_session(){
+    Counter == 0 ? setCounter(1) : null
     Counter < 100 ? send_api("trip") : null
   }
 
@@ -243,6 +250,7 @@ export default function Home() {
 
     
   function reset_trip(){
+    setLoadedTrip(false)
     setReceiveTrip(false)
     setCounter(-1)
     setDrawValue(null)
@@ -255,6 +263,8 @@ export default function Home() {
     setDrawValue(draw_value(DrawData.temperature))
     setPreviousDrawValue(draw_value(DrawData.temperature))
   }
+
+
 
   return (
     <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c] font-mono">
@@ -288,8 +298,8 @@ export default function Home() {
             <a className={ShowData ? "font-bold text-2xl" : ""} onClick={()=>show_content("data")}>Run</a>
             <a className={ShowAbout ? "font-bold text-2xl" : ""} onClick={()=>show_content("about")}>About</a>
           </div>
-          {ShowForm ?
-          <div className="grid grid-rows-3 max-w-[800px] h-140 place-items-center overflow-y-auto mt-20 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+          <div>
+            <div className={ShowForm ? "grid grid-rows-3 max-w-[800px] h-140 place-items-center overflow-y-auto mt-20 p-4 dot-scrollbar static" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
               <div className="grid grid-rows-1 grid-cols-3 gap-4 w-full text-xl mr-auto mt-24">
                 <div>
                   Derived From: 
@@ -352,19 +362,19 @@ export default function Home() {
                   </div>
                 </div>
             </div>
-          </div>
-          : 
-          ShowData ?
-          <div className="grid grid-rows-1 max-w-[800px] h-140 place-items-center overflow-y-auto mt-12 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+            </div>
+            <div className={ShowData ? "grid grid-rows-1 max-w-[800px] h-140 place-items-center overflow-y-auto mt-12 p-4 dot-scrollbar static" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
               <div className={Counter < 100 ? "mt-4 px-4 py-2 ml-auto w-32 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800 select-none" : "mt-4 px-3 py-2 ml-auto w-32 h-12 bg-gray-600 rounded-lg text-xl text-white cursor-none disabled select-none"}  onClick={e => run_session()}>
                 {Counter < 100 ? "Run Test" : "Finished!"}
               </div>
               <div className="mt-12 w-180 h-100 bg-gray-200">
-                  <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
+                  {LoadedTrip ? 
+                    <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
+                  : null}
               </div>
-          </div>
-          : 
-          <div className="grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-[740px] gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+            </div>
+            <div className={ShowAbout ? "grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-[740px] gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+          {/* <div className="grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-[740px] gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}> */}
             <div>
               An unlimited amount of training data for machine learning can be created and stored using <i>Stateshaper</i>. The ability for the engine to derive synthetic data by tokenizing its numeric output allows for a wide range of test values to be used. Each test can be stored and re-created at any time from the small seed formats seen to the right of the screen. 
             </div>
@@ -384,8 +394,9 @@ export default function Home() {
             <div className="mt-4">
               Other uses can include, but are not limited to, smart home scheduling, gaming NPC behavior, content generation, graphic assets and store inventories. 
             </div>
+            </div>
           </div>
-        }
+
         </div>
 
         <div className="grid w-3/4 place-items-center h-full static">

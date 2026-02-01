@@ -14,19 +14,15 @@ export default function Draw(props) {
 
 
     useEffect(()=>{
-        try{
-           props.X_Interval ? setX_Interval(props.X_Interval) : null
-        }catch{}
-        
-        try{
-            props.Color ? setColor(props.Color) : null
-        }catch{}
-        setLine(null)
+        props.X_Interval ? setX_Interval(props.X_Interval) : null
+        props.Color ? setColor(props.Color) : null
+        props.Counter < 1 ? setLine(null) : null
+        console.log(Line)
     }, [])
 
 
     useEffect(()=>{
-        props.RunTestState[0] == true && props.Counter <= 100 ? calculate() : null
+        props.RunTestState[0] == true && props.Counter < 100 ? calculate() : null
     }, [props.RunTestState])
 
 
@@ -40,6 +36,8 @@ export default function Draw(props) {
         console.log(props.Counter)
         console.log("value")
         console.log(props.Value)
+        console.log("line")
+        console.log(Line)
 
         props.Counter < 1 ? setLine(null) : null
         if(((props.Counter - 1) * X_Interval) < 719){

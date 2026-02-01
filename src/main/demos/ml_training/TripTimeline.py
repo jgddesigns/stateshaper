@@ -87,6 +87,7 @@ class TripTimeline:
     
     def reset_trip(self):
         self.trip_counter = 0
+        self.end = False
         self.run = False
         self.start = False
         self.token = 1
@@ -133,7 +134,7 @@ class TripTimeline:
         
 
     def start_trip(self):
-        
+        self.end = False
         if self.trip_counter >= self.current_interval["range"][1]:
             self.current_interval = copy.deepcopy(self.next_interval) 
             self.total_trip = copy.deepcopy(self.next_interval)
@@ -151,6 +152,7 @@ class TripTimeline:
         
 
     def compare_intervals(self):
+        print(f"trip counter {str(self.trip_counter)}")
         for attribute in self.trip_attributes:
             self.set_attribute(attribute) 
         print(f"\n\nnext trip interval set: {self.current_interval}")
