@@ -87,8 +87,8 @@ class Connector:
 
     def output_seed(self, state=None, vocab=None, constants=None, mod=None, derived=None):
         seed = {}
-
-        seed["s"] = self.engine["state"] if not state else state
+        
+        seed["s"] = self.engine["state"][0] if not state else state
         if vocab or derived:
             seed["v"] = self.compressed_vocab if vocab else derived
         seed["c"] = self.engine["constants"] if not constants else constants

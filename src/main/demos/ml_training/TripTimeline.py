@@ -7,20 +7,20 @@ from .data.environments import environment_data
 class TripTimeline:
 
 
-    def __init__(self, trip={'environment': 'town', 'range': [0, 5], 'data': {'environment': 'town', 'temperature': 0.48, 'humidity': 0.26, 'light': 0.42, 'elevation': 0.24, 'curves': 0.09, 'road_size': 0.31, 'road_texture': 0.23, 'incline': 0.2, 'incline_variance': 0.04, 'traffic': 0.29, 'hazard_variance': 0.01, 'potential_hazard': 'cyclist', 'weather_variance': 0.18, 'weather_type': 'rain'}}, token=5, **kwargs):
+    def __init__(self, trip={'environment': 'town', 'range': [0, 5], 'data': {'environment': 'town', 'temperature': 0.48, 'humidity': 0.26, 'light': 0.42, 'elevation': 0.24, 'curves': 0.09, 'road_size': 0.31, 'road_texture': 0.23, 'incline': 0.2, 'incline_variance': 0.04, 'traffic': 0.29, 'hazard_variance': 0.01, 'potential_hazard': 'cyclist', 'weather_variance': 0.18, 'weather_type': 'rain'}}, token=1, **kwargs):
         # trip length 1-100
         # break into intervals
         # transitions have increment/decrement style for each attribute based on neighboring intervals. ie low elevation -> high elevation incline number steadily rises between each interval's median, some values change instantly when needed. 
         # intervals can overlap ie low elevation with rain or sun to high elevation with rain or sun. ex.: {"low_elevation": [1, 25], "sun": [1, 15], "rain": [15, 70], "high_elevation": [25, 100]}
-        self.trip = trip
-        self.current_trip = trip["environment"]
-        self.current_interval = copy.deepcopy(trip["environment"][0])
-        self.total_trip = copy.deepcopy(trip["environment"][0])
-        self.token = token
-        try:
-            self.next_interval = trip[1] 
-        except:
-            self.next_interval = None
+        # self.trip = trip
+        # self.current_trip = trip
+        # self.current_interval = copy.deepcopy(trip["environment"][0])
+        # self.total_trip = copy.deepcopy(trip["environment"][0])
+        # self.token = token
+        # try:
+        #     self.next_interval = copy.deepcopy(trip["environment"][1])
+        # except:
+        #     self.next_interval = None
 
         self.max_counter = 100
 
@@ -76,26 +76,65 @@ class TripTimeline:
         self.stop_precision = [] 
         self.rule_precision = []
 
+        self.start = False
+
     
 
 
-    def start_trip(self):
-        self.trip_progress()
-        return self.trip
+    # def start_trip(self):
+    #     self.trip_progress()
+    #     return self.trip
+    
+    def reset_trip(self):
+        self.trip_counter = 0
+        self.run = False
+        self.start = False
+        self.token = 1
+        self.trip = None
+        self.current_trip = None
+        self.current_interval = None
+        self.total_trip = None
+        self.next_interval = None
+        self.trip_attributes =  {
+            "temperature": 0,
+            "humidity": 0,
+            "light": 0,
+            "elevation": 0,
+            "curves": 0,
+            "road_size": 0,
+            "road_texture": 0,
+            "incline": 0,
+            "incline_variance": 0,
+            "traffic": 0,
+            "hazard_variance": 0,
+            "weather_variance": 0,
+        }
 
+    def set_trip(self, token, trip):
+        if self.start == False:
+            self.token = token
+            self.trip = trip
+            self.current_trip = trip
+            self.current_interval = copy.deepcopy(trip[0])
+            self.total_trip = copy.deepcopy(trip[0])
+            self.start = True         
+            try:
+                self.next_interval = trip[1] 
+            except:
+                self.next_interval = None
+            
 
     def trip_progress(self):
-        self.check_intervals()
         print(f"\n\n\n\nCurrent Interval: {self.current_interval['environment']}, Range: {self.current_interval['range']}")
         print(f"\n{self.current_interval}")
         if self.next_interval != None:
             print(f"\n\nNext Interval: {self.next_interval['environment']}, Range: {self.next_interval['range']}")
             print(f"\n{self.next_interval}\n\n")
-        self.run_timer()
         
 
-    def check_intervals(self):
-        if self.trip_counter > 0:
+    def start_trip(self):
+        
+        if self.trip_counter >= self.current_interval["range"][1]:
             self.current_interval = copy.deepcopy(self.next_interval) 
             self.total_trip = copy.deepcopy(self.next_interval)
         if len(self.current_trip) > 1 :
@@ -105,9 +144,9 @@ class TripTimeline:
 
     def check_next(self):
         try:
-            return self.current_trip[self.current_trip.index(self.current_interval)+1]
+            return self.trip[self.trip.index(self.current_interval)+1]
         except:
-            print("End of possible environments in this trip.")
+            print("No other environments in this trip.")
             return None
         
 
@@ -128,18 +167,20 @@ class TripTimeline:
             pass
 
 
-    def run_timer(self, timer=False):
+    def run_timer(self, one_trip=False, step=False):
         if self.end == False:
             self.trip_counter += 1
+            # self.check_intervals()
             self.adjust_values()
             self.hazard_check()
             self.steering_check()
             self.speed_check()
+            # self.compare_intervals()
             self.stop_check()
             self.rules_check()
-            self.end_check()
-            # time.sleep(1) if timer == True else None 
-        return True
+            self.end_check(one_trip, step)
+            return self.total_trip
+        return self.total_trip
         
 
     def adjust_values(self):
@@ -147,29 +188,29 @@ class TripTimeline:
         print(f"Environment: {self.current_interval['environment']}, Range: {self.current_interval['range']}")
         print(self.token)
         print(self.trip_attributes)
+        print(self.total_trip)
+        print(self.next_interval)
         for attribute in self.trip_attributes:
             self.total_trip["data"][attribute] = (self.total_trip["data"][attribute] + self.trip_attributes[attribute]) if attribute in self.measured["gradual"] else self.trip_attributes[attribute]
 
         if self.next_interval != None:
             if self.trip_counter == self.next_interval["range"][0]:
-                self.run = False
+                # self.run = False
                 for attribute in self.trip_attributes:
                     self.total_trip["data"][attribute] = round(self.total_trip["data"][attribute], 2) 
 
                 self.interval_end()
     
 
-    def end_check(self):
-        if self.trip_counter >= self.trip_length and self.end == False:
+    def end_check(self, one_trip=False, step=False):
+        if (self.trip_counter >= self.trip_length and self.end == False) or one_trip == True and self.trip_counter >= self.current_interval["range"][1]:
             print("\n\nend of trip")
             print("\n\nhazards encountered\n")
             print(self.hazard_data)
             self.trip_data = {"hazard_data": self.hazard_data, "steering_precision": self.steering_precision, "speed_precision": self.speed_precision, "stop_precision": self.stop_precision, "rule_precision": self.rule_precision}
             self.end = True
-            # print("\n\ntrip")
-            # print(self.trip)
         else:
-            self.run_timer()
+            self.run_timer() if step == False else None
             
 
     def interval_end(self):

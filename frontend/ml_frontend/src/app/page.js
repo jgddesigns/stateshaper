@@ -1,11 +1,19 @@
 'use client'
 import {useEffect, useState} from "react"
 import "./shapes.css"
+import Draw from "./classes/Draw"
 
 export default function Home() {
+  const [DrawValue, setDrawValue] = useState(0)
+  const [DrawColor, setDrawColor] = useState("red")
+  const [DrawData, setDrawData] = useState("red")
+  const [PreviousDrawValue, setPreviousDrawValue] = useState(0)
+  const [RunTest, setRunTest] = useState(false)
+  const [TestTrigger, setTestTrigger] = useState(false)
+  const [X_Interval, setX_Interval] = useState(10)
+  const [Counter, setCounter] = useState(-1)
   const [CurrentToken, setCurrentToken] = useState(0)
   const [OriginalToken, setOriginalToken] = useState(0)
-  const [CurrentMap, setCurrentMap] = useState(0)
   const [MapData, setMapData] = useState(0)
   const [MapText, setMapText] = useState("")
   const [Data, setData] = useState("")
@@ -18,39 +26,57 @@ export default function Home() {
   const [SeedText, setSeedText] = useState("")
   const classes = ["font-bold", ""]
   const [LinkText, setLinkText] = useState(classes[0])
-  const [ShapesData, setShapesData] = useState(null)
-  const [Shapes, setShapes] = useState(null)
-  const [Line, setLine] = useState(<svg></svg>)
+  const [ReceiveTrip, setReceiveTrip] = useState(false)
 
+  const colors = [
+    "#6B8EAD", // muted steel blue
+    "#7FA6A0", // soft teal pastel
+    "#9A7AA0", // dusty lavender
+    "#8FAF7A", // desaturated moss green
+    "#C97BBE", // soft magenta pastel 
+    "#7C9EB2", // calm slate blue
+    "#9C6B6B", // muted rose
+    "#6F8F7D", // subdued sea green
+    "#8B7AAE", // soft periwinkle
+    "#5F8A8B"  // deep pastel teal
+  ]
 
-  const grid_size = 25
-
-  const colors = ["bg-red-400","bg-blue-400","bg-green-400","bg-yellow-400","bg-orange-400","bg-purple-400","bg-pink-400","bg-cyan-400","bg-lime-400","bg-teal-400","bg-emerald-400","bg-indigo-400"]
-  const text = ["text-red-400","text-blue-400","text-green-400","text-yellow-400","text-orange-400","text-purple-400","text-pink-400","text-cyan-400","text-lime-400","text-teal-400","text-emerald-400","text-indigo-400"]
 
   const content = {
-    "form" : setShowForm,
-    "data" : setShowData,
-    "about":  setShowAbout
+    "form": setShowForm,
+    "data": setShowData,
+    "about": setShowAbout
   }
 
 
   useEffect(()=>{
-    send_api("forward")
+    send_api("start")
   }, [])
 
 
   useEffect(()=>{
+    if(TestTrigger == true){
+      setRunTest(true)
+      setTestTrigger(false)
+    } 
+  }, [TestTrigger])
+
+
+  useEffect(()=>{
     if(Data){
-      console.log(Data) 
       set_seeds()
       change_map(0)
-      setLine(draw_line())
       !OriginalToken ? setOriginalToken(Data["token"]) : null
       setCurrentToken(Data["token"])
-
+      setX_Interval(Data.test.environment[0].range[1]/100)
+      initialize_draw()
     }
   }, [Data])
+
+
+  useEffect(()=>{
+    ReceiveTrip == true ? adjust_trip() : null
+  }, [ReceiveTrip])
 
 
   useEffect(()=>{
@@ -58,53 +84,11 @@ export default function Home() {
   }, [Seeds])
 
 
-  useEffect(()=>{
-    CurrentMap ? setChangeMap(true) : null
-  }, [CurrentMap])
-
-
-  useEffect(()=>{
-    ShapesData ? draw_shapes() : null
-  }, [ShapesData])
-
-
-
-
-  function draw_shapes(){
-    let shapes = []
-    for(let item of ShapesData){
-      if(item != ""){
-        let shape_class = item["shape"] + " " + colors[item["color"]]  + " " + text[item["color"]] + " w-" + item["size"]["width"] + " h-" + item["size"]["height"] + " justify-self-center self-center select-none"
-        shapes.push(shape_class)
-      }else{
-        shapes.push("w-32 h-64 justify-self-center self-center text-[#02082c] select-none")
-      }
+  function draw_value(value){
+    if(value < 1){
+      value = value * 100
     }
-    setShapes(shapes)
-  }
-
-
-  function set_shapes(){
-    // let shapes = new_shapes()
-    
-    // for(let item of Object.keys(Data["shapes"])){
-    //   shapes[get_pos(Data["shapes"][item]["pos"]["x"], Data["shapes"][item]["pos"]["y"])] = Data["shapes"][item]
-    // }
-    // setShapesData(shapes)
-  }
-
-
-  function new_shapes(){
-    let shapes = []
-    while(shapes.length < grid_size){
-      shapes.push("")
-    }
-    return shapes
-  }
-
-
-  function get_pos(x, y){
-    return ((x+1)*(y+1)) - 1
+    return 400 - value
   }
 
 
@@ -155,11 +139,24 @@ export default function Home() {
     const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "" })
+      body: JSON.stringify({ message: JSON.stringify({"token": 1, "environment": Data ? Data.test.environment : []}) })
     });
     const data = await res.json()
-    setData(data["response"])
+    
+    if(path != "trip" && path != "reset"){
+      setData(data.response)
+      setDrawData(data.response.test.environment[0].data)
+    }
+
+    if(path == "trip"){
+      setDrawData(data.response.test.data)
+      setReceiveTrip(true)
+    }   
+
+    console.log("data in " + path)
+    console.log(data.response)
   }
+
 
   function get_name(name){
     name = name.split("_")
@@ -171,9 +168,11 @@ export default function Home() {
     return string
   }
 
+
   function capitalize(word){
     return word[0].toUpperCase() + word.slice(1)
   }
+
 
   function get_range(range){
     return range[0].toString().length > 1 ? range[0] + " - " + range[1] : range[0] + "  - " + range[1]
@@ -182,6 +181,9 @@ export default function Home() {
 
   function change_map(current){
     try{
+      reset_trip()
+      setX_Interval(Data.test.environment[current].range[1]/100)
+      setDrawData(Data.test.environment[current].data)
       setMapText(Data.test.environment.map((item, i) => (
         <div className="grid grid-cols-2 gap-8" key={i}>
           <div className="flex items-center cursor-pointer z-99" onClick={e => change_map(i)}>
@@ -191,7 +193,7 @@ export default function Home() {
             mi. {get_range(item.range)}
           </div>
         </div>
-        )))
+      )))
       setMapData(Object.keys(Data.test.environment[current].data).map((item, i) => (
         <div className="grid w-full grid-rows-1 grid-cols-2 gap-8 text-lg" key={i}>
           <div>
@@ -202,7 +204,9 @@ export default function Home() {
           </div>
         </div>
       )))
-    }catch{setMapData("")}
+    }catch{
+      setMapData("")
+    }
   }
 
 
@@ -211,19 +215,45 @@ export default function Home() {
   }
  
 
-  function draw_line(){
-    return <svg width="400" height="400">
-            <path
-              d="M 20 100 Q 200 180 200 100"
-              stroke="red"
-              strokeWidth="2"
-              fill="none"
-            />
-          </svg>
+  function run_session(){
+    Counter < 100 ? send_api("trip") : null
   }
 
-  function run_session(){
 
+  function adjust_trip(){
+    setReceiveTrip(false)
+    let counter = Counter
+    // let value = DrawValue
+    counter++
+
+    // counter % 2 == 0 ? value-=Math.round((Math.random() * 20)) : counter % 3 == 0 ? value+=Math.round((Math.random() * 70)) : value-=Math.round((Math.random() * 15))
+    setCounter(counter)
+    console.log("\ndraw data in adjust trip")
+    console.log(DrawData)
+    try{
+      setDrawValue(draw_value(DrawData.temperature))
+      console.log("\ndraw value set")
+      console.log(draw_value(DrawData.temperature))
+    }catch{
+      console.log("\nunable to set draw value")
+    }
+    
+    setTestTrigger(true)
+  }
+
+    
+  function reset_trip(){
+    setReceiveTrip(false)
+    setCounter(-1)
+    setDrawValue(null)
+    setTestTrigger(false)
+    send_api("reset")
+  }
+  
+
+  function initialize_draw(){
+    setDrawValue(draw_value(DrawData.temperature))
+    setPreviousDrawValue(draw_value(DrawData.temperature))
   }
 
   return (
@@ -260,12 +290,28 @@ export default function Home() {
           </div>
           {ShowForm ?
           <div className="grid grid-rows-3 max-w-[800px] h-140 place-items-center overflow-y-auto mt-20 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
-            <div className="grid grid-rows-1 grid-cols-2 w-full text-xl mt-12 static">
+              <div className="grid grid-rows-1 grid-cols-3 gap-4 w-full text-xl mr-auto mt-24">
+                <div>
+                  Derived From: 
+                </div>
+                <div>
+                  {Data.token}
+                </div>
+                <div className="grid grid-rows-1 grid-cols-2 self-end right-0 ml-auto gap-8 px-8">
+                    <button className={Data ? Data["token"] != OriginalToken ? "w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer text-4xl hover:bg-gray-300 hover:text-blue-700 select-none z-99" : "disabled select-none w-20 h-12 px-4 py-1 bg-gray-600 rounded-2xl cursor-none text-4xl" : null} onClick={e => send_api("reverse")} disabled={Data ? Data["token"] == OriginalToken : false}>
+                      &larr;
+                    </button>
+                    <button className="w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer px-2 text-4xl hover:bg-gray-300 hover:text-blue-700 select-none z-99"  onClick={e => send_api("forward")}>
+                      &rarr;
+                    </button>
+                </div>
+              </div>
+            <div className="grid grid-rows-1 grid-cols-2 w-full h-24 text-xl mt-36 static">
               <div className="grid w-full grid-rows-2 grid-cols-1">
                 <div>
                   <b>Car:</b>
                 </div>   
-                <div className="text-2xl text-blue-400 mt-4">
+                <div className="text-blue-400 text-2xl mt-4">
                   <i>{Data ? get_name(Data.test.vehicle.name) : null}</i>
                 </div>
               </div>
@@ -275,14 +321,14 @@ export default function Home() {
                     <b>Maps:</b> 
                   </div>
                 </div>
-                <div>
+                <div className="mt-4">
                   {Data ? MapText :null}
                 </div>
               </div>
             </div>
-            <div className="grid grid-rows-2 grid-cols-1 gap-24 w-full text-lg mt-150">
+            <div className="grid grid-rows-2 grid-cols-1 gap-24 w-full text-lg mt-36">
                 <div className="grid w-full grid-rows-1 grid-cols-1 justify-self-start mt-auto top-0 static">
-                  <b className="text-xl">Data:</b> <i></i>
+                  {/* <b className="text-xl">Data:</b> <i></i> */}
                 </div>
                 <div className="grid grid-rows-1 grid-cols-2">
                   <div>
@@ -305,32 +351,16 @@ export default function Home() {
                     {Data ? MapData : null}
                   </div>
                 </div>
-              <div className="grid grid-rows-1 grid-cols-3 gap-4 w-full text-xl mr-auto mt-24">
-                <div>
-                  Derived From: 
-                </div>
-                <div>
-                  {Data.token}
-                </div>
-                <div className="grid grid-rows-1 grid-cols-2 self-end right-0 ml-auto gap-8 px-8">
-                    <div className={Data ? Data["token"] != OriginalToken ? "w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer text-4xl hover:bg-gray-300 hover:text-blue-700" : "w-20 h-12 px-4 py-1 bg-gray-600 rounded-2xl cursor-none text-4xl" : null}>
-                      &larr;
-                    </div>
-                    <div className="w-20 h-12 px-4 py-1 bg-blue-600 rounded-2xl cursor-pointer px-2 text-4xl hover:bg-gray-300 hover:text-blue-700">
-                      &rarr;
-                    </div>
-                </div>
-              </div>
             </div>
           </div>
           : 
           ShowData ?
           <div className="grid grid-rows-1 max-w-[800px] h-140 place-items-center overflow-y-auto mt-12 p-4 dot-scrollbar static" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
-              <div className="mt-4 px-4 py-2 ml-auto w-24 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800" onClick={e => run_sesion()}>
-                Begin
+              <div className={Counter < 100 ? "mt-4 px-4 py-2 ml-auto w-32 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800 select-none" : "mt-4 px-3 py-2 ml-auto w-32 h-12 bg-gray-600 rounded-lg text-xl text-white cursor-none disabled select-none"}  onClick={e => run_session()}>
+                {Counter < 100 ? "Run Test" : "Finished!"}
               </div>
               <div className="mt-12 w-180 h-100 bg-gray-200">
-                  {Line}
+                  <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
               </div>
           </div>
           : 
@@ -411,9 +441,9 @@ export default function Home() {
         EXAMPLE ONLY
       </div>
       {ShowCode ?
-        <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600">
+        <div className="text-white p-4 py-5 bottom-18 right-192 ml-auto absolute w-128 h-24 rounded-lg bg-blue-600 overflow-x-auto overflow-y-hidden">
         <div className="text-md ">
-          <span className="font-bold">Github:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic" href="https://www.github.com/jgddesigns/stateshaper/tree/graphics_demo" target="_blank">https://www.github.com/jgddesigns/stateshape/tree/ml_demo</a>
+          <span className="font-bold">Github:</span> <a className="cursor-pointer hover:text-gray-300 hover:italic px-2" href="https://www.github.com/jgddesigns/stateshaper/tree/graphics_demo" target="_blank">https://www.github.com/jgddesigns/stateshaper/tree/ml_demo</a>
         </div>
         </div>
       : null}

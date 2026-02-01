@@ -6,7 +6,7 @@ from .TripTimeline import TripTimeline
 class BuildEnvironment:
 
 
-    def __init__(self, token=5, **kwargs):
+    def __init__(self, token=1, **kwargs):
         # trip length 1-100
         # break into intervals
         # transitions have increment/decrement style for each attribute based on neighboring intervals. ie low elevation -> high elevation incline number steadily rises between each interval's median, some values change instantly when needed. 
@@ -64,8 +64,7 @@ class BuildEnvironment:
         self.deviation = 20
         self.token = token
 
-        # self.ml_test = self.create_environment(self.get_token())
-        # self.trip_timeline = TripTimeline() 
+
 
 
     def get_token(self, random=False):
@@ -78,8 +77,10 @@ class BuildEnvironment:
 
     def create_environment(self, token):
         print("start environment")
+        print(f"token: {token}")
         intervals = []
         interval_count = (token % self.max_intervals) + 1
+        print(f"interval count {interval_count}")
         current = 0
         adjust = 1
         while len(intervals) < interval_count: 
@@ -95,6 +96,7 @@ class BuildEnvironment:
             current = interval_range[1]
             if current >= 100:
                 print("environments created")
+                print(intervals)
                 return intervals
     
 
@@ -108,6 +110,7 @@ class BuildEnvironment:
         start = current
         end = current + (token % remaining) if len(intervals) < interval_count - 1 else 100
         end = end + min_range if current - end < min_range else end
+        end = 100 if end > 100 else end
         return [start, end]
 
 

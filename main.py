@@ -42,9 +42,26 @@ with open("example_data/tokens.json", "r") as f:
     f.close()
 run = RunEngine(data, token_count=50)
 run.start_engine()
-state = [random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973)]
+# state = [random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973), random.randint(1, 9973)]
+state=[1]
 run.define_engine(state=state)
 tokens = run.run_engine()
+trip = TripTimeline()
+run_trip = RunEngine(data, token_count=50)
+run_trip.start_engine()
+run_trip.define_engine(state=state)
+
+
+@app.post("/api/start")
+def forward():
+    run.start_engine()
+    run.define_engine(state=state)
+    token = run.one_token()
+    test = ml.current_test(token)
+    run_trip.start_engine()
+    run_trip.define_engine(state=state)
+    trip.reset_trip()
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
 
 
 @app.post("/api/forward")
@@ -61,9 +78,21 @@ def reverse():
     return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
-@app.post("/api/run_test")
+@app.post("/api/trip")
 def run_test(input: Input):
     input = json.loads(input.message)
-    trip = TripTimeline(input["token"], input["environment"])
-    test = trip.start_trip()
-    return {"response": {"trip": trip, "test": test, "token": input["token"], "seed": [run.get_seed(state=state), run.engine]}}
+    token = run_trip.one_token()
+    trip.set_trip(token, input["environment"])
+    trip.start_trip()
+    test = trip.run_timer(False, True)
+    
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+
+
+@app.post("/api/reset")
+def forward():
+    # run.define_engine(state=state)
+    run_trip.start_engine()
+    run_trip.define_engine(state=state)
+    trip.reset_trip()
+    return {"response": {}}

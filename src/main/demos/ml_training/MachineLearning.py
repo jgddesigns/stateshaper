@@ -1,4 +1,5 @@
 import random
+import sys
 
 from .BuildEnvironment import BuildEnvironment
 from .data.vehicles import vehicles
@@ -6,7 +7,7 @@ from .data.vehicles import vehicles
 class MachineLearning:
 
 
-    def __init__(self, token=5, **kwargs):
+    def __init__(self, token=1, **kwargs):
 
         self.vehicle = {
             "torque": 0,                # 0 (pulls nothing) - 1 (pulls anything)
@@ -89,10 +90,10 @@ class MachineLearning:
         tensors = self.get_tensors(token) if not one_tensors or self.one_tensors == None  else self.one_tensors
         self.one_tensors = tensors
 
-        random_txt = "Random"
-        repeat_txt = "Repeat"
+        # random_txt = "Random"
+        # repeat_txt = "Repeat"
         print("\n\nNew ML Training Test Created\n")
-        print(f"Vehicle: {repeat_txt if one_vehicle else random_txt}, Tensors: {repeat_txt if one_tensors else random_txt}\n")
+        # print(f"Vehicle: {repeat_txt if one_vehicle else random_txt}, Tensors: {repeat_txt if one_tensors else random_txt}\n")
         print({"vehicle": vehicle, "tensors": tensors})
         print("\n\n\n")
         environment = self.build_environment.create_environment(token)
@@ -100,10 +101,6 @@ class MachineLearning:
 
 
     def get_vehicle(self, token):
-        # vehicle = {}
-        # for item in self.attributes.items():
-        #     vehicle[item[0]] = item[1](token)
-        # return vehicle
         vehicle = token % len(vehicles)
         return vehicles[vehicle]
     
