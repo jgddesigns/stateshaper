@@ -33,7 +33,7 @@ export default function Home() {
   const [Pause, setPause] = useState(false)
   const [StartTest, setStartTest] = useState(false)
   const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","potential_hazard","weather_type"]
-  const [SelectedAttributes, setSelectedAttributes] = useState([attributes[1]])
+  const [SelectedAttributes, setSelectedAttributes] = useState([attributes[0]])
 
 
   const content = {
