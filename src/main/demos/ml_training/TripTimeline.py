@@ -7,7 +7,7 @@ from .data.environments import environment_data
 class TripTimeline:
 
 
-    def __init__(self, trip={'environment': 'town', 'range': [0, 5], 'data': {'environment': 'town', 'temperature': 0.48, 'humidity': 0.26, 'light': 0.42, 'elevation': 0.24, 'curves': 0.09, 'road_size': 0.31, 'road_texture': 0.23, 'incline': 0.2, 'incline_variance': 0.04, 'traffic': 0.29, 'hazard_variance': 0.01, 'potential_hazard': 'cyclist', 'weather_variance': 0.18, 'weather_type': 'rain'}}, token=1, **kwargs):
+    def __init__(self, trip=[{'environment': 'town', 'range': [0, 5], 'data': {'environment': 'town', 'temperature': 0.48, 'humidity': 0.26, 'light': 0.42, 'elevation': 0.24, 'curves': 0.09, 'road_size': 0.31, 'road_texture': 0.23, 'incline': 0.2, 'incline_variance': 0.04, 'traffic': 0.29, 'hazard_variance': 0.01, 'potential_hazard': 'cyclist', 'weather_variance': 0.18, 'weather_type': 'rain'}}], token=1, **kwargs):
         # trip length 1-100
         # break into intervals
         # transitions have increment/decrement style for each attribute based on neighboring intervals. ie low elevation -> high elevation incline number steadily rises between each interval's median, some values change instantly when needed. 

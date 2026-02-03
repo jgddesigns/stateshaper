@@ -2,6 +2,7 @@
 import {useEffect, useState} from "react"
 import "./shapes.css"
 import Draw from "./classes/Draw"
+import Stats from "./classes/Stats"
 
 export default function Home() {
   const defaults = {}
@@ -31,6 +32,8 @@ export default function Home() {
   const [LoadedTrip, setLoadedTrip] = useState(true)
   const [Pause, setPause] = useState(false)
   const [StartTest, setStartTest] = useState(false)
+  const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","potential_hazard","weather_type"]
+  const [SelectedAttributes, setSelectedAttributes] = useState([attributes[1]])
 
 
   const content = {
@@ -40,8 +43,12 @@ export default function Home() {
   }
 
 
+
+
+
   useEffect(()=>{
     send_api("start")
+    get_attributes()
   }, [])
 
 
@@ -242,9 +249,10 @@ export default function Home() {
     console.log("\ndraw data in adjust trip")
     console.log(DrawData)
     try{
-      setDrawValue(draw_value(DrawData.temperature))
+      setDrawValue(draw_value(DrawData[SelectedAttributes[0]]))
       console.log("\ndraw value set")
-      console.log(draw_value(DrawData.temperature))
+      console.log(SelectedAttributes[0])
+      console.log(draw_value(DrawData[SelectedAttributes[0]]))
     }catch{
       console.log("\nunable to set draw value")
     }
@@ -270,6 +278,52 @@ export default function Home() {
   }
 
 
+  function get_attributes() {
+    // function from chat gpt
+    const stats = [...attributes]
+    const data = []
+
+    const rowCols = [4, 4, 4] 
+    const bottomRowItems = 3  
+
+    rowCols.forEach((cols, rowIndex) => {
+      const rowItems = []
+      const itemsInRow =
+        rowIndex === 2 ? bottomRowItems : cols 
+
+      for (let i = 0; i < itemsInRow && stats.length; i++) {
+        const item = stats.shift()
+        rowItems.push(
+          <div
+            key={`item-${rowIndex}-${i}`}
+            className={SelectedAttributes.includes(item) == false ? "cursor-pointer text-md text-white hover:text-green-200"  : "cursor-pointer text-md font-bold text-green-300 hover:text-violet-200"}
+            onClick={() => draw_data(item)}
+          >
+            {item}
+          </div>
+        )
+      }
+
+      while (rowItems.length < cols) {
+        rowItems.push(<div key={`empty-${rowIndex}-${rowItems.length}`} />)
+      }
+
+      data.push(
+        <div
+          key={`row-${rowIndex}`}
+          className={`grid grid-rows-1 grid-cols-${cols} gap-8`}
+        >
+          {rowItems}
+        </div>
+      )
+    })
+
+    return <div className="grid grid-rows-3 w-full h-full">{data}</div>
+  }
+
+  function assign_colors(){
+
+  }
 
   return (
     <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c] font-mono">
@@ -368,14 +422,23 @@ export default function Home() {
                 </div>
             </div>
             </div>
-            <div className={ShowData ? "grid grid-rows-1 max-w-[800px] h-140 place-items-center overflow-y-auto mt-12 p-4 dot-scrollbar static" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
-              <div className={Counter < 100 ? "mt-4 px-4 py-2 ml-auto w-32 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800 select-none" : "mt-4 px-3 py-2 ml-auto w-32 h-12 bg-gray-600 rounded-lg text-xl text-white cursor-none disabled select-none"}  onClick={e => run_session()}>
-                {Counter < 100 ? "Run Test" : "Finished!"}
-              </div>
+            <div className={ShowData ? "grid grid-rows-3 max-w-[800px] h-150 place-items-center overflow-y-auto  p-4 dot-scrollbar static gap-28" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
+
+                {/* <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: get_attributes() }} /> */}
+                <div>
+                  {/* {get_attributes()} */}
+                  <Stats AttributeStates={[SelectedAttributes, setSelectedAttributes]} StartTest={StartTest} Counter={Counter}/>
+                </div>
+
+                
+
               <div className="mt-12 w-180 h-100 bg-gray-200">
-                  {LoadedTrip ? 
-                    <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
-                  : null}
+                {LoadedTrip ? 
+                  <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
+                : null}
+              </div>
+              <div className={Counter < 100 ? "mt-16 px-4 py-2 ml-auto w-32 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800 select-none" : "mt-16 px-3 py-2 ml-auto w-32 h-12 bg-gray-600 rounded-lg text-xl text-white cursor-none disabled select-none"}  onClick={e => run_session()}>
+                {Counter < 100 ? "Run Test" : "Finished!"}
               </div>
             </div>
             <div className={ShowAbout ? "grid place-items-center h-140 mt-20 grid-cols-1 grid-auto-rows w-[740px] gap-6 overflow-y-auto dot-scrollbar p-6 text-lg" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
