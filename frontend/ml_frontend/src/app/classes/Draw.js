@@ -5,18 +5,6 @@ import {useEffect, useState} from "react"
 // props: Value, PreviousValue, Counter, X_Interval, RunTestState
 export default function Draw(props) {
     const defaults = {"interval": 7.19, "max_x": 725, "max_y": 400}
-    const colors = {
-        "steel_blue": "#6B8EAD",
-        "soft_teal": "#7FA6A0",
-        "lavender": "#9A7AA0",
-        "moss_green": "#8FAF7A",
-        "magenta": "#C97BBE",
-        "slate_blue": "#7C9EB2",
-        "rose": "#9C6B6B",
-        "sea_green": "#6F8F7D",
-        "periwinkle": "#8B7AAE",
-        "teal": "#5F8A8B"
-    }
 
     const [Line, setLine] = useState(null)
     const [Calculations, setCalculations] = useState(null)
@@ -24,7 +12,7 @@ export default function Draw(props) {
     const [X_Interval, setX_Interval] = useState(defaults.interval)
     const [PreviousValue, setPreviousValue] = useState(defaults.max_y)
     const [CurrentValue, setCurrentValue] = useState(0)
-    const [Color, setColor] = useState(colors.rose)
+    const [Color, setColor] = useState(props.Color ? props.Color : "red")
 
 
 
@@ -109,7 +97,7 @@ export default function Draw(props) {
 
   return (
     <div>
-        <svg width={defaults.max_x} height={defaults.max_y}>
+        <svg className="absolute" width={defaults.max_x} height={defaults.max_y}>
             {Line ? 
                 Line.map(item =>
                     item  

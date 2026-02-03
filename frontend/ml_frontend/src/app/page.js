@@ -32,10 +32,11 @@ export default function Home() {
   const [LoadedTrip, setLoadedTrip] = useState(true)
   const [Pause, setPause] = useState(false)
   const [StartTest, setStartTest] = useState(false)
+  const [DisplayCreated, setDisplayCreated] = useState(false)
   const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","potential_hazard","weather_type"]
   const [SelectedAttributes, setSelectedAttributes] = useState([attributes[0]])
-
-
+  const [DrawClasses, setDrawClasses] = useState([<Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>])
+                  // <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
   const content = {
     "form": setShowForm,
     "data": setShowData,
@@ -43,7 +44,19 @@ export default function Home() {
   }
 
 
-
+const colors = {
+  "temperature": "#FF6B6B",      // pastel red
+  "humidity": "#FFB6B9",         // soft pink
+  "light": "#FFD6A5",            // pastel orange
+  "elevation": "#FDFFB6",        // pastel yellow
+  "curves": "#CAFFBF",           // pastel green
+  "road_size": "#9BF6FF",        // pastel cyan
+  "road_texture": "#A0C4FF",     // pastel blue
+  "incline": "#66BB6A",          // pastel violet
+  "traffic": "#FFC6FF",          // pastel magenta
+  "potential_hazard": "#8E7BC8", // soft coral
+  "weather_type": "#FFC75F"      // light peach
+}
 
 
   useEffect(()=>{
@@ -321,9 +334,35 @@ export default function Home() {
     return <div className="grid grid-rows-3 w-full h-full">{data}</div>
   }
 
-  function assign_colors(){
 
+
+  function draw_display(){
+    let classes = []
+    let data = null
+
+    
+    for(let value of SelectedAttributes){
+      data = {
+        "value": null,
+        "prev_value": null,
+        "counter": null,
+        "color": null,
+      }
+      data.value = draw_value(DrawData[value])
+      data.prev_value = draw_value(DrawData[value])
+      data.counter = Counter
+      data.color = colors[value]
+
+      // classes.push(<div key={classes.length}><Draw Value={data.value} PreviousValue={data.prev_value} Counter={data.counter} Color={data.color} RunTestState={[RunTest, setRunTest]}/></div>)
+      classes.push(data)
+    }
+    console.log("\ndraw classes")
+    console.log(classes)
+    // setDisplayCreated(true)
+    return classes
   }
+
+
 
   return (
     <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c] font-mono">
@@ -432,9 +471,14 @@ export default function Home() {
 
                 
 
-              <div className="mt-12 w-180 h-100 bg-gray-200">
-                {LoadedTrip ? 
-                  <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
+              <div className="mt-12 w-180 h-100 bg-gray-400">
+                {LoadedTrip && DrawClasses ? 
+                  // <Draw Value={DrawValue} PreviousValue={PreviousDrawValue} Counter={Counter} Color={DrawColor} RunTestState={[RunTest, setRunTest]}/>
+                  <div>
+                    {Data ? draw_display().map((data, i) => (
+                      <Draw Value={data.value} PreviousValue={data.prev_value} Counter={data.counter} Color={data.color} RunTestState={[RunTest, setRunTest]} key={i}/>
+                    )) : null}
+                  </div>
                 : null}
               </div>
               <div className={Counter < 100 ? "mt-16 px-4 py-2 ml-auto w-32 h-12 bg-blue-900 rounded-lg text-xl text-white cursor-pointer hover:bg-blue-800 select-none" : "mt-16 px-3 py-2 ml-auto w-32 h-12 bg-gray-600 rounded-lg text-xl text-white cursor-none disabled select-none"}  onClick={e => run_session()}>
