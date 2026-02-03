@@ -68,14 +68,14 @@ def forward():
 def forward():
     token = run.one_token()
     test = ml.current_test(token)
-    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
 
 
 @app.post("/api/reverse")
 def reverse():
     token = run.reverse_one()
     test = ml.current_test(token)
-    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
 
 
 @app.post("/api/trip")

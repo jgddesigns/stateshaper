@@ -8,7 +8,7 @@ import {useEffect, useState} from "react"
 export default function Stats(props) {
   const [Data, setData] = useState(true)
 
-  const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","potential_hazard","weather_type"]
+  const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","hazard","weather"]
 
 const colors = {
   "temperature": "#FF6B6B",      // pastel red
@@ -56,8 +56,8 @@ const colors = {
         rowItems.push(
           <div
             key={`item-${rowIndex}-${i}`}
-            className={props.AttributeStates[0].includes(item) == false && props.StartTest == false ? "cursor-pointer text-md text-white hover:text-green-200"  : props.StartTest == false ?  "cursor-pointer text-md font-bold text-green-300 hover:text-violet-200" : props.AttributeStates[0].includes(item) == false ? "text-md text-white" : "text-md"}
-            onClick={() => draw_data(item)}
+            className={props.AttributeStates[0].includes(item) == false && props.StartTest == false ? "cursor-pointer text-md text-white hover:text-green-200 select-none"  : props.StartTest == false ?  "cursor-pointer text-md font-bold text-green-300 hover:text-violet-300 select-none" : props.AttributeStates[0].includes(item) == false ? "text-md text-white disabled select-none cursor-default" : "text-md font-bold disabled select-none cursor-default"}
+            onClick={props.StartTest == false ?  () => draw_data(item) : null}
             style={{ color:  props.AttributeStates[0].includes(item) == true && props.StartTest == true && colors[item]}}
           >
             {item}
@@ -72,7 +72,7 @@ const colors = {
       data.push(
         <div
           key={`row-${rowIndex}`}
-          className={`grid grid-rows-1 grid-cols-${cols} gap-8`}
+          className={`grid grid-rows-1 grid-cols-${cols} gap-16`}
         >
           {rowItems}
         </div>
