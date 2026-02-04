@@ -8,10 +8,8 @@ export default function Draw(props) {
 
     const [Line, setLine] = useState(null)
     const [Calculations, setCalculations] = useState(null)
-
     const [X_Interval, setX_Interval] = useState(defaults.interval)
     const [PreviousValue, setPreviousValue] = useState(defaults.max_y)
-    const [CurrentValue, setCurrentValue] = useState(0)
     const [Color, setColor] = useState(props.Color ? props.Color : "red")
 
 
@@ -43,7 +41,6 @@ export default function Draw(props) {
         props.Counter < 1 ? setLine(null) : null
         if(((props.Counter - 1) * X_Interval) < 719){
             setPreviousValue(props.Value)
-            setCurrentValue(props.Value)
 
             let prev_x = props.Counter > 0 ? (props.Counter - 1) * X_Interval : (props.Counter * X_Interval)
             prev_x > 719 ? prev_x = 719 : null
@@ -94,10 +91,21 @@ export default function Draw(props) {
     }
 
 
+    function hover_display(e, hover){
+        try{
+            Line ? props.setHoverPos([e.clientX-120, props.Value-150]) : null
+            props.setShowDrawData(hover)
+        }catch{
+            props.setHoverPos([0, 0])
+        }
+
+    }
+
+
 
   return (
     <div>
-        <svg className="absolute" width={defaults.max_x} height={defaults.max_y}>
+        <svg className="absolute" width={defaults.max_x} height={defaults.max_y} onMouseEnter={e => hover_display(e, true)} onMouseLeave={e => hover_display(false)}>
             {Line ? 
                 Line.map(item =>
                     item  

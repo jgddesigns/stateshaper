@@ -1,20 +1,16 @@
 'use client'
-import {useEffect, useState} from "react"
+import {useEffect, useState, useRef} from "react"
 import "./shapes.css"
 import Draw from "./classes/Draw"
 import Stats from "./classes/Stats"
 
 export default function Home() {
-  const defaults = {}
-  const [DrawValue, setDrawValue] = useState(0)
-  const [DrawColor, setDrawColor] = useState("red")
-  const [DrawData, setDrawData] = useState("red")
-  const [PreviousDrawValue, setPreviousDrawValue] = useState(0)
+  const ref = useRef(null)
+  const [DrawData, setDrawData] = useState(null)
   const [RunTest, setRunTest] = useState(false)
   const [TestTrigger, setTestTrigger] = useState(false)
   const [X_Interval, setX_Interval] = useState(10)
   const [Counter, setCounter] = useState(-1)
-  const [CurrentToken, setCurrentToken] = useState(0)
   const [OriginalToken, setOriginalToken] = useState(0)
   const [MapData, setMapData] = useState(0)
   const [MapText, setMapText] = useState("")
@@ -26,12 +22,16 @@ export default function Home() {
   const [ShowExample, setShowExample] = useState(false)
   const [ShowCode, setShowCode] = useState(false)
   const [SeedText, setSeedText] = useState("")
-  const classes = ["font-bold", ""]
-  const [LinkText, setLinkText] = useState(classes[0])
   const [ReceiveTrip, setReceiveTrip] = useState(false)
   const [LoadedTrip, setLoadedTrip] = useState(true)
   const [Pause, setPause] = useState(false)
   const [StartTest, setStartTest] = useState(false)
+  const [ShowDrawData, setShowDrawData] = useState(false)
+  const [HoverPos, setHoverPos] = useState([0, 0])
+    
+  const classes = ["font-bold", ""]
+  const [LinkText, setLinkText] = useState(classes[0])
+  
   const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","hazard","weather"]
   const [SelectedAttributes, setSelectedAttributes] = useState([attributes[0]])
 
@@ -43,24 +43,23 @@ export default function Home() {
   }
 
 
-const colors = {
-  "temperature": "#FF6B6B",      // pastel red
-  "humidity": "#FFB6B9",         // soft pink
-  "light": "#FFD6A5",            // pastel orange
-  "elevation": "#FDFFB6",        // pastel yellow
-  "curves": "#CAFFBF",           // pastel green
-  "road_size": "#9BF6FF",        // pastel cyan
-  "road_texture": "#A0C4FF",     // pastel blue
-  "incline": "#66BB6A",          // pastel violet
-  "traffic": "#FFC6FF",          // pastel magenta
-  "hazard": "#8E7BC8", // soft coral
-  "weather": "#FFC75F"      // light peach
-}
+  const colors = {
+    "temperature": "#FF6B6B",      // pastel red
+    "humidity": "#FFB6B9",         // soft pink
+    "light": "#FFD6A5",            // pastel orange
+    "elevation": "#FDFFB6",        // pastel yellow
+    "curves": "#CAFFBF",           // pastel green
+    "road_size": "#9BF6FF",        // pastel cyan
+    "road_texture": "#A0C4FF",     // pastel blue
+    "incline": "#66BB6A",          // pastel violet
+    "traffic": "#FFC6FF",          // pastel magenta
+    "hazard": "#8E7BC8",           // soft coral
+    "weather": "#FFC75F"           // light peach
+  }
 
 
   useEffect(()=>{
     send_api("start")
-    // get_attributes()
   }, [])
 
 
@@ -78,9 +77,9 @@ const colors = {
       set_seeds()
       change_map(0)
       !OriginalToken ? setOriginalToken(Data["token"]) : null
-      setCurrentToken(Data["token"])
+      // setCurrentToken(Data["token"])
       setX_Interval(Data.test.environment[0].range[1]/100)
-      initialize_draw()
+      // initialize_draw()
     }
   }, [Data])
 
@@ -263,14 +262,14 @@ const colors = {
     setCounter(counter)
     console.log("\ndraw data in adjust trip")
     console.log(DrawData)
-    try{
-      setDrawValue(draw_value(DrawData[SelectedAttributes[0]]))
-      console.log("\ndraw value set")
-      console.log(SelectedAttributes[0])
-      console.log(draw_value(DrawData[SelectedAttributes[0]]))
-    }catch{
-      console.log("\nunable to set draw value")
-    }
+    // try{
+    //   setDrawValue(draw_value(DrawData[SelectedAttributes[0]]))
+    //   console.log("\ndraw value set")
+    //   console.log(SelectedAttributes[0])
+    //   console.log(draw_value(DrawData[SelectedAttributes[0]]))
+    // }catch{
+    //   console.log("\nunable to set draw value")
+    // }
     
     setTestTrigger(true)
   }
@@ -280,17 +279,17 @@ const colors = {
     setLoadedTrip(false)
     setReceiveTrip(false)
     setCounter(-1)
-    setDrawValue(null)
+    // setDrawValue(null)
     setTestTrigger(false)
     setStartTest(false)
     send_api("reset")
   }
   
 
-  function initialize_draw(){
-    setDrawValue(draw_value(DrawData.temperature))
-    setPreviousDrawValue(draw_value(DrawData.temperature))
-  }
+  // function initialize_draw(){
+  //   setDrawValue(draw_value(DrawData.temperature))
+  //   setPreviousDrawValue(draw_value(DrawData.temperature))
+  // }
 
 
   function draw_display(){
@@ -315,7 +314,7 @@ const colors = {
 
 
 
-  
+
   return (
     <div className="flex grid grid-auto-rows dark:bg-black h-screen min-h-screen fixed bg-[#02082c] font-mono">
       <style>
@@ -416,21 +415,27 @@ const colors = {
               <div>
                 <Stats AttributeStates={[SelectedAttributes, setSelectedAttributes]} StartTest={StartTest} Counter={Counter}/>
               </div>
-              <div className="relative mt-12 w-180 h-100 bg-gray-400">
+              <div className="relative mt-12 w-180 h-100 bg-gray-400" ref={ref}>
                 {StartTest == true && Counter >= 0 ?
                   <div>
                     <div className="absolute text-black text-sm p-4">
                       map: {DrawData ? DrawData.environment : null}
                     </div>
+                    {ShowDrawData == true && (StartTest == true || Counter >= 100) ?
+                      <div className="absolute text-black text-sm p-4 mt-24" style={{left: HoverPos[0], top: HoverPos[1]}}>
+                        draw data:  {DrawData.temperature.toFixed(4)} 
+                      </div>
+                    : null}
                     <div className="absolute text-black text-sm p-4 ml-auto right-0">
                       mile: {Counter}
                     </div>
+
                   </div>
                 : null}
                 {LoadedTrip ? 
                   <div>
                     {Data ? draw_display().map((data, i) => (
-                      <Draw Value={data.value} PreviousValue={data.prev_value} Counter={data.counter} Color={data.color} RunTestState={[RunTest, setRunTest]} key={i}/>
+                      <Draw Value={data.value} PreviousValue={data.prev_value} Counter={data.counter} Color={data.color} setShowDrawData={setShowDrawData} setHoverPos={setHoverPos} RunTestState={[RunTest, setRunTest]} key={i}/>
                     )) : null}
                   </div>
                 : null}

@@ -1,35 +1,28 @@
 'use client'
-import {useEffect, useState} from "react"
 
 
 // props: 
 //  AttributeStates 
 //  selected attribute states for graph drawing
 export default function Stats(props) {
-  const [Data, setData] = useState(true)
-
   const attributes = ["temperature","humidity","light","elevation","curves","road_size","road_texture","incline","traffic","hazard","weather"]
 
-const colors = {
-  "temperature": "#FF6B6B",      // pastel red
-  "humidity": "#FFB6B9",         // soft pink
-  "light": "#FFD6A5",            // pastel orange
-  "elevation": "#FDFFB6",        // pastel yellow
-  "curves": "#CAFFBF",           // pastel green
-  "road_size": "#9BF6FF",        // pastel cyan
-  "road_texture": "#A0C4FF",     // pastel blue
-  "incline": "#66BB6A",          // pastel violet
-  "traffic": "#FFC6FF",          // pastel magenta
-  "potential_hazard": "#8E7BC8", // soft coral
-  "weather_type": "#FFC75F"      // light peach
-}
-
-
-
-
-  function assign_colors(item){
-    return "text-md text-[" + colors[item] + "]"
+  const colors = {
+    "temperature": "#FF6B6B",      // pastel red
+    "humidity": "#FFB6B9",         // soft pink
+    "light": "#FFD6A5",            // pastel orange
+    "elevation": "#FDFFB6",        // pastel yellow
+    "curves": "#CAFFBF",           // pastel green
+    "road_size": "#9BF6FF",        // pastel cyan
+    "road_texture": "#A0C4FF",     // pastel blue
+    "incline": "#66BB6A",          // pastel violet
+    "traffic": "#FFC6FF",          // pastel magenta
+    "potential_hazard": "#8E7BC8", // soft coral
+    "weather_type": "#FFC75F"      // light peach
   }
+
+
+
 
   function draw_data(data){
     let attributes = [...props.AttributeStates[0]]
@@ -81,6 +74,9 @@ const colors = {
 
     return <div className="grid grid-rows-3 w-full h-full">{data}</div>
   }
+
+
+
 
   return (
     <div>
