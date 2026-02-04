@@ -7,23 +7,13 @@ from .data.environments import environment_data
 class TripTimeline:
 
 
-    def __init__(self, trip=[{'environment': 'town', 'range': [0, 5], 'data': {'environment': 'town', 'temperature': 0.48, 'humidity': 0.26, 'light': 0.42, 'elevation': 0.24, 'curves': 0.09, 'road_size': 0.31, 'road_texture': 0.23, 'incline': 0.2, 'incline_variance': 0.04, 'traffic': 0.29, 'hazard_variance': 0.01, 'potential_hazard': 'cyclist', 'weather_variance': 0.18, 'weather_type': 'rain'}}], token=1, **kwargs):
+    def __init__(self, **kwargs):
         # trip length 1-100
         # break into intervals
         # transitions have increment/decrement style for each attribute based on neighboring intervals. ie low elevation -> high elevation incline number steadily rises between each interval's median, some values change instantly when needed. 
         # intervals can overlap ie low elevation with rain or sun to high elevation with rain or sun. ex.: {"low_elevation": [1, 25], "sun": [1, 15], "rain": [15, 70], "high_elevation": [25, 100]}
-        # self.trip = trip
-        # self.current_trip = trip
-        # self.current_interval = copy.deepcopy(trip["environment"][0])
-        # self.total_trip = copy.deepcopy(trip["environment"][0])
-        # self.token = token
-        # try:
-        #     self.next_interval = copy.deepcopy(trip["environment"][1])
-        # except:
-        #     self.next_interval = None
 
         self.max_counter = 100
-
         self.trip_counter = 0 
         self.trip_length = 100 #lets say 1 is 1 mile. nothing fancy yet (real times). irl 1 mile takes longer than 1 second.
 
@@ -65,9 +55,7 @@ class TripTimeline:
         }
 
         self.measured = {
-            "gradual": ["temperature", "humidity", "elevation", "incline"],
-            "varients": [["incline", "incline_variance"], ["potential_hazard", "hazard_variance"], ["weather_type", "weather_variance"]],
-            "instant": ["light", "road_size", "road_texture", "incline_variance", "traffic", "hazard_variance", "potential_hazard", "weather_variance", "weather_type"]
+            "gradual": ["temperature", "humidity", "elevation", "incline", "light", "potential_hazard","road_size", "road_texture", "incline_variance", "traffic", "hazard_variance",  "weather_variance", "weather_type"]
         }
 
         self.hazard_data = []
@@ -75,16 +63,11 @@ class TripTimeline:
         self.speed_precision = [] 
         self.stop_precision = [] 
         self.rule_precision = []
-
         self.start = False
 
     
 
 
-    # def start_trip(self):
-    #     self.trip_progress()
-    #     return self.trip
-    
     def reset_trip(self):
         self.trip_counter = 0
         self.end = False
@@ -110,6 +93,7 @@ class TripTimeline:
             "hazard_variance": 0,
             "weather_variance": 0,
         }
+
 
     def set_trip(self, token, trip):
         if self.start == False:
@@ -172,14 +156,8 @@ class TripTimeline:
     def run_timer(self, one_trip=False, step=False):
         if self.end == False:
             self.trip_counter += 1
-            # self.check_intervals()
             self.adjust_values()
             self.hazard_check()
-            self.steering_check()
-            self.speed_check()
-            # self.compare_intervals()
-            self.stop_check()
-            self.rules_check()
             self.end_check(one_trip, step)
             return self.total_trip
         return self.total_trip
@@ -197,10 +175,8 @@ class TripTimeline:
 
         if self.next_interval != None:
             if self.trip_counter == self.next_interval["range"][0]:
-                # self.run = False
                 for attribute in self.trip_attributes:
                     self.total_trip["data"][attribute] = round(self.total_trip["data"][attribute], 2) 
-
                 self.interval_end()
     
 
@@ -230,19 +206,6 @@ class TripTimeline:
             print("hazard encountered")
             self.handle_hazard(True) if self.fail_check() else self.handle_hazard(False)
     
-
-    def steering_check(self):
-        pass
-
-    def speed_check(self):
-        pass
-
-    def stop_check(self):
-        pass
-
-    def rules_check(self):
-        pass
-
 
     def fail_check(self):
         print(round(self.compare_constants("hazard_variance") * ((self.token * self.trip_counter) if self.trip_counter % 2 == 0 else (self.token * self.trip_counter * self.trip_counter))))

@@ -90,10 +90,7 @@ class MachineLearning:
         tensors = self.get_tensors(token) if not one_tensors or self.one_tensors == None  else self.one_tensors
         self.one_tensors = tensors
 
-        # random_txt = "Random"
-        # repeat_txt = "Repeat"
         print("\n\nNew ML Training Test Created\n")
-        # print(f"Vehicle: {repeat_txt if one_vehicle else random_txt}, Tensors: {repeat_txt if one_tensors else random_txt}\n")
         print({"vehicle": vehicle, "tensors": tensors})
         print("\n\n\n")
         environment = self.build_environment.create_environment(token)

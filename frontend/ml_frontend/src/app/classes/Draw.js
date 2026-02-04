@@ -91,21 +91,10 @@ export default function Draw(props) {
     }
 
 
-    function hover_display(e, hover){
-        try{
-            Line ? props.setHoverPos([e.clientX-120, props.Value-150]) : null
-            props.setShowDrawData(hover)
-        }catch{
-            props.setHoverPos([0, 0])
-        }
-
-    }
-
-
 
   return (
     <div>
-        <svg className="absolute" width={defaults.max_x} height={defaults.max_y} onMouseEnter={e => hover_display(e, true)} onMouseLeave={e => hover_display(false)}>
+        <svg className="absolute" width={defaults.max_x} height={defaults.max_y}>
             {Line ? 
                 Line.map(item =>
                     item  

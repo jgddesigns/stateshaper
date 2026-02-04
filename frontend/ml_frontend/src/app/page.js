@@ -77,9 +77,7 @@ export default function Home() {
       set_seeds()
       change_map(0)
       !OriginalToken ? setOriginalToken(Data["token"]) : null
-      // setCurrentToken(Data["token"])
       setX_Interval(Data.test.environment[0].range[1]/100)
-      // initialize_draw()
     }
   }, [Data])
 
@@ -160,8 +158,8 @@ export default function Home() {
 
 
   async function send_api(path) {
-    // const res = await fetch(`https://stateshaper-ml-backend.vercel.app/api/` + path, {
-    const res = await fetch("http://localhost:8000/api/" + path, {
+    const res = await fetch(`https://stateshaper-ml-backend.vercel.app/api/` + path, {
+    // const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: JSON.stringify({"token": 1, "environment": Data ? Data.test.environment : []}) })
@@ -262,15 +260,6 @@ export default function Home() {
     setCounter(counter)
     console.log("\ndraw data in adjust trip")
     console.log(DrawData)
-    // try{
-    //   setDrawValue(draw_value(DrawData[SelectedAttributes[0]]))
-    //   console.log("\ndraw value set")
-    //   console.log(SelectedAttributes[0])
-    //   console.log(draw_value(DrawData[SelectedAttributes[0]]))
-    // }catch{
-    //   console.log("\nunable to set draw value")
-    // }
-    
     setTestTrigger(true)
   }
 
@@ -279,18 +268,11 @@ export default function Home() {
     setLoadedTrip(false)
     setReceiveTrip(false)
     setCounter(-1)
-    // setDrawValue(null)
     setTestTrigger(false)
     setStartTest(false)
     send_api("reset")
   }
   
-
-  // function initialize_draw(){
-  //   setDrawValue(draw_value(DrawData.temperature))
-  //   setPreviousDrawValue(draw_value(DrawData.temperature))
-  // }
-
 
   function draw_display(){
     let classes = []
@@ -413,7 +395,7 @@ export default function Home() {
             </div>
             <div className={ShowData ? "grid grid-rows-3 max-w-[800px] h-150 place-items-center overflow-y-auto  p-4 dot-scrollbar static gap-28" : "hidden"} style={{scrollbarWidth: 'thin', scrollbarColor: 'gray transparent'}}>
               <div>
-                <Stats AttributeStates={[SelectedAttributes, setSelectedAttributes]} StartTest={StartTest} Counter={Counter}/>
+                <Stats AttributeStates={[SelectedAttributes, setSelectedAttributes]} StartTest={StartTest} Counter={Counter} DrawData={DrawData}/>
               </div>
               <div className="relative mt-12 w-180 h-100 bg-gray-400" ref={ref}>
                 {StartTest == true && Counter >= 0 ?
@@ -421,11 +403,6 @@ export default function Home() {
                     <div className="absolute text-black text-sm p-4">
                       map: {DrawData ? DrawData.environment : null}
                     </div>
-                    {ShowDrawData == true && (StartTest == true || Counter >= 100) ?
-                      <div className="absolute text-black text-sm p-4 mt-24" style={{left: HoverPos[0], top: HoverPos[1]}}>
-                        draw data:  {DrawData.temperature.toFixed(4)} 
-                      </div>
-                    : null}
                     <div className="absolute text-black text-sm p-4 ml-auto right-0">
                       mile: {Counter}
                     </div>
