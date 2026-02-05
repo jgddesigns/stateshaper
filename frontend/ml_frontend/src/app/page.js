@@ -109,9 +109,9 @@ export default function Home() {
 
   function draw_value(value){
     if(value < 1){
-      value = value * 100
+      value = value * 3 * 100
     }
-    return 400 - value
+    return 400 - (value)
   }
 
 
@@ -158,8 +158,8 @@ export default function Home() {
 
 
   async function send_api(path) {
-    const res = await fetch(`https://stateshaper-ml-backend.vercel.app/api/` + path, {
-    // const res = await fetch("http://localhost:8000/api/" + path, {
+    // const res = await fetch(`https://stateshaper-ml-backend.vercel.app/api/` + path, {
+    const res = await fetch("http://localhost:8000/api/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: JSON.stringify({"token": 1, "environment": Data ? Data.test.environment : []}) })

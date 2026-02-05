@@ -45,7 +45,7 @@ export default function Draw(props) {
             let prev_x = props.Counter > 0 ? (props.Counter - 1) * X_Interval : (props.Counter * X_Interval)
             prev_x > 719 ? prev_x = 719 : null
 
-            let x = ((props.Counter + 1) * X_Interval)  
+            let x = ((props.Counter) * X_Interval)  
             x > 719 ? x = 719 : null
 
             let prev_y = props.Counter > 0 ? PreviousValue : props.Value
