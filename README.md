@@ -69,13 +69,11 @@ With a plugin file that uses a numerical token to set each graphic object's attr
 
 <br> 
 
-*Tiny State Compression*
+*ML Training Demo*
 
-https://tiny-state.streamlit.app
+https://stateshaper-ml-demo.vercel.app
 
-<br> 
-
-An interactive tool that shows how a *Stateshaper* seee can be compressed even further in ~8 bytes. A seed can be compressed, extracted and re-compressed continually and maintain its original values. 
+ML Training can require an enourmous amount of data. *Stateshaper* is able to create nearly all possible test scenarios and re-create them at any time. This only takes a basic plugin file that derives values from tokenized numeric output. This demo shows how *Stateshaper* can be used in ML Training for self-driving cars.
 
 ---
 
