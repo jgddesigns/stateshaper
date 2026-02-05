@@ -25,30 +25,21 @@ Fintech:
 
     A stock market data quality assurance tester benefitting from the *Stateshaper* engine's ability to generate synthetic data. 
 
+    *stateshaper-qa.vercel.app*
+
 <br>
 
 Graphics:
 
     An infinite amount of graphical assets can be created using the 'tokens' rule and basing your function logic on the output. 
 
+    *stateshaper-graphics.vercel.app*
 
-<br> <br>
-
-**COMING SOON** 
-
-
-Inventory:
-
-    A demonstration of how *Stateshaper* can generator store inventory in real time rather than having it stored in a database.
 
 <br> 
 
-Meal Plan:
+ML Training
 
-    A meal planning app that uses the *Stateshaper* engine to integrate compressed personalization.
+   *Stateshaper* can be used for ML Training by tokenizing its unlimited numeric output to derive memorized test values.
 
-<br>
-
-Smart Home:
-
-    A smart home scheduler that benefits from using *Stateshaper* for personalizatiobn.
+    *stateshaper-ml-demo.vercel.app*
