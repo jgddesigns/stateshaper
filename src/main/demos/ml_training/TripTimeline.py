@@ -181,17 +181,6 @@ class TripTimeline:
                     self.total_trip["data"][attribute] = round(self.total_trip["data"][attribute], 2) 
                 self.interval_end()
 
-    
-    def adjustment(self, attribute):
-        adjust = ((self.token * self.get_constants(attribute)) % 10 / 100) if self.get_constants(attribute) % 3 == 0 else ((self.token * self.get_constants(attribute)) % 5 / 100) if self.get_constants(attribute) % 2 == 0 else ((self.token * self.get_constants(attribute)) % 3 / 100)
-        return -adjust if self.token % 2 == 0 else adjust
-    
-
-    def get_constants(self, attribute):
-        compare = [(i * round(self.token * int(self.current_interval["data"][attribute]) * int(self.trip_counter)) % self.token) for i in list(self.constants[attribute].values())]
-        matching = compare.index(min(compare))
-        return self.constants[attribute][list(self.constants[attribute].keys())[matching]]
-
 
     def end_check(self, one_trip=False, step=False):
         if (self.trip_counter >= self.trip_length and self.end == False) or one_trip == True and self.trip_counter >= self.current_interval["range"][1]:

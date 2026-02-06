@@ -21,8 +21,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    #allow_origins=["https://stateshaper-ml-demo.vercel.app"],  
+    # allow_origins=["http://localhost:3000"],
+    allow_origins=["https://stateshaper-ml-demo.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -91,7 +91,6 @@ def run_test(input: Input):
 
 @app.post("/api/reset")
 def forward():
-    # run.define_engine(state=state)
     run_trip.start_engine()
     run_trip.define_engine(state=state)
     trip.reset_trip()
