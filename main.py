@@ -21,8 +21,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"],
-    allow_origins=["https://stateshaper-graphics.vercel.app"],  
+    allow_origins=["http://localhost:3000"],
+    #allow_origins=["https://stateshaper-ml-demo.vercel.app"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,21 +61,21 @@ def forward():
     run_trip.start_engine()
     run_trip.define_engine(state=state)
     trip.reset_trip()
-    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
 @app.post("/api/forward")
 def forward():
     token = run.one_token()
     test = ml.current_test(token)
-    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
 @app.post("/api/reverse")
 def reverse():
     token = run.reverse_one()
     test = ml.current_test(token)
-    return {"response": {"test": test, "token": token, "seed": [run.get_seed(), run.engine]}}
+    return {"response": {"test": test, "token": token, "seed": [run.get_seed(state=state), run.engine]}}
 
 
 @app.post("/api/trip")

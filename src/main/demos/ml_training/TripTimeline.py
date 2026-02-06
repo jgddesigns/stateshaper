@@ -157,7 +157,6 @@ class TripTimeline:
         if self.end == False:
             self.trip_counter += 1
             self.adjust_values()
-            self.hazard_check()
             self.end_check(one_trip, step)
             return self.total_trip
         return self.total_trip
@@ -172,13 +171,27 @@ class TripTimeline:
         print(self.next_interval)
         for attribute in self.trip_attributes:
             self.total_trip["data"][attribute] = (self.total_trip["data"][attribute] + self.trip_attributes[attribute]) if attribute in self.measured["gradual"] else self.trip_attributes[attribute]
+            self.total_trip["data"][attribute] = .99 if self.total_trip["data"][attribute] >= .99 else self.total_trip["data"][attribute]
+            self.total_trip["data"][attribute] = 0 if self.total_trip["data"][attribute] < 0 else self.total_trip["data"][attribute]
+
 
         if self.next_interval != None:
             if self.trip_counter == self.next_interval["range"][0]:
                 for attribute in self.trip_attributes:
                     self.total_trip["data"][attribute] = round(self.total_trip["data"][attribute], 2) 
                 self.interval_end()
+
     
+    def adjustment(self, attribute):
+        adjust = ((self.token * self.get_constants(attribute)) % 10 / 100) if self.get_constants(attribute) % 3 == 0 else ((self.token * self.get_constants(attribute)) % 5 / 100) if self.get_constants(attribute) % 2 == 0 else ((self.token * self.get_constants(attribute)) % 3 / 100)
+        return -adjust if self.token % 2 == 0 else adjust
+    
+
+    def get_constants(self, attribute):
+        compare = [(i * round(self.token * int(self.current_interval["data"][attribute]) * int(self.trip_counter)) % self.token) for i in list(self.constants[attribute].values())]
+        matching = compare.index(min(compare))
+        return self.constants[attribute][list(self.constants[attribute].keys())[matching]]
+
 
     def end_check(self, one_trip=False, step=False):
         if (self.trip_counter >= self.trip_length and self.end == False) or one_trip == True and self.trip_counter >= self.current_interval["range"][1]:
@@ -197,30 +210,3 @@ class TripTimeline:
         print(self.next_interval)
         print("\n\n")
         self.trip_progress()
-
-
-    def hazard_check(self):
-        print(f"\ncompare hazard variance")
-        print(f"{self.current_interval['data']['hazard_variance']}, {self.hazard_chance()}\n")
-        if self.hazard_chance() < self.current_interval["data"]["hazard_variance"]:
-            print("hazard encountered")
-            self.handle_hazard(True) if self.fail_check() else self.handle_hazard(False)
-    
-
-    def fail_check(self):
-        print(round(self.compare_constants("hazard_variance") * ((self.token * self.trip_counter) if self.trip_counter % 2 == 0 else (self.token * self.trip_counter * self.trip_counter))))
-        return round(self.compare_constants("hazard_variance") * ((self.token * self.trip_counter) if self.trip_counter % 2 == 0 else (self.token * self.trip_counter * self.trip_counter))) % self.hazard_fail == 0
-
-
-    def hazard_chance(self):
-        return (((self.trip_counter + self.compare_constants("hazard_variance")) * (self.token * self.compare_constants("hazard_variance") + (round(self.compare_constants("hazard_variance"))/self.trip_counter))) % 100) / 100
-
-
-    def handle_hazard(self, fail):
-        self.hazard_data.append({"environment": self.current_interval["environment"], "hazard": self.current_interval["data"]["potential_hazard"], "location": self.trip_counter, "result": fail})
-
-
-    def compare_constants(self, variance):
-        compare = [(i * round(self.token * int(self.current_interval["data"][variance]) * int(self.trip_counter)) % self.token) for i in list(self.constants[variance].values())]
-        matching = compare.index(min(compare))
-        return self.constants[variance][list(self.constants[variance].keys())[matching]]

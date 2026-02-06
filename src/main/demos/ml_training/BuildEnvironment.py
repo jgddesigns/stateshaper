@@ -75,25 +75,24 @@ class BuildEnvironment:
         self.token = token
 
 
-    def create_environment(self, token):
+    def create_environment(self, token, adjust=1):
         print("start environment")
         print(f"token: {token}")
         intervals = []
         interval_count = (token % self.max_intervals) + 1
         print(f"interval count {interval_count}")
         current = 0
-        adjust = 1
         while len(intervals) < interval_count: 
             multiplier = 3 if len(intervals) % 2 == 0 else 5
             interval_range = self.get_range(current, intervals, interval_count, token) 
             environment = self.environments[(token * (len(intervals) + 1) * multiplier * adjust)  % len(self.environments)]
             if self.check_included(intervals, environment) == False:
+                interval_range[1] = 100 if interval_count - len(intervals) < 2 else interval_range[1]
                 intervals.append({"environment": environment, "range": interval_range, "data": self.get_environment(token, environment, multiplier * adjust)})  
             else:
                 adjust += 1
-                if adjust >= 10:
-                    interval_count -= 1
-            current = interval_range[1]
+                intervals[len(intervals)-1]["range"][1] = 100 if len(intervals) == interval_count else intervals[len(intervals)-1]["range"][1]
+            current = intervals[len(intervals)-1]["range"][1]
             if current >= 100:
                 print("environments created")
                 print(intervals)
@@ -110,7 +109,7 @@ class BuildEnvironment:
         start = current
         end = current + (token % remaining) if len(intervals) < interval_count - 1 else 100
         end = end + min_range if current - end < min_range else end
-        end = 100 if end > 100 else end
+        end = 100 if end > 100 or interval_count - len(intervals) < 2 else end
         return [start, end]
 
 
