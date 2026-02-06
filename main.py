@@ -42,7 +42,7 @@ with open("example_data/tokens.json", "r") as f:
     f.close()
 run = RunEngine(data, token_count=50)
 run.start_engine()
-state = [random.randint(1, 9973)]
+
 # state=[1]
 run.define_engine(state=state)
 tokens = run.run_engine()
@@ -54,6 +54,7 @@ run_trip.define_engine(state=state)
 
 @app.post("/api/start")
 def forward():
+    state = [random.randint(1, 9973)]
     run.start_engine()
     run.define_engine(state=state)
     token = run.one_token()
