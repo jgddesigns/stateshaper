@@ -79,7 +79,7 @@ class BuildEnvironment:
         print("start environment")
         print(f"token: {token}")
         intervals = []
-        interval_count = (token % self.max_intervals) + 1
+        interval_count = 1 + (token % self.max_intervals) + 1
         print(f"interval count {interval_count}")
         current = 0
         while len(intervals) < interval_count: 
