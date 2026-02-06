@@ -40,17 +40,10 @@ class Input(BaseModel):
 with open("example_data/tokens.json", "r") as f:
     data = json.loads(f.read())
     f.close()
-run = RunEngine(data, token_count=50)
-run.start_engine()
 
-# state=[1]
-run.define_engine(state=state)
-tokens = run.run_engine()
+run = RunEngine(data, token_count=50)
 trip = TripTimeline()
 run_trip = RunEngine(data, token_count=50)
-run_trip.start_engine()
-run_trip.define_engine(state=state)
-
 
 @app.post("/api/start")
 def forward():
