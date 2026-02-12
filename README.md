@@ -24,7 +24,7 @@ It is most effective for applications involving synthetic data, personalization 
 
 The parameters entered into *Stateshaper* effect what output will be produced. 
 
-Numeric values are returned that can be tokenized and used to derive data such as variables, rule-sets, function triggers, build sequence maps and more. 
+Numeric values are returned that can be tokenized and used to derive data such as variables, rule-sets, function triggers, build sequences and more. 
 
 It is lossless, indexible and reversible. Storage size is less than 50 bytes.
 
@@ -40,11 +40,13 @@ from stateshaper import Stateshaper
 stateshaper = Stateshaper() 
 
 # With parameters (not required)
+# From stored list: [175, [4, 9, 51, 119], 195740]
 #
 # initial_state - The number where the math starts. Can be any positive whole number.
 # constants - Used for variety in the output. Can be any positive whole numbers.
 # mod - The maximum token value. Set higher to more effectively approach infinite output.
-stateshaper = Stateshaper(initial_state=1, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973)
+stateshaper = Stateshaper(initial_state=1175, constants={"a": 4,"b": 9,"c": 51,"d": 119}, mod=195740)
+
 
 stateshaper.start_engine()
 
@@ -55,10 +57,10 @@ token_array = stateshaper.run_engine(50)
 token = stateshaper.one_token()
 
 # Reverse 50 places
-previous_place = stateshaper.reverse(50)
+reverse = stateshaper.reverse(50)
 
 # Jump to token 1,000,000
-forward_place = stateshaper.jump(1000000)
+forward = stateshaper.jump(1000000)
 ```
 
 
@@ -68,6 +70,8 @@ forward_place = stateshaper.jump(1000000)
 Output Example:
 
 ```python
+# stateshaper.run_engine(5)
+
 [3478, 583, 72, 8931, 4566]
 ```
 
@@ -77,9 +81,9 @@ Output Example:
 Use Example:
 
 ```python
-value = token % max_value
+# Add more rules to create values as needed.
 
-# Add more rules to create values as needed. 
+value = token % max_value
 ```
 
 <br>
