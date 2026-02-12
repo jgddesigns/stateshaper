@@ -55,10 +55,10 @@ token_array = stateshaper.run_engine(50)
 token = stateshaper.one_token()
 
 # Reverse 50 places
-previous_place = stateshaper.reverse(50)
+reverse = stateshaper.reverse(50)
 
 # Jump to token 1,000,000
-forward_place = stateshaper.jump(1000000)
+forward = stateshaper.jump(1000000)
 ```
 
 
