@@ -41,11 +41,12 @@ stateshaper = Stateshaper()
 
 # With parameters (not required)
 #
+# from stored list: [1, [3, 5, 7, 11], 9973]
 # initial_state - The number where the math starts. Can be any positive whole number.
 # constants - Used for variety in the output. Can be any positive whole numbers.
 # mod - The maximum token value. Set higher to more effectively approach infinite output.
 stateshaper = Stateshaper(initial_state=1, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973)
-# storage example [1, [3, 5, 7, 11], 9973]
+
 
 stateshaper.start_engine()
 
