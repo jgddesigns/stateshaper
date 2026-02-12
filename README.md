@@ -1,6 +1,6 @@
 # *Stateshaper*
 
-**Create many types of content from a small seed**
+*Create many types of content from a small seed*
 
 <br>
 <br>
