@@ -24,7 +24,7 @@ It is most effective for applications involving synthetic data, personalization 
 
 The parameters entered into *Stateshaper* effect what output will be produced. 
 
-Numeric values are returned that can be tokenized and used to derive data such as variables, rule-sets, function triggers, build sequence maps and more. 
+Numeric values are returned that can be tokenized and used to derive data such as variables, rule-sets, function triggers, build sequences and more. 
 
 It is lossless, indexible and reversible. Storage size is less than 50 bytes.
 
