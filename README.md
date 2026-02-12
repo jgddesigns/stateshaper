@@ -39,7 +39,7 @@ from stateshaper import Stateshaper
 # Parameters only need to be included if a variation in output is needed.
 stateshaper = Stateshaper() 
 
-# With parameters (not required)
+# Using custom values (not required)
 # From stored list: [175, [4, 9, 51, 119], 195740]
 #
 # initial_state - The number where the math starts. Can be any positive whole number.
