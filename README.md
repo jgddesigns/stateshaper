@@ -4,6 +4,19 @@
 
 <br>
 <br>
+<pre>
+pip install stateshaper
+</pre>
+
+<br>
+<br>
+
+<pre>
+git clone https://github.com/jgddesigns/stateshaper.git
+</pre>
+
+<br>
+<br>
 
 *Stateshaper* is an infinite data generator. 
 
@@ -30,7 +43,7 @@ stateshaper = Stateshaper()
 #
 # initial_state - The number where the math starts. Can be any positive whole number.
 # constants - Used for variety in the output. Can be any positive whole numbers.
-# mod - The maximum token value. Set higher for more determinism.
+# mod - The maximum token value. Set higher to more effectively approach infinite output.
 stateshaper = Stateshaper(initial_state=1, constants={"a": 3,"b": 5,"c": 7,"d": 11}, mod=9973)
 
 stateshaper.start_engine()
