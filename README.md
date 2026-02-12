@@ -21,7 +21,7 @@ It is lossless, indexible and reversible. Storage size is less than 50 bytes.
 Basic Example:
 
 ```python
-from stateshaper import *Stateshaper*
+from stateshaper import Stateshaper
 
 # Parameters only need to be included if a variation in output is needed.
 stateshaper = Stateshaper() 

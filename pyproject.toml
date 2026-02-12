@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stateshaper"            
-version = "0.1.0"
-description = "An infinite deterministic token stream derived from just one number."
+version = "1.0.1"
+description = "Create a memorized array of unlimited numbers from a small seed. The output can be tokenized and used in code to derive values. Useful for synthetic data, personalization, world building and more."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
