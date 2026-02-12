@@ -77,9 +77,9 @@ Output Example:
 Use Example:
 
 ```python
-value = token % max_value
+# Add more rules to create values as needed.
 
-# Add more rules to create values as needed. 
+value = token % max_value
 ```
 
 <br>
