@@ -8,5 +8,4 @@ build/
 .idea/
 .vscode/
 .DS_Store
-d.bat
 src/main/demo.py
