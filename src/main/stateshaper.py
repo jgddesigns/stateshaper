@@ -3,13 +3,10 @@ from core import Stateshaper
 
 class RunEngine:
 
-    def __init__(self, initial_state=158, constants={"a": 4,"b": 9,"c": 515,"d": 1171}, mod=489489489418948948942894284273, **kwargs):
+    def __init__(self, initial_state=1, constants={"a": 3, "b": 5, "c": 7, "d": 11}, mod=9973):
         self.initial_state = initial_state
         self.constants = constants
         self.mod = mod
-
-        self.start_engine()
-        self.jump(10000000000000000000000000000000000000000000000000000000)
 
 
     def start_engine(self):
@@ -63,6 +60,3 @@ class RunEngine:
         print("============================================")
         print(self.tokens)
         return self.tokens
-    
-
-RunEngine()

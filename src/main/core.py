@@ -16,8 +16,6 @@ class Stateshaper:
         self.token_array = []
 
 
-
-
     def step(self): 
         self.morph_array()
         self.iteration += 1
