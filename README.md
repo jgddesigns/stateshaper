@@ -40,8 +40,8 @@ from stateshaper import Stateshaper
 stateshaper = Stateshaper() 
 
 # With parameters (not required)
-#
 # from stored list: [1, [3, 5, 7, 11], 9973]
+#
 # initial_state - The number where the math starts. Can be any positive whole number.
 # constants - Used for variety in the output. Can be any positive whole numbers.
 # mod - The maximum token value. Set higher to more effectively approach infinite output.
